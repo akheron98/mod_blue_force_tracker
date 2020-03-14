@@ -10,7 +10,7 @@ defined('_JEXEC') or die; ?>
     .filter-group {
         font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
         font-weight: 600;
-        position: inherit;
+        position: absolute;
         top: 50px;
         right: 10px;
         z-index: 1;
@@ -127,7 +127,15 @@ defined('_JEXEC') or die; ?>
 
                 var label = document.createElement('label');
                 label.setAttribute('for', layerID);
-                label.textContent = symbol;
+                let labelString = symbol;
+                if (symbol === 'embassy') {
+                    labelString = 'Terrain';
+                } else (symbol === 'toilet') {
+                    labelString = 'Équipe';
+                } else {
+                    labelString = 'Événement';
+                }
+                label.textContent = labelString;
                 filterGroup.appendChild(label);
 
 // When the checkbox changes, update the visibility of the layer.
