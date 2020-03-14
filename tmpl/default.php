@@ -98,6 +98,7 @@ defined('_JEXEC') or die; ?>
 </style>
 <div style="height:<?php echo $height;?>px" id="map"></div>
 <nav id="filter-group" class="filter-group"></nav>
+<?php echo $getPlaces;?>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
     //var places = <?php echo $getPlaces;?>;
