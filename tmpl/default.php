@@ -87,16 +87,8 @@ defined('_JEXEC') or die; ?>
         'type': 'FeatureCollection',
         'features': [
         <?php foreach ($eventList as $event) :
-                echo "{'type': 'Feature','properties': {'description': '";?>
-                <div class="card">
-                    <img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%">
-                    <div class="container">
-                        <h4><b><?php echo $event->title;?></b></h4>
-                        <p><?php echo $event->info;?></p>
-                        <p><a href="<?php echo $event->url;?>" target="_blank"><?php echo $event->url;?></a></p>
-                    </div>
-                </div>
-          <?php echo "','icon': '";
+                echo "{'type': 'Feature','properties': {'description':";?>'<div class="card"><img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%"><div class="container"><h4><b><?php echo $event->title;?></b></h4><p><?php echo $event->info;?></p><p><a href="<?php echo $event->url;?>" target="_blank"><?php echo $event->url;?></a></p></div></div>'
+          <?php echo ",'icon': '";
                 echo $event->type;
                 echo "'},'geometry': {'type': 'Point','coordinates': [";
                 echo $event->lon;
