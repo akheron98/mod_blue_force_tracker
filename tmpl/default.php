@@ -60,11 +60,18 @@ defined('_JEXEC') or die; ?>
         font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     }
 
+    .mapboxgl-popup-content {
+        background: #fff;
+    }
+
     .card {
         box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
         transition: 0.3s;
-        width: 100%;
+        width: 200px;
+        max-height: 350px;
         border-radius: 5px;
+        background: #0254FE;
+        color: #fff;
     }
 
     .card:hover {
@@ -73,10 +80,19 @@ defined('_JEXEC') or die; ?>
 
     img {
         border-radius: 5px 5px 0 0;
+        object-fit: cover;
+        width: 100%;
+        height: 112px;
+    }
+
+    .container h4 {
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
 
     .container {
         padding: 2px 16px;
+        width: 180px;
     }
 </style>
 <div style="height:<?php echo $height;?>px" id="map"></div>
@@ -105,7 +121,7 @@ defined('_JEXEC') or die; ?>
         container: 'map',
         style: 'mapbox://styles/akheron/ck7rh7pw12b5c1is1hbldygdh',
         center: [-72.937107, 46.286173],
-        zoom: 3.5
+        zoom: 6.5
     });
     map.addControl(new mapboxgl.FullscreenControl());
     map.on('load', function() {

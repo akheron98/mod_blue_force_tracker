@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS `#__blueforcetracker` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `url`, `image`, `lat`, `lon`)
-    VALUES ('ranger-station', 'Realcap', 'Terrain de 500 mètres pouvant contenir environ 100 joueurs.<br/>Terrain privé.','', 'https://www.w3schools.com/howto/img_avatar2.png', '45.066445', '-73.545832');
+    VALUES ('ranger-station', 'Les Vignes des Bacchantes', '653 Chemin Brownlee, Hemmingford, QC J0L 1H0.','http://www.vignesdesbacchantes.com', 'http://www.faqmilsim.ca/images/hemmingford.jpg', '45.066445', '-73.545832');
 INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `url`, `image`, `lat`, `lon`)
-    VALUES ('embassy', 'Bootcamp', 'Entrainement militaire.<br/> 9e édition.<br />','http://www.faqmilsim.ca', 'https://www.w3schools.com/howto/img_avatar2.png', '45.101403', '-72.940174');
+    VALUES ('embassy', 'Bootcamp FAQ Milsim', 'Entrainement de Airsoft. 9e édition.','http://www.faqmilsim.ca', 'http://www.faqmilsim.ca/img/faqmilsim_transparent.png', '45.066445', '-73.545832');
 INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `url`, `image`, `lat`, `lon`)
-    VALUES ('toilet', 'FAQ Milsim', 'Organisation sans but lucratif.','http://www.faqmilsim.ca', 'https://www.w3schools.com/howto/img_avatar2.png', '45.597621','-73.336571');
+    VALUES ('toilet', 'FAQ Milsim', 'Organisation sans but lucratif de formation militaire récréative.','http://www.faqmilsim.ca', 'http://www.faqmilsim.ca/img/faqmilsim_transparent.png', '45.597621','-73.336571');
