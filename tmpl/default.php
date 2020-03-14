@@ -59,6 +59,25 @@ defined('_JEXEC') or die; ?>
         max-width: 400px;
         font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        width: 40%;
+        border-radius: 5px;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+
+    img {
+        border-radius: 5px 5px 0 0;
+    }
+
+    .container {
+        padding: 2px 16px;
+    }
 </style>
 <div style="height:<?php echo $height;?>px" id="map"></div>
 <nav id="filter-group" class="filter-group"></nav>
@@ -68,13 +87,16 @@ defined('_JEXEC') or die; ?>
         'type': 'FeatureCollection',
         'features': [
         <?php foreach ($eventList as $event) :
-                echo "{'type': 'Feature','properties': {'description': '<h1>";
-                echo $event->title;
-                echo "</h1><br />";
-                echo "<p>";
-                echo $event->info;
-                echo "</p>";
-                echo "','icon': '";
+                echo "{'type': 'Feature','properties': {'description': '";?>
+                <div class="card">
+                    <img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%">
+                    <div class="container">
+                        <h4><b><?php echo $event->title;?></b></h4>
+                        <p><?php echo $event->info;?></p>
+                        <p><a href="<?php echo $event->url;?>" target="_blank"><?php echo $event->url;?></a></p>
+                    </div>
+                </div>
+          <?php echo "','icon': '";
                 echo $event->type;
                 echo "'},'geometry': {'type': 'Point','coordinates': [";
                 echo $event->lon;
@@ -129,11 +151,11 @@ defined('_JEXEC') or die; ?>
                 label.setAttribute('for', layerID);
                 let labelString = symbol;
                 if (symbol === 'embassy') {
-                    labelString = 'Terrain';
+                    labelString = 'Événement';
                 } else if (symbol === 'toilet') {
                     labelString = 'Équipe';
                 } else {
-                    labelString = 'Événement';
+                    labelString = 'Terrain';
                 }
                 label.textContent = labelString;
                 filterGroup.appendChild(label);
