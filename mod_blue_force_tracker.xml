@@ -37,9 +37,9 @@
         </sql>
     </install>
 	<update>
-		<sql>
-            <file driver="mysql" charset="utf8">sql/mysql/update.mysql.utf8.sql</file>
-        </sql>
+		<schemas>
+			<schemapath type="mysql">sql/mysql/updates</schemapath> 
+		</schemas> 
 	</update>
     <uninstall>
         <sql>
