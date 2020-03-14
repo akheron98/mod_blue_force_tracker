@@ -2,7 +2,7 @@
 <extension type="module" version="3.1.0" client="site" method="upgrade">
     <name>Blueforcetracker</name>
     <author>Gabriel Bourque</author>
-    <version>1.0.1</version>
+    <version>1.0.0</version>
     <description>Carte des points d'intérêts.</description>
     <files>
         <filename>mod_blue_force_tracker.xml</filename>

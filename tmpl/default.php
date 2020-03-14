@@ -89,9 +89,10 @@ defined('_JEXEC') or die; ?>
     var filterGroup = document.getElementById('filter-group');
     var map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/akheron/ck7rh7pw12b5c1is1hbldygdh',
-        center: [-77.38, 39],
-        zoom: 3
+        style: 'mapbox://styles/mapbox/streets-v11',
+        //style: 'mapbox://styles/akheron/ck7rh7pw12b5c1is1hbldygdh',
+        center: [-72.54, 45.06],
+        zoom: 3.5
     });
     map.addControl(new mapboxgl.FullscreenControl());
     map.on('load', function() {
