@@ -24,5 +24,6 @@ require_once dirname(__FILE__) . '/helper.php';
 **/
 $height = $params->get('height', '1');
 $width = $params->get('width', '1');
+$places = modBlueForceTrackerHelper::getPlaces();
 $eventList    = modBlueForceTrackerHelper::getEventList();
 require JModuleHelper::getLayoutPath('mod_blue_force_tracker');
