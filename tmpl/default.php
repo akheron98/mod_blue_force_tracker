@@ -100,24 +100,26 @@ defined('_JEXEC') or die; ?>
 <nav id="filter-group" class="filter-group"></nav>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
-    var places = <?php echo $getPlaces;?>;
+    var places =
 
-    // var places = {
-    //     'type': 'FeatureCollection',
-    //     'features': [
-    //     <?php foreach ($eventList as $event) :
-    //             echo "{'type': 'Feature','properties': {'description':";?>'<div class="card"><a href="<?php echo $event->url;?>" target="_blank"><img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%"></a><div class="container"><h4><b><?php echo $event->title;?></b></h4><p><?php echo $event->info;?></p></div></div>'
-    //       <?php echo ",'icon': '";
-    //             echo $event->type;
-    //             echo "'},'geometry': {'type': 'Point','coordinates': [";
-    //             echo $event->lon;
-    //             echo ", ";
-    //             echo $event->lat;
-    //             echo "]}},";
-    //           endforeach;
-    //     ?>
-    //     ]
-    // };
+    //<?php echo $getPlaces;?>;
+
+    var places = {
+        'type': 'FeatureCollection',
+        'features': [
+        <?php foreach ($eventList as $event) :
+                echo "{'type': 'Feature','properties': {'description':";?>'<div class="card"><a href="<?php echo $event->url;?>" target="_blank"><img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%"></a><div class="container"><h4><b><?php echo $event->title;?></b></h4><p><?php echo $event->info;?></p></div></div>'
+          <?php echo ",'icon': '";
+                echo $event->type;
+                echo "'},'geometry': {'type': 'Point','coordinates': [";
+                echo $event->lon;
+                echo ", ";
+                echo $event->lat;
+                echo "]}},";
+              endforeach;
+        ?>
+        ]
+    };
 
     var filterGroup = document.getElementById('filter-group');
     var map = new mapboxgl.Map({
