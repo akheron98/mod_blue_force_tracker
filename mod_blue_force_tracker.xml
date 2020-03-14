@@ -42,5 +42,8 @@
             <file driver="mysql" charset="utf8">sql/mysql/uninstall.mysql.utf8.sql</file>
         </sql>
     </uninstall>
+    <updateservers>
+	    <server type="extension" name="Blueforcetracker" priority="1">https://raw.githubusercontent.com/akheron98/mod_blue_force_tracker/master/updates/blueforcetracker_update.xml</server>
+    </updateservers>
 </extension>
 
