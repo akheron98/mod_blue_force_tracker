@@ -24,7 +24,7 @@ class ModBlueForceTrackerHelper
     {
         $db = JFactory::getDbo();
         $query = $db->getQuery(true)
-                    ->select($db->quoteName(array('type', 'title', 'info', 'lat', 'lon')))
+                    ->select($db->quoteName(array('type', 'title', 'info', 'url', 'image', 'lat', 'lon')))
                     ->from($db->quoteName('#__blueforcetracker'));
                  $db->setQuery($query);
 

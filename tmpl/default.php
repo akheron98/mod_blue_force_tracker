@@ -63,7 +63,7 @@ defined('_JEXEC') or die; ?>
     .card {
         box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
         transition: 0.3s;
-        width: 40%;
+        width: 100%;
         border-radius: 5px;
     }
 
@@ -87,7 +87,7 @@ defined('_JEXEC') or die; ?>
         'type': 'FeatureCollection',
         'features': [
         <?php foreach ($eventList as $event) :
-                echo "{'type': 'Feature','properties': {'description':";?>'<div class="card"><img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%"><div class="container"><h4><b><?php echo $event->title;?></b></h4><p><?php echo $event->info;?></p><p><a href="<?php echo $event->url;?>" target="_blank"><?php echo $event->url;?></a></p></div></div>'
+                echo "{'type': 'Feature','properties': {'description':";?>'<div class="card"><a href="<?php echo $event->url;?>" target="_blank"><img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%"></a><div class="container"><h4><b><?php echo $event->title;?></b></h4><p><?php echo $event->info;?></p></div></div>'
           <?php echo ",'icon': '";
                 echo $event->type;
                 echo "'},'geometry': {'type': 'Point','coordinates': [";
