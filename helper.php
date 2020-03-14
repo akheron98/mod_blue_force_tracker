@@ -34,6 +34,6 @@ class ModBlueForceTrackerHelper
     public static function getPlaces() {
         $response = file_get_contents('http://www.faqmilsim.ca/akheron/json/mod_blue_force_tracker-places.json');
 
-        return json_decode($response);;
+        return json_decode($response);
     }
 }
