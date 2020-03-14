@@ -1,0 +1,16 @@
+<updates>
+	<update>
+		<name>Blueforcetracker</name>
+		<description>Blue Force Tracker 1.0.1</description>
+		<element>mod_blue_force_tracker</element>
+		<type>module</type>
+		<version>1.0.1</version>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/akheron98/mod_blue_force_tracker/archive/mod_blue_force_tracker-1.0.1.zip</downloadurl>
+		</downloads>
+		<maintainer>Gabriel Bourque</maintainer>
+		<maintainerurl>https://github.com/akheron98/mod_blue_force_tracker</maintainerurl>
+		<targetplatform name="joomla" version="3.6"/>
+		<client>site</client>
+	</update>
+</updates>
