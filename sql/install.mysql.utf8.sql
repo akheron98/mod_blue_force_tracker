@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS `#__blueforcetracker` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
-INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `lat`, `lon`)
+INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `url`, `lat`, `lon`)
     VALUES ('marker', 'Realcap', 'Terrain de 500 mètres pouvant contenir environ 100 joueurs.<br/>Terrain privé.','', '45.066445', '-73.545832');
-INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `lat`, `lon`)
+INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `url`, `lat`, `lon`)
     VALUES ('ranger-station', 'Bootcamp', 'Entrainement militaire.<br/> 9e édition.<br />','http://www.faqmilsim.ca', '45.101403', '-72.940174');
-INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `lat`, `lon`)
+INSERT INTO `#__blueforcetracker` (`type`, `title`, `info`, `url`, `lat`, `lon`)
     VALUES ('star', 'FAQ Milsim', 'Organisation sans but lucratif.','http://www.faqmilsim.ca', '45.597621','-73.336571');
