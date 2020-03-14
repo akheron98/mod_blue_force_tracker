@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="3.1.0" client="site" method="upgrade">
+    <name>Blue Force tracker!</name>
+    <author>Gabriel Bourque</author>
+    <version>1.0.0</version>
+    <description>Carte des points d'intérêts.</description>
+    <files>
+        <filename>mod_blue_force_tracker.xml</filename>
+        <filename module="mod_blue_force_tracker">mod_blue_force_tracker.php</filename>
+        <filename>index.html</filename>
+        <filename>helper.php</filename>
+        <filename>tmpl/default.php</filename>
+        <filename>tmpl/index.html</filename>
+        <folder>sql</folder>
+    </files>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                        name="height"
+                        type="number"
+                        default="500"
+                        filter="integer"
+                        label="Map height"/>
+                <field
+                        name="width"
+                        type="number"
+                        default="500"
+                        filter="integer"
+                        label="Map width"/>
+            </fieldset>
+        </fields>
+    </config>
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/mysql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/mysql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+</extension>
+
