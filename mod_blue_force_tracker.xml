@@ -36,7 +36,11 @@
             <file driver="mysql" charset="utf8">sql/mysql/install.mysql.utf8.sql</file>
         </sql>
     </install>
-
+	<update>
+		<sql>
+            <file driver="mysql" charset="utf8">sql/mysql/update.mysql.utf8.sql</file>
+        </sql>
+	</update>
     <uninstall>
         <sql>
             <file driver="mysql" charset="utf8">sql/mysql/uninstall.mysql.utf8.sql</file>
