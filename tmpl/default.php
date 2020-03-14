@@ -130,7 +130,7 @@ defined('_JEXEC') or die; ?>
                 let labelString = symbol;
                 if (symbol === 'embassy') {
                     labelString = 'Terrain';
-                } else (symbol === 'toilet') {
+                } else if (symbol === 'toilet') {
                     labelString = 'Équipe';
                 } else {
                     labelString = 'Événement';
