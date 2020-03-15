@@ -92,34 +92,19 @@ defined('_JEXEC') or die; ?>
     }
 
     .container {
-        padding: 2px 16px;
+        padding: 2px 2px;
         width: 180px;
     }
 </style>
 <div style="height:<?php echo $height;?>px" id="map"></div>
 <nav id="filter-group" class="filter-group"></nav>
-<?php echo $places;?>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
-    //var places = <?php echo $places;?>;
-
+    var markers = <?php echo $places;?>;
     var places = {
-        'type': 'FeatureCollection',
-        'features': [
-        <?php foreach ($eventList as $event) :
-                echo "{'type': 'Feature','properties': {'description':";?>'<div class="card"><a href="<?php echo $event->url;?>" target="_blank"><img src="<?php echo $event->image;?>" alt="<?php echo $event->title;?>" style="width:100%"></a><div class="container"><h4><b><?php echo $event->title;?></b></h4><p><?php echo $event->info;?></p></div></div>'
-          <?php echo ",'icon': '";
-                echo $event->type;
-                echo "'},'geometry': {'type': 'Point','coordinates': [";
-                echo $event->lon;
-                echo ", ";
-                echo $event->lat;
-                echo "]}},";
-              endforeach;
-        ?>
-        ]
-    };
-
+					'type': 'FeatureCollection',
+					'features': markers['Items']
+    			  };
     var filterGroup = document.getElementById('filter-group');
     var map = new mapboxgl.Map({
         container: 'map',
@@ -161,15 +146,7 @@ defined('_JEXEC') or die; ?>
 
                 var label = document.createElement('label');
                 label.setAttribute('for', layerID);
-                let labelString = symbol;
-                if (symbol === 'embassy') {
-                    labelString = 'Événement';
-                } else if (symbol === 'toilet') {
-                    labelString = 'Équipe';
-                } else {
-                    labelString = 'Terrain';
-                }
-                label.textContent = labelString;
+                label.textContent = feature.properties['type'];
                 filterGroup.appendChild(label);
 
 // When the checkbox changes, update the visibility of the layer.
@@ -182,7 +159,19 @@ defined('_JEXEC') or die; ?>
                 });
                 map.on('click', layerID, function(e) {
                     var coordinates = e.features[0].geometry.coordinates.slice();
+                    var label = e.features[0].properties.label;
                     var description = e.features[0].properties.description;
+                    var url = e.features[0].properties.url;
+                    var image = e.features[0].properties.image;
+                    var html = '<div class="card">'+
+                        			'<a href="' + url + '" target="_blank">'+
+                        				'<img src="' + image + '" alt="' + label + '" style="width:100%">'+
+                        			'</a>'+
+                        			'<div class="container">'+
+                        				'<h4><b>' + label + '</b></h4>'+
+                        				'<p>' + description + '</p>'+
+                        			'</div>'+
+                        		'</div>';
 
 // Ensure that if the map is zoomed out such that multiple
 // copies of the feature are visible, the popup appears
@@ -193,7 +182,7 @@ defined('_JEXEC') or die; ?>
 
                     new mapboxgl.Popup()
                         .setLngLat(coordinates)
-                        .setHTML(description)
+                        .setHTML(html)
                         .addTo(map);
                 });
 

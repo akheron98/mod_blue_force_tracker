@@ -11,7 +11,6 @@
         <filename>helper.php</filename>
         <filename>tmpl/default.php</filename>
         <filename>tmpl/index.html</filename>
-        <folder>sql</folder>
     </files>
     <config>
         <fields name="params">
@@ -31,24 +30,6 @@
             </fieldset>
         </fields>
     </config>
-    <install>
-        <sql>
-            <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
-        </sql>
-    </install>
-
-    <uninstall>
-        <sql>
-            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
-        </sql>
-    </uninstall>
-
-    <update>
-        <schemas>
-            <schemapath type="mysql">sql/updates/mysql</schemapath>
-        </schemas>
-    </update>
-
     <updateservers>
 	    <server type="extension" name="Blueforcetracker" priority="1">https://raw.githubusercontent.com/akheron98/mod_blue_force_tracker/master/updates/blueforcetracker_update.xml</server>
     </updateservers>
