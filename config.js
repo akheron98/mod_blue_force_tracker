@@ -26,3 +26,11 @@ window._config = {
 
 
 };
+
+
+"Accept": "*/*",
+    "Authorization": "eyJraWQiOiJLTzRVMWZs",
+    "content-type": "application/json; charset=UTF-8"
+	
+	access: AKIATQHSDUMADPFW2VKH
+	secret : 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
