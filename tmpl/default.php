@@ -1,166 +1,11 @@
 <?php
 // No direct access
 defined('_JEXEC') or die; ?>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/axios/dist/axios.standalone.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/CryptoJS/rollups/hmac-sha256.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/CryptoJS/rollups/sha256.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/CryptoJS/components/hmac.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/CryptoJS/components/enc-base64.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/url-template/url-template.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/apiGatewayCore/sigV4Client.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/apiGatewayCore/apiGatewayClient.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/apiGatewayCore/simpleHttpClient.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/lib/apiGatewayCore/utils.js"></script>
-<script type="text/javascript" src="/modules/mod_blue_force_tracker/tmpl/js/apigClient.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/jquery-3.4.1.min.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet" />
-<style>
-body {
-	margin: 0;
-	padding: 0;
-}
+<link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet" />
 
-#map {
-	position: relative;
-	top: 0;
-	bottom: 0;
-	width: 100%;
-}
-
-.filter-group {
-	font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-	font-weight: 600;
-	position: absolute;
-	top: 100px;
-	right: 10px;
-	z-index: 1;
-	border-radius: 3px;
-	width: 120px;
-	color: #fff;
-}
-
-.filter-group input[type='checkbox']:first-child+label {
-	border-radius: 3px 3px 0 0;
-}
-
-.filter-group label:last-child {
-	border-radius: 0 0 3px 3px;
-	border: none;
-}
-
-.filter-group input[type='checkbox'] {
-	display: none;
-}
-
-.filter-group input[type='checkbox']+label {
-	background-color: #0254FE;
-	display: block;
-	cursor: pointer;
-	padding: 10px;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-}
-
-.filter-group input[type='checkbox']+label {
-	background-color: #0254FE;
-	text-transform: capitalize;
-}
-
-.filter-group input[type='checkbox']+label:hover, .filter-group input[type='checkbox']:checked+label
-	{
-	background-color: #0254FE;
-}
-
-.filter-group input[type='checkbox']:checked+label:before {
-	content: '✔';
-	margin-right: 5px;
-}
-
-.mapboxgl-popup {
-	max-width: 400px;
-	font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-.mapboxgl-popup-content {
-	background: #fff;
-}
-
-.card {
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-	transition: 0.3s;
-	width: 200px;
-	max-height: 350px;
-	border-radius: 5px;
-	background: #0254FE;
-	color: #fff;
-}
-
-.card:hover {
-	box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-}
-
-img {
-	background: #222;
-	border-radius: 5px 5px 0 0;
-	object-fit: cover;
-	width: 100%;
-	height: 112px;
-}
-
-.container h4 {
-	margin-top: 5px;
-	margin-bottom: 5px;
-}
-
-.container {
-	padding: 2px 2px;
-	width: 180px;
-}
-
-.coordinates {
-	background: rgba(0, 0, 0, 0.5);
-	color: #fff;
-	position: absolute;
-	bottom: 40px;
-	left: 10px;
-	padding: 5px 5px;
-	margin: 0;
-	font-size: 11px;
-	line-height: 18px;
-	border-radius: 3px;
-	display: none;
-}
-
-.marker-form input[type=text] {
-    font-size: 11px;
-    background: #222;
-    width:100%;
-    padding: 2px;
-    border-radius:5px;
-    border:1px solid #7ac9b7;
-}
-
-.marker-form select {
-    font-size: 11px;
-    background: #222;
-    margin-bottom: 10px;
-    width:100%;
-    padding: 2px;
-    border-radius:5px;
-    border:1px solid #7ac9b7;
-}
-
-.marker-form input[type=submit] {
-    font-size: 11px;
-    background-color: #0254FE;
-    color: #fff;
-    width:100%;
-    padding: 2px;
-    border-radius:5px;
-    border:1px solid #7ac9b7;
-}
-
-</style>
 <div style="height:<?php echo $height;?>px" id="map"></div>
 <pre id="coordinates" class="coordinates"></pre>
 <nav id="filter-group" class="filter-group"></nav>
@@ -182,16 +27,27 @@ img {
             ]
         }
     };
-    const apigClient = apigClientFactory.newClient();
     let markersP = new Promise((resolve => {
-        apigClient.markerGet({}, {}, {})
-                .then(function(result){
-                    resolve(result);
-                }).catch( function(result){
-                console.log("Sorry, GET API Gateway is not responding");
-                console.log(result);
-            });
-        }));
+        const ajaxRequest = jQuery.ajax({
+            method: 'GET',
+            url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker?TableName=blue_force_tracker',
+            headers: {
+                "Accept": "*/*",
+                "Authorization": "eyJraWQiOiJLTzRVMWZs",
+                "content-type": "application/json; charset=UTF-8"
+            },
+            contentType: 'application/json',
+            crossDomain: true,
+            dataType: 'json'
+        });
+        ajaxRequest.done(function (data) {
+            resolve(data);
+        });
+        ajaxRequest.fail(function (request) {
+            jQuery("#result").html('There is error while get:' + request.responseText);
+        });
+    }));
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
     let coordinates = document.getElementById('coordinates');
     const map = new mapboxgl.Map({
@@ -349,7 +205,7 @@ img {
     markersP.then(function(markers) {
         const places = {
             'type': 'FeatureCollection',
-            'features': markers['data']['Items']
+            'features': markers['Items']
         };
 
         map.addControl(new mapboxgl.FullscreenControl());
