@@ -1,7 +1,7 @@
 <?php
 // No direct access
 defined('_JEXEC') or die; ?>
-<script src="/modules/mod_blue_force_tracker/tmpl/js/jquery-3.4.1.min.js"></script>
+<!--<script src="/modules/mod_blue_force_tracker/tmpl/js/jquery-3.4.1.min.js"></script>-->
 <script src="/modules/mod_blue_force_tracker/tmpl/js/groupFilter.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet" />
@@ -165,7 +165,7 @@ defined('_JEXEC') or die; ?>
                     }
                     const html = '<div class="card">' +
                         '<a href="' + url + '" target="_blank">' +
-                        '<img src="' + image + '" alt="' + label + '" style="width:100%">' +
+                        '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
                         '</a>' +
                         '<div class="container">' +
                         '<h4><b>' + label + '</b></h4>' +

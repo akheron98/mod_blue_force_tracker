@@ -13,9 +13,9 @@
  */
 class ModBlueForceTrackerHelper
 {
-    public static function getPlaces() {
-        $response = file_get_contents("https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker");
+    public static function getUserId() {
+        $user = JFactory::getUser();
 
-        return $response;
+        return $user->get('id');
     }
 }
