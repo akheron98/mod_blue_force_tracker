@@ -2,60 +2,80 @@
 // No direct access
 defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/jquery-3.4.1.min.js"></script>
+<script src="/modules/mod_blue_force_tracker/tmpl/js/groupFilter.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet" />
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet" />
 
 <div style="height:<?php echo $height;?>px" id="map"></div>
-<pre id="coordinates" class="coordinates"></pre>
-<nav id="filter-group" class="filter-group"></nav>
 <script>
-    const markerCanvas = {
-        type: "Feature",
-        properties: {
-            icon: "ranger-station",
-            type: "field",
-            label: "Nom",
-            description: "Description",
-            url: "Lien site internet",
-            image: "Lien image"
-        },
-        geometry: {
-            type: "Point",
-            coordinates: [
-                -72.937107, 46.286173
-            ]
+    class GroupFilterControl {
+        onAdd(map) {
+            this._map = map;
+            this._container = document.createElement('div');
+            this._container.className = 'mapboxgl-ctrl filter-group';
+            this._container.id = 'filter-group';
+            return this._container;
         }
-    };
-    let markersP = new Promise((resolve => {
-        const ajaxRequest = jQuery.ajax({
-            method: 'GET',
-            url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker?TableName=blue_force_tracker',
-            headers: {
-                "Accept": "*/*",
-                "Authorization": "eyJraWQiOiJLTzRVMWZs",
-                "content-type": "application/json; charset=UTF-8"
-            },
-            contentType: 'application/json',
-            crossDomain: true,
-            dataType: 'json'
-        });
-        ajaxRequest.done(function (data) {
-            resolve(data);
-        });
-        ajaxRequest.fail(function (request) {
-            jQuery("#result").html('There is error while get:' + request.responseText);
-        });
-    }));
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
-    let coordinates = document.getElementById('coordinates');
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/akheron/ck7rh7pw12b5c1is1hbldygdh',
-        center: [-72.937107, 46.286173],
-        zoom: 6.5
-    });
+        onRemove() {
+            this._container.parentNode.removeChild(this._container);
+            this._map = undefined;
+        }
+    }
+
+    class AddMarkerButtonControl {
+        onAdd(map) {
+            this._map = map;
+            this._container = document.createElement('div');
+            this._container.className = 'mapboxgl-ctrl filter-group';
+            this._container.id = 'add-group';
+            return this._container;
+        }
+
+        onRemove() {
+            this._container.parentNode.removeChild(this._container);
+            this._map = undefined;
+        }
+    }
+
+    class AddMarkerControl {
+        onAdd(map) {
+            this._map = map;
+            this._container = document.createElement('div');
+            this._container.className = 'mapboxgl-ctrl coordinates';
+            this._container.id = 'coordinates';
+            return this._container;
+        }
+
+        onRemove() {
+            this._container.parentNode.removeChild(this._container);
+            this._map = undefined;
+        }
+    }
+
+    function fetchAllMakers() {
+        return new Promise((resolve => {
+            const ajaxRequest = jQuery.ajax({
+                method: 'GET',
+                url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker?TableName=blue_force_tracker',
+                headers: {
+                    "Accept": "*/*",
+                    "Authorization": "eyJraWQiOiJLTzRVMWZs",
+                    "content-type": "application/json; charset=UTF-8"
+                },
+                contentType: 'application/json',
+                crossDomain: true,
+                dataType: 'json'
+            });
+            ajaxRequest.done(function (data) {
+                resolve(data);
+            });
+            ajaxRequest.fail(function (request) {
+                jQuery("#result").html('There is error while get:' + request.responseText);
+            });
+        }));
+    }
 
     function imageExists(url, callback) {
         let img = new Image();
@@ -131,6 +151,7 @@ defined('_JEXEC') or die; ?>
                         e.target.checked ? 'visible' : 'none'
                     );
                 });
+
                 map.on('click', layerID, async function (e) {
                     const coordinates = e.features[0].geometry.coordinates.slice();
                     const label = e.features[0].properties.label;
@@ -152,9 +173,9 @@ defined('_JEXEC') or die; ?>
                         '</div>' +
                         '</div>';
 
-// Ensure that if the map is zoomed out such that multiple
-// copies of the feature are visible, the popup appears
-// over the copy being pointed to.
+                    // Ensure that if the map is zoomed out such that multiple
+                    // copies of the feature are visible, the popup appears
+                    // over the copy being pointed to.
                     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                     }
@@ -178,18 +199,18 @@ defined('_JEXEC') or die; ?>
     }
 
     function showAddButton(marker) {
-        let filterGroup = document.getElementById('filter-group');
+        let addGroup = document.getElementById('add-group');
         let input = document.createElement('input');
         input.type = 'checkbox';
-        input.id = 'addMarker';
+        input.id = 'addMarkerInput';
         input.checked = false;
-        filterGroup.appendChild(input);
+        addGroup.appendChild(input);
 
         let label = document.createElement('label');
-        label.setAttribute('for', 'addMarker');
-        label.setAttribute('id', 'addMarker');
+        label.setAttribute('for', 'addMarkerInput');
+        label.setAttribute('id', 'addMarkerLabel');
         label.textContent = 'Ajouter';
-        filterGroup.appendChild(label);
+        addGroup.appendChild(label);
         //When the checkbox changes, update the visibility of the layer.
         input.addEventListener('change', function () {
             if (input.checked) {
@@ -201,13 +222,37 @@ defined('_JEXEC') or die; ?>
             }
         });
     }
+    const markerCanvas = {
+        type: "Feature",
+        properties: {
+            icon: "ranger-station",
+            type: "field",
+            label: "Nom",
+            description: "Description",
+            url: "Lien site internet",
+            image: "Lien image"
+        },
+        geometry: {
+            type: "Point",
+            coordinates: [
+                -72.937107, 46.286173
+            ]
+        }
+    };
+    let markersP = fetchAllMakers();
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/akheron/ck7rh7pw12b5c1is1hbldygdh',
+        center: [-72.937107, 46.286173],
+        zoom: 6.5
+    });
 
     markersP.then(function(markers) {
         const places = {
             'type': 'FeatureCollection',
             'features': markers['Items']
         };
-
         map.addControl(new mapboxgl.FullscreenControl());
         map.addControl(
                 new mapboxgl.GeolocateControl({
@@ -217,12 +262,15 @@ defined('_JEXEC') or die; ?>
                     trackUserLocation: true
                 })
             );
+        map.addControl(new GroupFilterControl(), 'top-right');
+        map.addControl(new AddMarkerButtonControl(), 'top-right');
         map.addControl(
                 new mapboxgl.NavigationControl({
                     options: {
                         showZoom:true
                     }
                 }), 'top-left');
+        map.addControl(new AddMarkerControl(), 'top-left');
         map.on('load', function() {
             map.addSource('places', {
                 'type': 'geojson',
@@ -238,9 +286,9 @@ defined('_JEXEC') or die; ?>
             showAddButton(marker);
 
             function onDragEnd() {
+                const coordinates = document.getElementById("coordinates");
                 const lngLat = marker.getLngLat();
                 coordinates.style.display = 'block';
-                const position = marker.getLngLat();
                 const type = markerCanvas.properties.type;
                 let teamSelected = '';
                 let eventSelected = '';
@@ -275,12 +323,6 @@ defined('_JEXEC') or die; ?>
                     '<br /><input type="submit" id="markerSave" name="markerSave" value="SAUVEGARDER" />' +
                     '</div>' +
                     '</form>';
-                //Ensure that if the map is zoomed out such that multiple
-                //copies of the feature are visible, the popup appears
-                //over the copy being pointed to.
-                while (Math.abs(lngLat.lng - coordinates[0]) > 180) {
-                    coordinates[0] += lngLat.lng > coordinates[0] ? 360 : -360;
-                }
             }
             marker.on('dragend', onDragEnd);
 
@@ -300,11 +342,11 @@ defined('_JEXEC') or die; ?>
 
                     const ajaxRequest = jQuery.ajax({
                         method: 'POST',
-                        url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker?TableName=blue_force_tracker',
+                        url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker',
                         headers: {
                             "Accept": "*/*",
                             "Authorization": "eyJraWQiOiJLTzRVMWZs",
-                            "content-type": "application/json; charset=UTF-8"
+                            "content-type": "application/json; charset=UTF-8",
                         },
                         contentType: 'application/json',
                         crossDomain: true,
@@ -312,18 +354,21 @@ defined('_JEXEC') or die; ?>
                         dataType: 'json'
                     });
                     ajaxRequest.done(async function (data){
-                        places.features.push(data);
-                        showMarker(data);
+                        let newMarker = JSON.parse(data);
+                        places.features.push(newMarker);
+                        let placesSources = map.getSource('places');
+                        placesSources.data = places;
+                        await showMarker(newMarker);
                         marker.remove();
                          // Show successfully for submit message
                         jQuery("#result").html('Sauvegard&eacute; avec succ&egrave;s');
                         let saveButton = jQuery("#markerSave");
                         saveButton.val("SAUVEGARDÉ!");
+                        document.getElementById('addMarkerLabel').textContent = 'Ajouter';
+                        document.getElementById('addMarkerInput').checked = false;
                         await new Promise(r => setTimeout(r, 2000));
-                        coordinates.style.display = 'none';
+                        document.getElementById("coordinates").style.display = 'none';
                         marker.remove();
-                        document.getElementById('addMarker').textContent = 'Ajouter';
-                        input.checked = false;
                         markerCanvas.properties.type = "field";
                         markerCanvas.properties.icon = 'ranger-station';
                         markerCanvas.properties.label = "Nom";

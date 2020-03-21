@@ -13,9 +13,6 @@ body {
 .filter-group {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;
-    position: absolute;
-    top: 100px;
-    right: 10px;
     z-index: 1;
     border-radius: 3px;
     width: 120px;
@@ -102,9 +99,9 @@ img {
 .coordinates {
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
-    position: absolute;
-    bottom: 40px;
-    left: 10px;
+    /*position: absolute;*/
+    /*bottom: 40px;*/
+    /*left: 10px;*/
     padding: 5px 5px;
     margin: 0;
     font-size: 11px;
@@ -116,6 +113,7 @@ img {
 .marker-form input[type=text] {
     font-size: 11px;
     background: #222;
+    color: #fff;
     width:100%;
     padding: 2px;
     border-radius:5px;
