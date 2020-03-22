@@ -193,7 +193,8 @@ defined('_JEXEC') or die; ?>
             label: "Nom",
             description: "Description",
             url: "Lien site internet",
-            image: "Lien image"
+            image: "Lien image",
+            owner:"",
         },
         geometry: {
             type: "Point",
@@ -215,9 +216,6 @@ defined('_JEXEC') or die; ?>
     addMapControls();
     const url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
     map.on('load', function () {
-        window.setInterval(function() {
-            map.getSource('places').setData(url);
-        }, 2000);
         map.addSource('places', { type: 'geojson', data: url });
         showMarker();
         const marker = new mapboxgl.Marker({
@@ -283,7 +281,7 @@ defined('_JEXEC') or die; ?>
 
             const ajaxRequest = jQuery.ajax({
                 method: 'POST',
-                url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker',
+                url: url,
                 headers: {
                     "Accept": "*/*",
                     "Authorization": "eyJraWQiOiJLTzRVMWZs",
@@ -295,6 +293,7 @@ defined('_JEXEC') or die; ?>
                 dataType: 'json'
             });
             ajaxRequest.done(async function () {
+                map.getSource('places').setData(url);
                 marker.remove();
                 // Show successfully for submit message
                 jQuery("#result").html('Sauvegard&eacute; avec succ&egrave;s');
