@@ -2,51 +2,35 @@
 // No direct access
 defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/customMapControl.js"></script>
+<script src="/modules/mod_blue_force_tracker/tmpl/js/d3.min.js" charset="utf-8"></script>
+<script src="/modules/mod_blue_force_tracker/tmpl/js/d3-fetch.min.js" charset="utf-8"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
-<link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet" />
-<link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet" />
+<link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet"/>
+<link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet"/>
 
-<div style="height:<?php echo $height;?>px" id="map"></div>
+<div style="height:<?php echo $height; ?>px" id="map"></div>
 <script>
-    function fetchAllMakers() {
-        return new Promise((resolve => {
-            const ajaxRequest = jQuery.ajax({
-                method: 'GET',
-                url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker?TableName=blue_force_tracker',
-                headers: {
-                    "Accept": "*/*",
-                    "Authorization": "eyJraWQiOiJLTzRVMWZs",
-                    "content-type": "application/json; charset=UTF-8"
-                },
-                contentType: 'application/json',
-                crossDomain: true,
-                dataType: 'json'
-            });
-            ajaxRequest.done(function (data) {
-                resolve(data);
-            });
-            ajaxRequest.fail(function (request) {
-                jQuery("#result").html('There is error while get:' + request.responseText);
-            });
-        }));
-    }
-
     function imageExists(url, callback) {
         let img = new Image();
-        img.onload = function() { callback(true); };
-        img.onerror = function() { callback(false); };
+        img.onload = function () {
+            callback(true);
+        };
+        img.onerror = function () {
+            callback(false);
+        };
         img.src = url;
     }
 
     async function IsValidImageUrl(url) {
         return new Promise(resolve => {
-            imageExists(url, function(exists) {
+            imageExists(url, function (exists) {
                 resolve(exists);
             });
         });
     }
+
     function getTypeLabel(type, language) {
-        switch(type) {
+        switch (type) {
             case "team" :
                 return language === "FR-ca" ? "Équipe" : "Team";
                 break;
@@ -72,8 +56,9 @@ defined('_JEXEC') or die; ?>
         return 'level-crossing';
     }
 
-    async function showMarker(feature) {
-            const symbol = feature.properties['icon'];
+    async function showMarker(data) {
+        data.features.forEach(function (feature) {
+            const symbol = getMarkerIconByType(feature.properties['type']);
             const layerID = "poi-" + symbol; //feature['markerId'];
             if (!map.getLayer(layerID)) {
                 map.addLayer({
@@ -115,7 +100,7 @@ defined('_JEXEC') or die; ?>
                     let isValidImage = await IsValidImageUrl(image);
 
                     if (!isValidImage) {
-                       image = "./images/image_non_trouvee.png";
+                        image = "./images/image_non_trouvee.png";
                     }
                     const html = '<div class="card">' +
                         '<a href="' + url + '" target="_blank">' +
@@ -139,9 +124,6 @@ defined('_JEXEC') or die; ?>
                         .setHTML(html)
                         .addTo(map);
                 });
-                map.on('click', layerID, function(e) {
-                    map.flyTo({ center: e.features[0].geometry.coordinates,speed: 0.2,curve: 1, });
-                });
                 // Change the cursor to a pointer when the mouse is over the places layer.
                 map.on('mouseenter', layerID, function () {
                     map.getCanvas().style.cursor = 'pointer';
@@ -152,7 +134,7 @@ defined('_JEXEC') or die; ?>
                     map.getCanvas().style.cursor = '';
                 });
             }
-
+        });
     }
 
     function showAddButton(marker) {
@@ -180,6 +162,7 @@ defined('_JEXEC') or die; ?>
         });
     }
 
+
     function addMapControls() {
         map.addControl(new mapboxgl.FullscreenControl());
         map.addControl(
@@ -200,11 +183,25 @@ defined('_JEXEC') or die; ?>
             }), 'top-left');
         map.addControl(new AddMarkerControl(), 'top-left');
     }
-    const markerCanvas = {
+
+    function fetchData() {
+        d3.json('https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker').then(function (data) {
+            if (map.getSource('places')) {
+                map.removeSource('places');
+            }
+            map.addSource('places', {
+                'type': 'geojson',
+                'data': data
+            });
+            showMarker(data);
+        });
+    }
+
+    const defaultMarker = {
         type: "Feature",
         properties: {
-            icon: "ranger-station",
             type: "field",
+            icon: "ranger-station",
             label: "Nom",
             description: "Description",
             url: "Lien site internet",
@@ -217,7 +214,8 @@ defined('_JEXEC') or die; ?>
             ]
         }
     };
-    let markersP = fetchAllMakers();
+
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -226,128 +224,117 @@ defined('_JEXEC') or die; ?>
         zoom: 6.5
     });
 
-    markersP.then(function(markers) {
-        const places = {
-            'type': 'FeatureCollection',
-            'features': markers['Items']
-        };
-        addMapControls();
-        map.on('load', function() {
-            map.addSource('places', {
-                'type': 'geojson',
-                'data': places
-            });
-            places.features.forEach(function (feature) {
-                showMarker(feature);
-            });
-            const marker = new mapboxgl.Marker({
-                draggable: true
-            }).setLngLat([-73.61027, 45.49917]);
+    addMapControls();
+    map.on('load', function () {
+        fetchData();
+        const marker = new mapboxgl.Marker({
+            draggable: true
+        }).setLngLat([-73.61027, 45.49917]);
+        showAddButton(marker);
 
-            showAddButton(marker);
+        function onDragEnd() {
+            const lngLat = marker.getLngLat();
+            const type = defaultMarker.properties.type;
+            const coordinates = document.getElementById("coordinates");
+            coordinates.style.display = 'block';
+            let teamSelected = '';
+            let eventSelected = '';
+            let fieldSelected = '';
 
-            function onDragEnd() {
-                const coordinates = document.getElementById("coordinates");
-                const lngLat = marker.getLngLat();
-                coordinates.style.display = 'block';
-                const type = markerCanvas.properties.type;
-                let teamSelected = '';
-                let eventSelected = '';
-                let fieldSelected = '';
-
-                if (type === 'team') {
-                    teamSelected = 'selected';
-                } else if (type === 'field') {
-                    fieldSelected = 'selected';
-                } else if (type === 'event') {
-                    eventSelected = 'selected';
-                }
-                const label = markerCanvas.properties.label;
-                const description = markerCanvas.properties.description;
-                const url = markerCanvas.properties.url;
-                const image = markerCanvas.properties.image;
-                coordinates.innerHTML =
-                    '<form id="markerForm" action="">' +
-                    '<div class="marker-form">' +
-                    '<div id="result"></div>' +
-                    '<h4>Nouveau point d&#39;int&eacute;r&ecirc;t</h4>' +
-                    '<select id="type" name="type">' +
-                    '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
-                    '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
-                    '<option value="field" ' + fieldSelected + '>Terrain</option>' +
-                    '</select><br />' +
-                    '<input id="label" name="label" placeholder="' + label + '" type="text" width="100px;"><br />' +
-                    '<input id="description" name="description" placeholder="' + description + '" type="text" width="100px;"><br />' +
-                    '<input id="url" name="url" placeholder="' + url + '" type="text" width="100px;"><br />' +
-                    '<input id="image" name="image" placeholder="' + image + '" type="text" width="100px;"><br />' +
-                    'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat +
-                    '<br /><input type="submit" id="markerSave" name="markerSave" value="SAUVEGARDER" />' +
-                    '</div>' +
-                    '</form>';
+            if (type === 'team') {
+                teamSelected = 'selected';
+            } else if (type === 'field') {
+                fieldSelected = 'selected';
+            } else if (type === 'event') {
+                eventSelected = 'selected';
             }
-            marker.on('dragend', onDragEnd);
+            const label = defaultMarker.properties.label;
+            const description = defaultMarker.properties.description;
+            const url = defaultMarker.properties.url;
+            const image = defaultMarker.properties.image;
+            coordinates.innerHTML =
+                '<form id="markerForm" action="">' +
+                '<div class="marker-form">' +
+                '<div id="result"></div>' +
+                '<h4>Nouveau point d&#39;int&eacute;r&ecirc;t</h4>' +
+                '<select id="type" name="type">' +
+                '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
+                '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
+                '<option value="field" ' + fieldSelected + '>Terrain</option>' +
+                '</select><br />' +
+                '<input id="label" name="label" placeholder="' + label + '" type="text" width="100px;"><br />' +
+                '<input id="description" name="description" placeholder="' + description + '" type="text" width="100px;"><br />' +
+                '<input id="url" name="url" placeholder="' + url + '" type="text" width="100px;"><br />' +
+                '<input id="image" name="image" placeholder="' + image + '" type="text" width="100px;"><br />' +
+                'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat +
+                '<br /><input type="submit" id="markerSave" name="markerSave" value="SAUVEGARDER" />' +
+                '</div>' +
+                '</form>';
+        }
 
-            jQuery(document).ready(function() {
-                jQuery(document).on('submit', '#markerForm', function(e) {
-                    let saveButton = jQuery("#markerSave");
-                    saveButton[0].disabled = true;
-                    e.preventDefault();
-                    const lngLat = marker.getLngLat();
-                    markerCanvas.properties.type = jQuery("#type").val();
-                    markerCanvas.properties.icon = getMarkerIconByType(markerCanvas.properties.type);
-                    markerCanvas.properties.label = jQuery("#label").val();
-                    markerCanvas.properties.description = jQuery("#description").val();
-                    markerCanvas.properties.url = jQuery("#url").val();
-                    markerCanvas.properties.image = jQuery("#image").val();
-                    markerCanvas.geometry.coordinates = [lngLat.lng.toFixed(5), lngLat.lat.toFixed(5)];
+        marker.on('dragend', onDragEnd);
 
-                    const ajaxRequest = jQuery.ajax({
-                        method: 'POST',
-                        url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker',
-                        headers: {
-                            "Accept": "*/*",
-                            "Authorization": "eyJraWQiOiJLTzRVMWZs",
-                            "content-type": "application/json; charset=UTF-8",
-                        },
-                        contentType: 'application/json',
-                        crossDomain: true,
-                        data: JSON.stringify(markerCanvas),
-                        dataType: 'json'
-                    });
-                    ajaxRequest.done(async function (data){
-                        let newMarker = JSON.parse(data);
-                        places.features.push(newMarker);
-                        let placesSources = map.getSource('places');
-                        placesSources.data = places;
-                        await showMarker(newMarker);
-                        marker.remove();
-                         // Show successfully for submit message
-                        jQuery("#result").html('Sauvegard&eacute; avec succ&egrave;s');
-                        let saveButton = jQuery("#markerSave");
-                        saveButton.val("SAUVEGARDÉ!");
-                        document.getElementById('addMarkerLabel').textContent = 'Ajouter';
-                        document.getElementById('addMarkerInput').checked = false;
-                        await new Promise(r => setTimeout(r, 2000));
-                        document.getElementById("coordinates").style.display = 'none';
-                        marker.remove();
-                        marker.setLngLat([-73.61027, 45.49917]);
-                        markerCanvas.properties.type = "field";
-                        markerCanvas.properties.icon = 'ranger-station';
-                        markerCanvas.properties.label = "Nom";
-                        markerCanvas.properties.description = "Description";
-                        markerCanvas.properties.url = "Lien site internet";
-                        markerCanvas.properties.image = "Lien image";
-                        markerCanvas.geometry.coordinates = [-72.937107, 46.286173];
-                    });
-                    /* On failure of request this function will be called  */
-                    ajaxRequest.fail(function (request){
-                        jQuery("#result").html('There is error while submit:' + request.responseText);
-                        let saveButton = jQuery("#markerSave");
-                        saveButton[0].disabled = false;
-                    });
-                    return false;
-                });
+        jQuery(document).on('submit', '#markerForm', function (e) {
+            let saveButton = jQuery("#markerSave");
+            saveButton[0].disabled = true;
+            e.preventDefault();
+            const lngLat = marker.getLngLat();
+            let markerToSave = jQuery.extend({}, defaultMarker)
+            markerToSave.properties.type = jQuery("#type").val();
+            markerToSave.properties.icon = getMarkerIconByType(markerToSave.properties.type);
+            markerToSave.properties.label = jQuery("#label").val();
+            markerToSave.properties.description = jQuery("#description").val();
+            markerToSave.properties.url = jQuery("#url").val();
+            markerToSave.properties.image = jQuery("#image").val();
+            markerToSave.geometry.coordinates = [lngLat.lng.toFixed(5), lngLat.lat.toFixed(5)];
+
+            const ajaxRequest = jQuery.ajax({
+                method: 'POST',
+                url: 'https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker',
+                headers: {
+                    "Accept": "*/*",
+                    "Authorization": "eyJraWQiOiJLTzRVMWZs",
+                    "content-type": "application/json; charset=UTF-8",
+                },
+                contentType: 'application/json',
+                crossDomain: true,
+                data: JSON.stringify(markerToSave),
+                dataType: 'json'
             });
+            ajaxRequest.done(async function (data) {
+                //TODO set marker ID
+                //let newMarker = JSON.parse(data);
+                // places.features.push(newMarker);
+                //let placesSources = map.getSource('places');
+                //placesSources.data;
+                //await showMarker(newMarker);
+                //fetchData();
+                marker.remove();
+                // Show successfully for submit message
+                jQuery("#result").html('Sauvegard&eacute; avec succ&egrave;s');
+                let saveButton = jQuery("#markerSave");
+                saveButton.val("SAUVEGARDÉ!");
+                document.getElementById('addMarkerLabel').textContent = 'Ajouter';
+                document.getElementById('addMarkerInput').checked = false;
+                await new Promise(r => setTimeout(r, 2000));
+                document.getElementById("coordinates").style.display = 'none';
+                marker.remove();
+                marker.setLngLat([-73.61027, 45.49917]);
+                // markerCanvas.properties.type = "field";
+                // markerCanvas.properties.icon = "ranger-station";
+                // markerCanvas.properties.label = "Nom";
+                // markerCanvas.properties.description = "Description";
+                // markerCanvas.properties.url = "Lien site internet";
+                // markerCanvas.properties.image = "Lien image";
+                // markerCanvas.geometry.coordinates = [-72.937107, 46.286173];
+            });
+            /* On failure of request this function will be called  */
+            ajaxRequest.fail(function (request) {
+                jQuery("#result").html('There is error while submit:' + request.responseText);
+                let saveButton = jQuery("#markerSave");
+                saveButton[0].disabled = false;
+            });
+            return false;
         });
     });
 </script>
