@@ -24,7 +24,7 @@ defined('_JEXEC') or die; ?>
             icon : 'embassy',
             string : "event"
         }
-    }
+    };
 
     function imageExists(url, callback) {
         let img = new Image();
@@ -49,95 +49,94 @@ defined('_JEXEC') or die; ?>
         switch (type) {
             case markerType.team.string :
                 return language === "FR-ca" ? "Équipe" : "Team";
-                break;
             case  markerType.field.string :
                 return language === "FR-ca" ? "Terrain" : "Field";
-                break;
             case  markerType.event.string :
                 return language === "FR-ca" ? "Événement" : "Event";
-                break;
             default:
                 return language === "FR-ca" ? "Type introuvable!" : "Type not found";
         }
     }
 
-    async function showMarker(data) {
-        data.features.forEach(function (feature) {
-            const symbol = markerType[feature.properties.type].icon;
-            const layerID = "poi-" + symbol; //feature['markerId'];
-            if (!map.getLayer(layerID)) {
-                map.addLayer({
-                    'id': layerID,
-                    'type': 'symbol',
-                    'source': 'places',
-                    'layout': {
-                        'icon-image': symbol + '-15',
-                        'icon-allow-overlap': true
-                    },
-                    'filter': ['==', 'icon', symbol]
-                });
-                let filterGroup = document.getElementById('filter-group');
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = layerID;
-                input.checked = true;
-                filterGroup.appendChild(input);
+    function showMarker() {
+        Object.keys(markerType).forEach(function (markerProperties) {
+            if (markerType.hasOwnProperty(markerProperties)) {
+                const symbol = markerType[markerProperties].icon;
+                const layerID = "poi-" + symbol; //feature['markerId'];
+                if (!map.getLayer(layerID)) {
+                    map.addLayer({
+                        'id': layerID,
+                        'type': 'symbol',
+                        'source': 'places',
+                        'layout': {
+                            'icon-image': symbol + '-15',
+                            'icon-allow-overlap': true
+                        },
+                        'filter': ['==', 'icon', symbol]
+                    });
+                    let filterGroup = document.getElementById('filter-group');
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.id = layerID;
+                    input.checked = true;
+                    filterGroup.appendChild(input);
 
-                const label = document.createElement('label');
-                label.setAttribute('for', layerID);
-                label.textContent = getTypeLabel(feature.properties['type'], "FR-ca");
-                filterGroup.appendChild(label);
+                    const label = document.createElement('label');
+                    label.setAttribute('for', layerID);
+                    label.textContent = getTypeLabel(markerProperties, "FR-ca");
+                    filterGroup.appendChild(label);
 
-                input.addEventListener('change', function (e) {
-                    map.setLayoutProperty(
-                        layerID,
-                        'visibility',
-                        e.target.checked ? 'visible' : 'none'
-                    );
-                });
+                    input.addEventListener('change', function (e) {
+                        map.setLayoutProperty(
+                            layerID,
+                            'visibility',
+                            e.target['checked'] ? 'visible' : 'none'
+                        );
+                    });
 
-                map.on('click', layerID, async function (e) {
-                    const coordinates = e.features[0].geometry.coordinates.slice();
-                    const label = e.features[0].properties.label;
-                    const description = e.features[0].properties.description;
-                    const url = e.features[0].properties.url;
-                    let image = e.features[0].properties.image;
-                    let isValidImage = await IsValidImageUrl(image);
+                    map.on('click', layerID, async function (e) {
+                        const coordinates = e.features[0].geometry.coordinates.slice();
+                        const label = e.features[0].properties.label;
+                        const description = e.features[0].properties.description;
+                        const url = e.features[0].properties.url;
+                        let image = e.features[0].properties.image;
+                        let isValidImage = await IsValidImageUrl(image);
 
-                    if (!isValidImage) {
-                        image = "./images/image_non_trouvee.png";
-                    }
-                    const html = '<div class="card">' +
-                        '<a href="' + url + '" target="_blank">' +
-                        '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
-                        '</a>' +
-                        '<div class="container">' +
-                        '<h4><b>' + label + '</b></h4>' +
-                        '<p>' + description + '</p>' +
-                        '</div>' +
-                        '</div>';
+                        if (!isValidImage) {
+                            image = "./images/image_non_trouvee.png";
+                        }
+                        const html = '<div class="card">' +
+                            '<a href="' + url + '" target="_blank">' +
+                            '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
+                            '</a>' +
+                            '<div class="container">' +
+                            '<h4><b>' + label + '</b></h4>' +
+                            '<p>' + description + '</p>' +
+                            '</div>' +
+                            '</div>';
 
-                    // Ensure that if the map is zoomed out such that multiple
-                    // copies of the feature are visible, the popup appears
-                    // over the copy being pointed to.
-                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                    }
+                        // Ensure that if the map is zoomed out such that multiple
+                        // copies of the feature are visible, the popup appears
+                        // over the copy being pointed to.
+                        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                        }
 
-                    new mapboxgl.Popup()
-                        .setLngLat(coordinates)
-                        .setHTML(html)
-                        .addTo(map);
-                });
-                // Change the cursor to a pointer when the mouse is over the places layer.
-                map.on('mouseenter', layerID, function () {
-                    map.getCanvas().style.cursor = 'pointer';
-                });
+                        new mapboxgl.Popup()
+                            .setLngLat(coordinates)
+                            .setHTML(html)
+                            .addTo(map);
+                    });
+                    // Change the cursor to a pointer when the mouse is over the places layer.
+                    map.on('mouseenter', layerID, function () {
+                        map.getCanvas().style.cursor = 'pointer';
+                    });
 
-                // Change it back to a pointer when it leaves.
-                map.on('mouseleave', layerID, function () {
-                    map.getCanvas().style.cursor = '';
-                });
+                    // Change it back to a pointer when it leaves.
+                    map.on('mouseleave', layerID, function () {
+                        map.getCanvas().style.cursor = '';
+                    });
+                }
             }
         });
     }
@@ -188,20 +187,6 @@ defined('_JEXEC') or die; ?>
             }), 'top-left');
         map.addControl(new AddMarkerControl(), 'top-left');
     }
-
-    function fetchData() {
-        d3.json('https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker').then(function (data) {
-            if (map.getSource('places')) {
-                map.removeSource('places');
-            }
-            map.addSource('places', {
-                'type': 'geojson',
-                'data': data
-            });
-            showMarker(data);
-        });
-    }
-
     const defaultMarker = {
         type: "Feature",
         properties: {
@@ -230,8 +215,13 @@ defined('_JEXEC') or die; ?>
     });
 
     addMapControls();
+    const url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
     map.on('load', function () {
-        fetchData();
+        window.setInterval(function() {
+            map.getSource('places').setData(url);
+        }, 2000);
+        map.addSource('places', { type: 'geojson', data: url });
+        showMarker();
         const marker = new mapboxgl.Marker({
             draggable: true
         }).setLngLat([-73.61027, 45.49917]);
@@ -284,7 +274,7 @@ defined('_JEXEC') or die; ?>
             saveButton[0].disabled = true;
             e.preventDefault();
             const lngLat = marker.getLngLat();
-            let markerToSave = jQuery.extend({}, defaultMarker)
+            let markerToSave = jQuery.extend({}, defaultMarker);
             markerToSave.properties.type = jQuery("#type").val();
             markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
             markerToSave.properties.label = jQuery("#label").val();
@@ -306,14 +296,7 @@ defined('_JEXEC') or die; ?>
                 data: JSON.stringify(markerToSave),
                 dataType: 'json'
             });
-            ajaxRequest.done(async function (data) {
-                //TODO set marker ID
-                //let newMarker = JSON.parse(data);
-                // places.features.push(newMarker);
-                //let placesSources = map.getSource('places');
-                //placesSources.data;
-                //await showMarker(newMarker);
-                //fetchData();
+            ajaxRequest.done(async function () {
                 marker.remove();
                 // Show successfully for submit message
                 jQuery("#result").html('Sauvegard&eacute; avec succ&egrave;s');
@@ -323,15 +306,8 @@ defined('_JEXEC') or die; ?>
                 document.getElementById('addMarkerInput').checked = false;
                 await new Promise(r => setTimeout(r, 2000));
                 document.getElementById("coordinates").style.display = 'none';
-                marker.remove();
+                document.getElementById("markerForm").reset();
                 marker.setLngLat([-73.61027, 45.49917]);
-                // markerCanvas.properties.type = "field";
-                // markerCanvas.properties.icon = "ranger-station";
-                // markerCanvas.properties.label = "Nom";
-                // markerCanvas.properties.description = "Description";
-                // markerCanvas.properties.url = "Lien site internet";
-                // markerCanvas.properties.image = "Lien image";
-                // markerCanvas.geometry.coordinates = [-72.937107, 46.286173];
             });
             /* On failure of request this function will be called  */
             ajaxRequest.fail(function (request) {
