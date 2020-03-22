@@ -2,8 +2,6 @@
 // No direct access
 defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/customMapControl.js"></script>
-<script src="/modules/mod_blue_force_tracker/tmpl/js/d3.min.js" charset="utf-8"></script>
-<script src="/modules/mod_blue_force_tracker/tmpl/js/d3-fetch.min.js" charset="utf-8"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet"/>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet"/>
