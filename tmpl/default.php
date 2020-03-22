@@ -1,59 +1,13 @@
 <?php
 // No direct access
 defined('_JEXEC') or die; ?>
-<!--<script src="/modules/mod_blue_force_tracker/tmpl/js/jquery-3.4.1.min.js"></script>-->
-<script src="/modules/mod_blue_force_tracker/tmpl/js/groupFilter.js"></script>
+<script src="/modules/mod_blue_force_tracker/tmpl/js/customMapControl.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet" />
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet" />
 
 <div style="height:<?php echo $height;?>px" id="map"></div>
 <script>
-    class GroupFilterControl {
-        onAdd(map) {
-            this._map = map;
-            this._container = document.createElement('div');
-            this._container.className = 'mapboxgl-ctrl filter-group';
-            this._container.id = 'filter-group';
-            return this._container;
-        }
-
-        onRemove() {
-            this._container.parentNode.removeChild(this._container);
-            this._map = undefined;
-        }
-    }
-
-    class AddMarkerButtonControl {
-        onAdd(map) {
-            this._map = map;
-            this._container = document.createElement('div');
-            this._container.className = 'mapboxgl-ctrl filter-group';
-            this._container.id = 'add-group';
-            return this._container;
-        }
-
-        onRemove() {
-            this._container.parentNode.removeChild(this._container);
-            this._map = undefined;
-        }
-    }
-
-    class AddMarkerControl {
-        onAdd(map) {
-            this._map = map;
-            this._container = document.createElement('div');
-            this._container.className = 'mapboxgl-ctrl coordinates';
-            this._container.id = 'coordinates';
-            return this._container;
-        }
-
-        onRemove() {
-            this._container.parentNode.removeChild(this._container);
-            this._map = undefined;
-        }
-    }
-
     function fetchAllMakers() {
         return new Promise((resolve => {
             const ajaxRequest = jQuery.ajax({
@@ -185,6 +139,9 @@ defined('_JEXEC') or die; ?>
                         .setHTML(html)
                         .addTo(map);
                 });
+                map.on('click', layerID, function(e) {
+                    map.flyTo({ center: e.features[0].geometry.coordinates,speed: 0.2,curve: 1, });
+                });
                 // Change the cursor to a pointer when the mouse is over the places layer.
                 map.on('mouseenter', layerID, function () {
                     map.getCanvas().style.cursor = 'pointer';
@@ -222,6 +179,27 @@ defined('_JEXEC') or die; ?>
             }
         });
     }
+
+    function addMapControls() {
+        map.addControl(new mapboxgl.FullscreenControl());
+        map.addControl(
+            new mapboxgl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                trackUserLocation: true
+            })
+        );
+        map.addControl(new GroupFilterControl(), 'top-right');
+        map.addControl(new AddMarkerButtonControl(), 'top-right');
+        map.addControl(
+            new mapboxgl.NavigationControl({
+                options: {
+                    showZoom: true
+                }
+            }), 'top-left');
+        map.addControl(new AddMarkerControl(), 'top-left');
+    }
     const markerCanvas = {
         type: "Feature",
         properties: {
@@ -253,24 +231,7 @@ defined('_JEXEC') or die; ?>
             'type': 'FeatureCollection',
             'features': markers['Items']
         };
-        map.addControl(new mapboxgl.FullscreenControl());
-        map.addControl(
-                new mapboxgl.GeolocateControl({
-                    positionOptions: {
-                        enableHighAccuracy: true
-                    },
-                    trackUserLocation: true
-                })
-            );
-        map.addControl(new GroupFilterControl(), 'top-right');
-        map.addControl(new AddMarkerButtonControl(), 'top-right');
-        map.addControl(
-                new mapboxgl.NavigationControl({
-                    options: {
-                        showZoom:true
-                    }
-                }), 'top-left');
-        map.addControl(new AddMarkerControl(), 'top-left');
+        addMapControls();
         map.on('load', function() {
             map.addSource('places', {
                 'type': 'geojson',
@@ -369,6 +330,7 @@ defined('_JEXEC') or die; ?>
                         await new Promise(r => setTimeout(r, 2000));
                         document.getElementById("coordinates").style.display = 'none';
                         marker.remove();
+                        marker.setLngLat([-73.61027, 45.49917]);
                         markerCanvas.properties.type = "field";
                         markerCanvas.properties.icon = 'ranger-station';
                         markerCanvas.properties.label = "Nom";
