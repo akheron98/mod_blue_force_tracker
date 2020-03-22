@@ -10,6 +10,22 @@ defined('_JEXEC') or die; ?>
 
 <div style="height:<?php echo $height; ?>px" id="map"></div>
 <script>
+
+    const markerType = {
+        team : {
+            icon : 'toilet',
+            string : "team"
+        },
+        field : {
+            icon : 'ranger-station',
+            string : "field"
+        },
+        event : {
+            icon : 'embassy',
+            string : "event"
+        }
+    }
+
     function imageExists(url, callback) {
         let img = new Image();
         img.onload = function () {
@@ -31,13 +47,13 @@ defined('_JEXEC') or die; ?>
 
     function getTypeLabel(type, language) {
         switch (type) {
-            case "team" :
+            case markerType.team.string :
                 return language === "FR-ca" ? "Équipe" : "Team";
                 break;
-            case "field" :
+            case  markerType.field.string :
                 return language === "FR-ca" ? "Terrain" : "Field";
                 break;
-            case "event" :
+            case  markerType.event.string :
                 return language === "FR-ca" ? "Événement" : "Event";
                 break;
             default:
@@ -45,20 +61,9 @@ defined('_JEXEC') or die; ?>
         }
     }
 
-    function getMarkerIconByType(type) {
-        if (type === "team") {
-            return 'toilet';
-        } else if (type === "event") {
-            return 'embassy';
-        } else if (type === "field") {
-            return 'ranger-station';
-        }
-        return 'level-crossing';
-    }
-
     async function showMarker(data) {
         data.features.forEach(function (feature) {
-            const symbol = getMarkerIconByType(feature.properties['type']);
+            const symbol = markerType[feature.properties.type].icon;
             const layerID = "poi-" + symbol; //feature['markerId'];
             if (!map.getLayer(layerID)) {
                 map.addLayer({
@@ -281,7 +286,7 @@ defined('_JEXEC') or die; ?>
             const lngLat = marker.getLngLat();
             let markerToSave = jQuery.extend({}, defaultMarker)
             markerToSave.properties.type = jQuery("#type").val();
-            markerToSave.properties.icon = getMarkerIconByType(markerToSave.properties.type);
+            markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
             markerToSave.properties.label = jQuery("#label").val();
             markerToSave.properties.description = jQuery("#description").val();
             markerToSave.properties.url = jQuery("#url").val();
