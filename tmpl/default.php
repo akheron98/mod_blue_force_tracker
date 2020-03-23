@@ -24,6 +24,26 @@ defined('_JEXEC') or die; ?>
         }
     };
 
+    const defaultMarker = {
+        type: "Feature",
+        properties: {
+            id: "0",
+            type: "field",
+            icon: "ranger-station",
+            label: "Nom",
+            description: "Description",
+            url: "Lien site internet",
+            image: "Lien image",
+            owner:"",
+        },
+        geometry: {
+            type: "Point",
+            coordinates: [
+                -72.937107, 46.286173
+            ]
+        }
+    };
+
     function imageExists(url, callback) {
         let img = new Image();
         img.onload = function () {
@@ -54,6 +74,10 @@ defined('_JEXEC') or die; ?>
             default:
                 return language === "FR-ca" ? "Type introuvable!" : "Type not found";
         }
+    }
+
+    function editMarker(markerToEdit) {
+        document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, 'updateMarker');
     }
 
     function showMarker() {
@@ -93,25 +117,39 @@ defined('_JEXEC') or die; ?>
                     });
 
                     map.on('click', layerID, async function (e) {
-                        const coordinates = e.features[0].geometry.coordinates.slice();
-                        const label = e.features[0].properties.label;
-                        const description = e.features[0].properties.description;
-                        const url = e.features[0].properties.url;
-                        let image = e.features[0].properties.image;
+                        let markerToShow = new Object();
+                        markerToShow['geometry'] = e.features[0].geometry;
+                        markerToShow['type'] = e.features[0].type;
+                        markerToShow['properties'] = e.features[0].properties;
+                        const coordinates = markerToShow.geometry.coordinates.slice();
+                        const label = markerToShow.properties.label;
+                        const description = markerToShow.properties.description;
+                        const url = markerToShow.properties.url;
+                        const userID = markerToShow.properties.owner;
+                        let buttonMAJHtml = "";
+                        let buttonSupprimerHTml = "";
+                        let labelHtml = '<h4><b>' + label + '</b></h4>';
+                        let descriptionHtml = '<p>' + description + '</p>';
+                        if (userID === "<?php echo $userID;?>") {
+                            buttonMAJHtml = '<button onclick=\'return editMarker(' + JSON.stringify(markerToShow) + ');\' id=\'updateMarker' + userID + '\' class=\'updateMarker\'><i class=\'fas fa-edit\' style=\'padding:0\'></i></button>';
+                            buttonSupprimerHTml = '<button onclick="return deleteMarker(\'' + markerToShow.properties.id + '\');" id="supprimerMarker' + userID + '" class="supprimerMarker"><i class="fas fa-trash" style="padding:0"></i></button>';
+                        }
+                        let image = markerToShow.properties.image;
                         let isValidImage = await IsValidImageUrl(image);
-
                         if (!isValidImage) {
                             image = "./images/image_non_trouvee.png";
                         }
-                        const html = '<div class="card">' +
+                        const container = '<div id="result"></div>' +
                             '<a href="' + url + '" target="_blank">' +
                             '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
                             '</a>' +
-                            '<div class="container">' +
-                            '<h4><b>' + label + '</b></h4>' +
-                            '<p>' + description + '</p>' +
-                            '</div>' +
+                            '<div id="cardContainer" class="container">' +
+                            labelHtml +
+                            descriptionHtml +
+                            buttonMAJHtml +
+                            buttonSupprimerHTml +
                             '</div>';
+                        const html = '<div id="card" class="card"></div>';
 
                         // Ensure that if the map is zoomed out such that multiple
                         // copies of the feature are visible, the popup appears
@@ -120,10 +158,10 @@ defined('_JEXEC') or die; ?>
                             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                         }
 
-                        new mapboxgl.Popup()
-                            .setLngLat(coordinates)
+                        popup.setLngLat(coordinates)
                             .setHTML(html)
                             .addTo(map);
+                        document.getElementById("card").innerHTML = container;
                     });
                     // Change the cursor to a pointer when the mouse is over the places layer.
                     map.on('mouseenter', layerID, function () {
@@ -136,6 +174,125 @@ defined('_JEXEC') or die; ?>
                     });
                 }
             }
+        });
+    }
+
+    function getMarkerFormHTML(marker, id) {
+        const lngLat = marker.geometry.coordinates;
+        let teamSelected = '';
+        let eventSelected = '';
+        let fieldSelected = '';
+        if (marker.properties.type === 'team') {
+            teamSelected = 'selected';
+        } else if (marker.properties.type === 'field') {
+            fieldSelected = 'selected';
+        } else if (marker.properties.type === 'event') {
+            eventSelected = 'selected';
+        }
+        let label = id === "newMarker" ? "" : marker.properties.label;
+        let description = id === "newMarker" ? "" : marker.properties.description;
+        let url = id === "newMarker" ? "" : marker.properties.url;
+        let image = id === "newMarker" ? "" : marker.properties.image;
+        let showCancel = "hidden"; //id === "newMarker" ? "hidden" : "submit";
+
+        return '<form id="markerForm' + id + '" action="">' +
+            '<div class="marker-form">' +
+            '<div id="result' + id + '"></div>' +
+            '<p>Votre point d&#39;int&eacute;r&ecirc;t</p>' +
+            '<select id="type' + id + '" name="type">' +
+            '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
+            '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
+            '<option value="field" ' + fieldSelected + '>Terrain</option>' +
+            '</select><br />' +
+            '<input id="label' + id + '" name="label" placeholder="' + defaultMarker.properties.label + '" value="'+label+'" type="text" width="100px;"><br />' +
+            '<input id="description' + id + '" name="description" placeholder="' + defaultMarker.properties.description + '" value="'+description+'" type="text" width="100px;"><br />' +
+            '<input id="url' + id + '" name="url" placeholder="' + defaultMarker.properties.url + '" value="'+url+'" type="text" width="100px;"><br />' +
+            '<input id="image' + id + '" name="image" placeholder="' + defaultMarker.properties.image + '" value="'+image+'" type="text" width="100px;"><br />' +
+            '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
+            '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
+            '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
+            'Longitude: ' + lngLat[0].toFixed(6) + '<br />Latitude: ' + lngLat[1].toFixed(6) +
+            '<br /><p>' +
+            '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
+            '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
+            '</p></div>' +
+            '</form>';
+    }
+
+    function cancelEditing(id) {
+        document.getElementById('markerForm' + id).style.display='none';
+        document.getElementById('card').style.display='block';
+        return false;
+    }
+
+    function getMarkerToSaveFromForm(id) {
+        let markerToSave = jQuery.extend({}, defaultMarker);
+        markerToSave.properties.id = jQuery("#id" + id).val();
+        markerToSave.properties.type = jQuery("#type" + id).val();
+        markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
+        markerToSave.properties.label = jQuery("#label" + id).val();
+        markerToSave.properties.description = jQuery("#description" + id).val();
+        markerToSave.properties.url = jQuery("#url" + id).val();
+        markerToSave.properties.image = jQuery("#image" + id).val();
+        markerToSave.properties.owner = "<?php echo $userID; ?>";
+        markerToSave.geometry.coordinates = [jQuery("#lng" + id).val(), jQuery("#lat" + id).val()];
+        return markerToSave;
+    }
+
+    function deleteMarker(idToDelete) {
+        if (confirm("Êtes-vous sur de vouloir supprimer votre point d'intérêt ?")) {
+            persistMarker({id:idToDelete}, 'DELETE','updateMarker', function(){popup.remove();});
+        }
+        return false;
+    }
+
+    function saveNewMarker(markerToSave, id) {
+        persistMarker(markerToSave, 'POST',id, function(){marker.remove();});
+        document.getElementById('addMarkerLabel').textContent = 'Ajouter';
+        document.getElementById('addMarkerInput').checked = false;
+        new Promise(r => setTimeout(r, 2000)).then(function () {
+            document.getElementById("coordinates").style.display = 'none';
+            document.getElementById("markerForm" + id).reset();
+            marker.setLngLat([-73.61027, 45.49917]);
+        });
+        return false;
+    }
+
+    function saveMarker(id) {
+        let saveButton = jQuery("#markerSave" + id);
+        saveButton[0].disabled = true;
+        let markerToSave = getMarkerToSaveFromForm(id);
+
+        if (id === "newMarker") {
+            saveNewMarker(markerToSave,id);
+        } else {
+            persistMarker(markerToSave, 'PUT',id, function(){popup.remove();});
+        }
+        return false;
+    }
+
+    async function persistMarker(markerToSave, method, id, callback) {
+        const ajaxRequest = jQuery.ajax({
+            method: method,
+            url: url,
+            headers: {
+                "Accept": "*/*",
+                "Authorization": "eyJraWQiOiJLTzRVMWZs",
+                "content-type": "application/json; charset=UTF-8",
+            },
+            contentType: 'application/json',
+            crossDomain: true,
+            data: JSON.stringify(markerToSave),
+            dataType: 'json'
+        });
+        ajaxRequest.done(function () {
+            jQuery("#result" + id).html('Opération réussie!');
+            callback();
+            map.getSource('places').setData(url);
+        });
+        /* On failure of request this function will be called  */
+        ajaxRequest.fail(function (request) {
+            jQuery("#result" + id).html('There is error while submit:' + request.responseText);
         });
     }
 
@@ -160,10 +317,10 @@ defined('_JEXEC') or die; ?>
             } else {
                 marker.remove();
                 label.textContent = 'Ajouter';
+                document.getElementById('coordinates').style.display = 'none';
             }
         });
     }
-
 
     function addMapControls() {
         map.addControl(new mapboxgl.FullscreenControl());
@@ -185,25 +342,6 @@ defined('_JEXEC') or die; ?>
             }), 'top-left');
         map.addControl(new AddMarkerControl(), 'top-left');
     }
-    const defaultMarker = {
-        type: "Feature",
-        properties: {
-            type: "field",
-            icon: "ranger-station",
-            label: "Nom",
-            description: "Description",
-            url: "Lien site internet",
-            image: "Lien image",
-            owner:"",
-        },
-        geometry: {
-            type: "Point",
-            coordinates: [
-                -72.937107, 46.286173
-            ]
-        }
-    };
-
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
     const map = new mapboxgl.Map({
@@ -212,107 +350,25 @@ defined('_JEXEC') or die; ?>
         center: [-72.937107, 46.286173],
         zoom: 6.5
     });
-
-    addMapControls();
+    const popup = new mapboxgl.Popup();
     const url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
+    const marker = new mapboxgl.Marker({draggable: true});
+    addMapControls();
+
     map.on('load', function () {
         map.addSource('places', { type: 'geojson', data: url });
         showMarker();
-        const marker = new mapboxgl.Marker({
-            draggable: true
-        }).setLngLat([-73.61027, 45.49917]);
+        marker.setLngLat([-73.61027, 45.49917]);
         showAddButton(marker);
 
         function onDragEnd() {
-            const lngLat = marker.getLngLat();
-            const type = defaultMarker.properties.type;
             const coordinates = document.getElementById("coordinates");
             coordinates.style.display = 'block';
-            let teamSelected = '';
-            let eventSelected = '';
-            let fieldSelected = '';
-
-            if (type === 'team') {
-                teamSelected = 'selected';
-            } else if (type === 'field') {
-                fieldSelected = 'selected';
-            } else if (type === 'event') {
-                eventSelected = 'selected';
-            }
-            const label = defaultMarker.properties.label;
-            const description = defaultMarker.properties.description;
-            const url = defaultMarker.properties.url;
-            const image = defaultMarker.properties.image;
-            coordinates.innerHTML =
-                '<form id="markerForm" action="">' +
-                '<div class="marker-form">' +
-                '<div id="result"></div>' +
-                '<h4>Nouveau point d&#39;int&eacute;r&ecirc;t</h4>' +
-                '<select id="type" name="type">' +
-                '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
-                '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
-                '<option value="field" ' + fieldSelected + '>Terrain</option>' +
-                '</select><br />' +
-                '<input id="label" name="label" placeholder="' + label + '" type="text" width="100px;"><br />' +
-                '<input id="description" name="description" placeholder="' + description + '" type="text" width="100px;"><br />' +
-                '<input id="url" name="url" placeholder="' + url + '" type="text" width="100px;"><br />' +
-                '<input id="image" name="image" placeholder="' + image + '" type="text" width="100px;"><br />' +
-                'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat +
-                '<br /><input type="submit" id="markerSave" name="markerSave" value="SAUVEGARDER" />' +
-                '</div>' +
-                '</form>';
-        }
-
-        marker.on('dragend', onDragEnd);
-
-        jQuery(document).on('submit', '#markerForm', function (e) {
-            let saveButton = jQuery("#markerSave");
-            saveButton[0].disabled = true;
-            e.preventDefault();
-            const lngLat = marker.getLngLat();
             let markerToSave = jQuery.extend({}, defaultMarker);
-            markerToSave.properties.type = jQuery("#type").val();
-            markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
-            markerToSave.properties.label = jQuery("#label").val();
-            markerToSave.properties.description = jQuery("#description").val();
-            markerToSave.properties.url = jQuery("#url").val();
-            markerToSave.properties.image = jQuery("#image").val();
-            markerToSave.geometry.coordinates = [lngLat.lng.toFixed(5), lngLat.lat.toFixed(5)];
-
-            const ajaxRequest = jQuery.ajax({
-                method: 'POST',
-                url: url,
-                headers: {
-                    "Accept": "*/*",
-                    "Authorization": "eyJraWQiOiJLTzRVMWZs",
-                    "content-type": "application/json; charset=UTF-8",
-                },
-                contentType: 'application/json',
-                crossDomain: true,
-                data: JSON.stringify(markerToSave),
-                dataType: 'json'
-            });
-            ajaxRequest.done(async function () {
-                map.getSource('places').setData(url);
-                marker.remove();
-                // Show successfully for submit message
-                jQuery("#result").html('Sauvegard&eacute; avec succ&egrave;s');
-                let saveButton = jQuery("#markerSave");
-                saveButton.val("SAUVEGARDÉ!");
-                document.getElementById('addMarkerLabel').textContent = 'Ajouter';
-                document.getElementById('addMarkerInput').checked = false;
-                await new Promise(r => setTimeout(r, 2000));
-                document.getElementById("coordinates").style.display = 'none';
-                document.getElementById("markerForm").reset();
-                marker.setLngLat([-73.61027, 45.49917]);
-            });
-            /* On failure of request this function will be called  */
-            ajaxRequest.fail(function (request) {
-                jQuery("#result").html('There is error while submit:' + request.responseText);
-                let saveButton = jQuery("#markerSave");
-                saveButton[0].disabled = false;
-            });
-            return false;
-        });
+            let lngLat = marker.getLngLat();
+            markerToSave.geometry.coordinates = [lngLat.lng, lngLat.lat];
+            coordinates.innerHTML = getMarkerFormHTML(markerToSave, 'newMarker');
+        }
+        marker.on('dragend', onDragEnd);
     });
 </script>

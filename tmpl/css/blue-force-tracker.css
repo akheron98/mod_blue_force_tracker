@@ -46,8 +46,11 @@
 }
 
 .filter-group input[type='checkbox']:checked+label:before {
-    content: '✔';
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f00c";
     margin-right: 5px;
+    line-height: 2em;
 }
 
 .mapboxgl-popup {
@@ -65,7 +68,8 @@
     width: 200px;
     max-height: 350px;
     border-radius: 5px;
-    background: #0254FE;
+    background: rgb(1, 42, 127); /* #0254FE;*/
+    /*background: #0254FE;*/
     color: #fff;
 }
 
@@ -91,18 +95,62 @@ cardImage {
     width: 180px;
 }
 
-.coordinates {
+.marker-form p {
+    text-align: center;
+    padding-top: 10px;
+    font-weight: 900;
+}
+
+.marker-form {
+    margin-top: 10px;
+    padding: 5px;
+    border-radius:5px;
     background: rgba(0, 0, 0, 0.5);
+}
+
+.coordinates {
     color: #fff;
-    /*position: absolute;*/
-    /*bottom: 40px;*/
-    /*left: 10px;*/
-    padding: 5px 5px;
-    margin: 0;
     font-size: 11px;
     line-height: 18px;
-    border-radius: 3px;
     display: none;
+}
+
+.container input[type=text] {
+    font-size: 11px;
+    background: #222;
+    color: #fff;
+    width:100%;
+    padding: 2px;
+    border-radius:5px;
+    border:1px solid #7ac9b7;
+}
+
+.container h4 {
+    text-align: center;
+}
+
+.container p {
+    color:lightgray;
+}
+
+.supprimerMarker {
+    background-color: rgba(0,0,0,0);
+    color: #fe000b;
+    display: inline-block;
+    font-size: 11px;
+    width:50%;
+    padding: 5px;
+    border:0px;
+}
+
+.updateMarker {
+    background-color: rgba(0,0,0,0);
+    color: #00a600;
+    display: inline-block;
+    font-size: 11px;
+    width:50%;
+    padding: 5px;
+    border:0px;
 }
 
 .marker-form input[type=text] {
@@ -126,11 +174,12 @@ cardImage {
 }
 
 .marker-form input[type=submit] {
-    font-size: 11px;
-    background-color: #0254FE;
-    color: #fff;
-    width:100%;
-    padding: 2px;
-    border-radius:5px;
-    border:1px solid #7ac9b7;
+    background-color: rgba(0,0,0,0);
+    color: #0254fe;
+    width:50%;
+    padding: 5px;
+    border:0px;
+    font-family: "Font Awesome 5 Free";
+    font-size: 2em;
+    font-weight: 900;
 }
