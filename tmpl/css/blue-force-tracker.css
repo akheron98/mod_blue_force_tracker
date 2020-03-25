@@ -95,19 +95,6 @@ cardImage {
     width: 180px;
 }
 
-.marker-form p {
-    text-align: center;
-    padding-top: 10px;
-    font-weight: 900;
-}
-
-.marker-form {
-    margin-top: 10px;
-    padding: 5px;
-    border-radius:5px;
-    background: rgba(0, 0, 0, 0.5);
-}
-
 .coordinates {
     color: #fff;
     font-size: 11px;
@@ -156,6 +143,18 @@ cardImage {
 .marker-form input[type=text] {
     font-size: 11px;
     background: #222;
+    margin-bottom: 5px;
+    color: #fff;
+    width:100%;
+    padding: 2px;
+    border-radius:5px;
+    border:1px solid #7ac9b7;
+}
+
+.marker-form input[type=url] {
+    font-size: 11px;
+    background: #222;
+    margin-bottom: 5px;
     color: #fff;
     width:100%;
     padding: 2px;
@@ -166,7 +165,7 @@ cardImage {
 .marker-form select {
     font-size: 11px;
     background: #222;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     width:100%;
     padding: 2px;
     border-radius:5px;
@@ -177,9 +176,43 @@ cardImage {
     background-color: rgba(0,0,0,0);
     color: #0254fe;
     width:50%;
-    padding: 5px;
+    padding: 2px;
     border:0px;
     font-family: "Font Awesome 5 Free";
     font-size: 2em;
     font-weight: 900;
+}
+
+.marker-form p {
+    text-align: center;
+    margin-bottom: 2px!important;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+.marker-form h6 {
+    text-align: center;
+    font-weight: 900;
+    margin-bottom: 0!important;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+.marker-form {
+    width: 200px;
+    padding: 0 5px 0 5px;
+    border-radius:5px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.marker-form span {
+    color:red;
+    text-align:right;
+    font-weight: 900;
+    padding-left: 10px;
+}
+
+.marker-form label {
+    font-size: 11px;
+    line-height: 5px;
 }

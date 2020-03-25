@@ -8,6 +8,10 @@ defined('_JEXEC') or die; ?>
 
 <div style="height:<?php echo $height; ?>px" id="map"></div>
 <script>
+    const EMPTY_STRING = "#";
+    const IMAGE_REGEX = /\w+\.(jpg|jpeg|gif|png|tiff|svg)$/gi;
+    const URL_REGEX = /^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
+    const joomlaUserId = "<?php echo $userID;?>";
 
     const markerType = {
         team : {
@@ -124,13 +128,13 @@ defined('_JEXEC') or die; ?>
                         const coordinates = markerToShow.geometry.coordinates.slice();
                         const label = markerToShow.properties.label;
                         const description = markerToShow.properties.description;
-                        const url = markerToShow.properties.url;
+                        const url = markerToShow.properties.url === EMPTY_STRING ? "#" : markerToShow.properties.url;
                         const userID = markerToShow.properties.owner;
                         let buttonMAJHtml = "";
                         let buttonSupprimerHTml = "";
                         let labelHtml = '<h4><b>' + label + '</b></h4>';
                         let descriptionHtml = '<p>' + description + '</p>';
-                        if (userID === "<?php echo $userID;?>") {
+                        if (userID === joomlaUserId) {
                             buttonMAJHtml = '<button onclick=\'return editMarker(' + JSON.stringify(markerToShow) + ');\' id=\'updateMarker' + userID + '\' class=\'updateMarker\'><i class=\'fas fa-edit\' style=\'padding:0\'></i></button>';
                             buttonSupprimerHTml = '<button onclick="return deleteMarker(\'' + markerToShow.properties.id + '\');" id="supprimerMarker' + userID + '" class="supprimerMarker"><i class="fas fa-trash" style="padding:0"></i></button>';
                         }
@@ -198,16 +202,20 @@ defined('_JEXEC') or die; ?>
         return '<form id="markerForm' + id + '" action="">' +
             '<div class="marker-form">' +
             '<div id="result' + id + '"></div>' +
-            '<p>Votre point d&#39;int&eacute;r&ecirc;t</p>' +
+            '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
             '<select id="type' + id + '" name="type">' +
             '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
             '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
             '<option value="field" ' + fieldSelected + '>Terrain</option>' +
             '</select><br />' +
-            '<input id="label' + id + '" name="label" placeholder="' + defaultMarker.properties.label + '" value="'+label+'" type="text" width="100px;"><br />' +
-            '<input id="description' + id + '" name="description" placeholder="' + defaultMarker.properties.description + '" value="'+description+'" type="text" width="100px;"><br />' +
-            '<input id="url' + id + '" name="url" placeholder="' + defaultMarker.properties.url + '" value="'+url+'" type="text" width="100px;"><br />' +
-            '<input id="image' + id + '" name="image" placeholder="' + defaultMarker.properties.image + '" value="'+image+'" type="text" width="100px;"><br />' +
+            '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
+            '<input required autofocus id="label' + id + '" name="label" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
+            '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
+            '<input required id="description' + id + '" name="description" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
+            '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
+            '<input id="url' + id + '" name="url" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
+            '<label for="image' + id + '">Adresse image</label><span id="error-image' + id + '"></span>' +
+            '<input id="image' + id + '" name="image" placeholder="http://www.example.com/image.jpg" value="'+image+'" type="url" width="100px;" pattern="/\\w+\\.(jpg|jpeg|gif|png|tiff|svg)$/gi"><br />' +
             '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
             '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
             '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
@@ -232,8 +240,10 @@ defined('_JEXEC') or die; ?>
         markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
         markerToSave.properties.label = jQuery("#label" + id).val();
         markerToSave.properties.description = jQuery("#description" + id).val();
-        markerToSave.properties.url = jQuery("#url" + id).val();
-        markerToSave.properties.image = jQuery("#image" + id).val();
+        let url = jQuery("#url" + id).val();
+        markerToSave.properties.url = url === "" ? EMPTY_STRING : url;
+        let image = jQuery("#image" + id).val();
+        markerToSave.properties.image = image === "" ? EMPTY_STRING : image;
         markerToSave.properties.owner = "<?php echo $userID; ?>";
         markerToSave.geometry.coordinates = [jQuery("#lng" + id).val(), jQuery("#lat" + id).val()];
         return markerToSave;
@@ -258,7 +268,61 @@ defined('_JEXEC') or die; ?>
         return false;
     }
 
+    function isUrlValid(url) {
+        return URL_REGEX.test(url);
+    }
+
+    function isValidImageURL(str){
+        if ( typeof str !== 'string' ) return false;
+        return !!str.match(IMAGE_REGEX);
+    }
+
+    function clearErrorMessage(id) {
+        document.getElementById('error-label'+id).innerHTML = "";
+        document.getElementById('error-description'+id).innerHTML = "";
+        document.getElementById('error-url'+id).innerHTML = "";
+        document.getElementById('error-image'+id).innerHTML = "";
+    }
+
+    function validerMarkerForm(id) {
+        let success = true;
+        clearErrorMessage(id);
+
+        if (!jQuery("#label" + id).val()) {
+            document.getElementById('error-label'+id).innerHTML = " Requis! *";
+            success = false;
+        }
+
+        if (!jQuery("#description" + id).val()) {
+            document.getElementById('error-description'+id).innerHTML = " Requis! *";
+            success = false;
+        }
+
+        let url = jQuery("#url" + id).val();
+        if (url && !isUrlValid(url)) {
+            document.getElementById('error-url'+id).innerHTML = " Invalide *";
+            success = false;
+        }
+
+        let image = jQuery("#image" + id).val();
+        if (image && !isUrlValid(image)) {
+            document.getElementById('error-image'+id).innerHTML = " Invalide *";
+            success = false;
+        } else {
+            if (image && !isValidImageURL(image)) {
+                document.getElementById('error-image'+id).innerHTML = " Invalide *";
+                success = false;
+            }
+        }
+        return success;
+    }
+
+
     function saveMarker(id) {
+        if (!validerMarkerForm(id)) {
+            console.log("should end here");
+            return false;
+        }
         let saveButton = jQuery("#markerSave" + id);
         saveButton[0].disabled = true;
         let markerToSave = getMarkerToSaveFromForm(id);
@@ -340,7 +404,7 @@ defined('_JEXEC') or die; ?>
                     showZoom: true
                 }
             }), 'top-left');
-        map.addControl(new AddMarkerControl(), 'top-left');
+        map.addControl(new AddMarkerControl(), 'bottom-left');
     }
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
