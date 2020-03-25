@@ -12,7 +12,7 @@ defined('_JEXEC') or die; ?>
     const IMAGE_REGEX = /\w+\.(jpg|jpeg|gif|png|tiff|svg)$/gi;
     const URL_REGEX = /^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
     const joomlaUserId = "<?php echo $userID;?>";
-
+    const connectedUser = joomlaUserId > 0;
     const markerType = {
         team : {
             icon : 'toilet',
@@ -361,29 +361,31 @@ defined('_JEXEC') or die; ?>
     }
 
     function showAddButton(marker) {
-        let addGroup = document.getElementById('add-group');
-        let input = document.createElement('input');
-        input.type = 'checkbox';
-        input.id = 'addMarkerInput';
-        input.checked = false;
-        addGroup.appendChild(input);
+        if (connectedUser) {
+            let addGroup = document.getElementById('add-group');
+            let input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = 'addMarkerInput';
+            input.checked = false;
+            addGroup.appendChild(input);
 
-        let label = document.createElement('label');
-        label.setAttribute('for', 'addMarkerInput');
-        label.setAttribute('id', 'addMarkerLabel');
-        label.textContent = 'Ajouter';
-        addGroup.appendChild(label);
-        //When the checkbox changes, update the visibility of the layer.
-        input.addEventListener('change', function () {
-            if (input.checked) {
-                marker.addTo(map);
-                label.textContent = 'Retirer';
-            } else {
-                marker.remove();
-                label.textContent = 'Ajouter';
-                document.getElementById('coordinates').style.display = 'none';
-            }
-        });
+            let label = document.createElement('label');
+            label.setAttribute('for', 'addMarkerInput');
+            label.setAttribute('id', 'addMarkerLabel');
+            label.textContent = 'Ajouter';
+            addGroup.appendChild(label);
+            //When the checkbox changes, update the visibility of the layer.
+            input.addEventListener('change', function () {
+                if (input.checked) {
+                    marker.addTo(map);
+                    label.textContent = 'Retirer';
+                } else {
+                    marker.remove();
+                    label.textContent = 'Ajouter';
+                    document.getElementById('coordinates').style.display = 'none';
+                }
+            });
+        }
     }
 
     function addMapControls() {
@@ -397,7 +399,9 @@ defined('_JEXEC') or die; ?>
             })
         );
         map.addControl(new GroupFilterControl(), 'top-right');
-        map.addControl(new AddMarkerButtonControl(), 'top-right');
+        if (connectedUser) {
+            map.addControl(new AddMarkerButtonControl(), 'top-right');
+        }
         map.addControl(
             new mapboxgl.NavigationControl({
                 options: {
