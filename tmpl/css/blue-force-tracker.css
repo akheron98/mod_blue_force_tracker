@@ -54,7 +54,8 @@
 }
 
 .mapboxgl-popup {
-    max-width: 400px;
+    max-width: 600px;
+    height: ;
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
@@ -66,10 +67,8 @@
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     transition: 0.3s;
     width: 200px;
-    max-height: 350px;
     border-radius: 5px;
-    background: rgb(1, 42, 127); /* #0254FE;*/
-    /*background: #0254FE;*/
+    background: rgb(1, 42, 127);
     color: #fff;
 }
 
@@ -82,7 +81,8 @@ cardImage {
     border-radius: 5px 5px 0 0;
     object-fit: cover;
     width: 100%;
-    height: 112px;
+    height: 200px;
+    max-height: 200px!important;
 }
 
 .container h4 {
@@ -215,4 +215,53 @@ cardImage {
 .marker-form label {
     font-size: 11px;
     line-height: 5px;
+}
+
+.marker-form input[type="file"] {
+    height: 0;
+    overflow: hidden;
+    width: 0;
+}
+
+.marker-form input[type="file"] + label {
+    background: #0254fe;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-size: inherit;
+    font-weight: 600;
+    outline: none;
+    padding: 10px 10px;
+    width: 100%;
+    position: relative;
+    transition: all 0.3s;
+    vertical-align: middle;
+}
+
+
+
+.marker-form input[type="file"]:focus + label,
+.marker-form input[type="file"] + label:hover {
+    background-color: #022d59;
+}
+
+.marker-form input[type="file"]:focus + label {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+}
+
+.marker-form-image {
+    display: none;
+    margin-left: 10px;
+    width: 350px;
+}
+
+.marker-form-with-image {
+    width: 600px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }

@@ -1,18 +1,22 @@
 <?php
 // No direct access
 defined('_JEXEC') or die; ?>
+<script src="/config-aws.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/customMapControl.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet"/>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet"/>
 
+<link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
+<script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
+
 <div style="height:<?php echo $height; ?>px" id="map"></div>
 <script>
     const EMPTY_STRING = "#";
-    const IMAGE_REGEX = /\w+\.(jpg|jpeg|gif|png|tiff|svg)$/gi;
     const URL_REGEX = /^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
     const joomlaUserId = "<?php echo $userID;?>";
-
+    const NEW_MARKER = "newMarker";
+    const UPDATE_MARKER = "updateMarker";
     const markerType = {
         team : {
             icon : 'toilet',
@@ -47,23 +51,12 @@ defined('_JEXEC') or die; ?>
             ]
         }
     };
+    let cropper;
 
-    function imageExists(url, callback) {
-        let img = new Image();
-        img.onload = function () {
-            callback(true);
-        };
-        img.onerror = function () {
-            callback(false);
-        };
-        img.src = url;
-    }
-
-    async function IsValidImageUrl(url) {
-        return new Promise(resolve => {
-            imageExists(url, function (exists) {
-                resolve(exists);
-            });
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
     }
 
@@ -81,7 +74,22 @@ defined('_JEXEC') or die; ?>
     }
 
     function editMarker(markerToEdit) {
-        document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, 'updateMarker');
+        document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, UPDATE_MARKER);
+
+        if (document.getElementById("previewImage" + UPDATE_MARKER) && document.getElementById("previewImage" + UPDATE_MARKER).src) {
+            cropper = jQuery('#previewImage' + UPDATE_MARKER).croppie({
+                viewport: {
+                    width: 200,
+                    height: 200,
+                }
+            });
+            cropper.croppie('bind', {
+                url: document.getElementById("previewImage" + UPDATE_MARKER).src,
+                zoom: 0
+            });
+
+            document.getElementById("showImage" + UPDATE_MARKER).style.display = 'block';
+        }
     }
 
     function showMarker() {
@@ -139,8 +147,8 @@ defined('_JEXEC') or die; ?>
                             buttonSupprimerHTml = '<button onclick="return deleteMarker(\'' + markerToShow.properties.id + '\');" id="supprimerMarker' + userID + '" class="supprimerMarker"><i class="fas fa-trash" style="padding:0"></i></button>';
                         }
                         let image = markerToShow.properties.image;
-                        let isValidImage = await IsValidImageUrl(image);
-                        if (!isValidImage) {
+
+                        if (!image || image === "#") {
                             image = "./images/image_non_trouvee.png";
                         }
                         const container = '<div id="result"></div>' +
@@ -193,38 +201,72 @@ defined('_JEXEC') or die; ?>
         } else if (marker.properties.type === 'event') {
             eventSelected = 'selected';
         }
-        let label = id === "newMarker" ? "" : marker.properties.label;
-        let description = id === "newMarker" ? "" : marker.properties.description;
-        let url = id === "newMarker" ? "" : marker.properties.url;
-        let image = id === "newMarker" ? "" : marker.properties.image;
-        let showCancel = "hidden"; //id === "newMarker" ? "hidden" : "submit";
+        let label = id === NEW_MARKER ? "" : marker.properties.label;
+        let description = id === NEW_MARKER ? "" : marker.properties.description;
+        let url = id === NEW_MARKER || marker.properties.url === "#" ? "" : marker.properties.url;
+        let image = id === NEW_MARKER ? "" : marker.properties.image;
+        let showCancel = "hidden"; //id === NEW_MARKER ? "hidden" : "submit";
+        let closeButton = id === NEW_MARKER ? "" : '<button class="mapboxgl-popup-close-button" type="button" aria-label="Close popup">×</button>';
 
         return '<form id="markerForm' + id + '" action="">' +
-            '<div class="marker-form">' +
-            '<div id="result' + id + '"></div>' +
-            '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
-            '<select id="type' + id + '" name="type">' +
-            '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
-            '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
-            '<option value="field" ' + fieldSelected + '>Terrain</option>' +
-            '</select><br />' +
-            '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
-            '<input required autofocus id="label' + id + '" name="label" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
-            '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
-            '<input required id="description' + id + '" name="description" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
-            '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
-            '<input id="url' + id + '" name="url" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
-            '<label for="image' + id + '">Adresse image</label><span id="error-image' + id + '"></span>' +
-            '<input id="image' + id + '" name="image" placeholder="http://www.example.com/image.jpg" value="'+image+'" type="url" width="100px;" pattern="/\\w+\\.(jpg|jpeg|gif|png|tiff|svg)$/gi"><br />' +
-            '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
-            '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
-            '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
-            'Longitude: ' + lngLat[0].toFixed(6) + '<br />Latitude: ' + lngLat[1].toFixed(6) +
-            '<br /><p>' +
-            '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
-            '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
-            '</p></div>' +
-            '</form>';
+            closeButton +
+            '<div class="marker-form-with-image">' +
+                '<div class="marker-form">' +
+                    '<div id="app"></div>'+
+                    '<div id="result' + id + '"></div>' +
+                    '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
+                    '<select id="type' + id + '" name="type">' +
+                        '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
+                        '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
+                        '<option value="field" ' + fieldSelected + '>Terrain</option>' +
+                    '</select><br />' +
+                    '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
+                    '<input required autofocus id="label' + id + '" name="label' + id + '" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
+                    '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
+                    '<input required id="description' + id + '" name="description' + id + '" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
+                    '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
+                    '<input id="url' + id + '" name="url' + id + '" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
+                    '<input id="image' + id + '" type="file" accept="image/*" onchange="previewImage(\''+id+'\');">' +
+                    '<label for="image' + id + '">Choissisez une image...</label><span id="error-image' + id + '"></span>' +
+                    '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
+                    '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
+                    '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
+                    'Lng: ' + lngLat[0].toFixed(5) + '<br />Lat: ' + lngLat[1].toFixed(5) +
+                    '<br />' +
+                    '<p>' +
+                        '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
+                        '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
+                    '</p>' +
+                '</div>' +
+                '<div id="showImage'+id+'" class="marker-form-image">' +
+                    '<img id="previewImage'+id+'" src="'+image+'" alt="Prévisualisation"/>' +
+                '</div>' +
+            '</div>' +
+        '</form>';
+    }
+
+    function previewImage(id) {
+        if (document.getElementById("image" + id)) {
+            let oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("image" + id).files[0]);
+
+            oFReader.onload = function () {
+                document.getElementById("previewImage" + id).src = oFReader.result;
+
+                if (!document.getElementById("previewImage" + UPDATE_MARKER) || !document.getElementById("previewImage" + UPDATE_MARKER).src) {
+                    cropper = jQuery('#previewImage' + id).croppie({
+                        viewport: {
+                            width: 200,
+                            height: 200
+                        }
+                    });
+                }
+                cropper.croppie('bind', {
+                    url: document.getElementById("previewImage" + id).src,
+                });
+            };
+            document.getElementById("showImage" + id).style.display = 'block';
+        }
     }
 
     function cancelEditing(id) {
@@ -234,24 +276,42 @@ defined('_JEXEC') or die; ?>
     }
 
     function getMarkerToSaveFromForm(id) {
-        let markerToSave = jQuery.extend({}, defaultMarker);
-        markerToSave.properties.id = jQuery("#id" + id).val();
-        markerToSave.properties.type = jQuery("#type" + id).val();
-        markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
-        markerToSave.properties.label = jQuery("#label" + id).val();
-        markerToSave.properties.description = jQuery("#description" + id).val();
-        let url = jQuery("#url" + id).val();
-        markerToSave.properties.url = url === "" ? EMPTY_STRING : url;
-        let image = jQuery("#image" + id).val();
-        markerToSave.properties.image = image === "" ? EMPTY_STRING : image;
-        markerToSave.properties.owner = "<?php echo $userID; ?>";
-        markerToSave.geometry.coordinates = [jQuery("#lng" + id).val(), jQuery("#lat" + id).val()];
-        return markerToSave;
+        return new Promise(resolve => {
+            let markerToSave = jQuery.extend({}, defaultMarker);
+            let markerId = jQuery("#id" + id).val();
+            markerToSave.properties.id = id === NEW_MARKER ? uuidv4() : markerId;
+            markerToSave.properties.type = jQuery("#type" + id).val();
+            markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
+            markerToSave.properties.label = jQuery("#label" + id).val();
+            markerToSave.properties.description = jQuery("#description" + id).val();
+            let url = jQuery("#url" + id).val();
+            markerToSave.properties.url = url === "" ? EMPTY_STRING : url;
+            markerToSave.properties.owner = "<?php echo $userID; ?>";
+            markerToSave.geometry.coordinates = [jQuery("#lng" + id).val(), jQuery("#lat" + id).val()];
+
+            markerToSave.properties.image = EMPTY_STRING;
+            let imageBlob = document.getElementById("previewImage" + id).src;
+            if (imageBlob) {
+                cropper.croppie('result', {
+                    type: 'canvas',
+                    size: 'viewport',
+                    resultSize: {
+                        width: 200,
+                        height: 200
+                    }
+                }).then(function (resp) {
+                    markerToSave.properties.image = resp;
+                    resolve(markerToSave);
+                });
+            } else {
+                resolve(markerToSave);
+            }
+        });
     }
 
     function deleteMarker(idToDelete) {
         if (confirm("Êtes-vous sur de vouloir supprimer votre point d'intérêt ?")) {
-            persistMarker({id:idToDelete}, 'DELETE','updateMarker', function(){popup.remove();});
+            persistMarker({id:idToDelete}, 'DELETE',UPDATE_MARKER, function(){popup.remove();});
         }
         return false;
     }
@@ -270,11 +330,6 @@ defined('_JEXEC') or die; ?>
 
     function isUrlValid(url) {
         return URL_REGEX.test(url);
-    }
-
-    function isValidImageURL(str){
-        if ( typeof str !== 'string' ) return false;
-        return !!str.match(IMAGE_REGEX);
     }
 
     function clearErrorMessage(id) {
@@ -304,16 +359,6 @@ defined('_JEXEC') or die; ?>
             success = false;
         }
 
-        let image = jQuery("#image" + id).val();
-        if (image && !isUrlValid(image)) {
-            document.getElementById('error-image'+id).innerHTML = " Invalide *";
-            success = false;
-        } else {
-            if (image && !isValidImageURL(image)) {
-                document.getElementById('error-image'+id).innerHTML = " Invalide *";
-                success = false;
-            }
-        }
         return success;
     }
 
@@ -325,13 +370,13 @@ defined('_JEXEC') or die; ?>
         }
         let saveButton = jQuery("#markerSave" + id);
         saveButton[0].disabled = true;
-        let markerToSave = getMarkerToSaveFromForm(id);
-
-        if (id === "newMarker") {
-            saveNewMarker(markerToSave,id);
-        } else {
-            persistMarker(markerToSave, 'PUT',id, function(){popup.remove();});
-        }
+        getMarkerToSaveFromForm(id).then(function(markerToSave) {
+            if (id === NEW_MARKER) {
+                saveNewMarker(markerToSave,id);
+            } else {
+                persistMarker(markerToSave, 'PUT',id, function(){popup.remove();});
+            }
+        });
         return false;
     }
 
@@ -343,6 +388,7 @@ defined('_JEXEC') or die; ?>
                 "Accept": "*/*",
                 "Authorization": "eyJraWQiOiJLTzRVMWZs",
                 "content-type": "application/json; charset=UTF-8",
+                "x-api-key": AWS_API_KEY
             },
             contentType: 'application/json',
             crossDomain: true,
@@ -431,7 +477,7 @@ defined('_JEXEC') or die; ?>
             let markerToSave = jQuery.extend({}, defaultMarker);
             let lngLat = marker.getLngLat();
             markerToSave.geometry.coordinates = [lngLat.lng, lngLat.lat];
-            coordinates.innerHTML = getMarkerFormHTML(markerToSave, 'newMarker');
+            coordinates.innerHTML = getMarkerFormHTML(markerToSave, NEW_MARKER);
         }
         marker.on('dragend', onDragEnd);
     });
