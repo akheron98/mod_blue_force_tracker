@@ -10,8 +10,24 @@ defined('_JEXEC') or die; ?>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
 <script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
 
-<div style="height:<?php echo $height; ?>px" id="map"></div>
+<div class="blue_force_tracker">
+    <div id="infoMap" class="infoMap">
+        <fieldset>
+            <input
+                    id="feature-filter"
+                    type="text"
+                    placeholder="Recherche"
+            />
+        </fieldset>
+        <div id="feature-listing" class="listing"></div>
+    </div>
+    <div style="height:<?php echo $height; ?>px" id="map"></div>
+</div>
+
 <script>
+    let markers = [];
+    const filterEl = document.getElementById('feature-filter');
+    const listingEl = document.getElementById('feature-listing');
     const EMPTY_STRING = "#";
     const URL_REGEX = /^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
     const joomlaUserId = "<?php echo $userID;?>";
@@ -76,6 +92,7 @@ defined('_JEXEC') or die; ?>
 
     function editMarker(markerToEdit) {
         document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, UPDATE_MARKER);
+        document.getElementsByClassName("marker-form-with-image")[0].classList.add('marker-form-with-image-width');
 
         if (document.getElementById("previewImage" + UPDATE_MARKER) && document.getElementById("previewImage" + UPDATE_MARKER).src) {
             cropper = jQuery('#previewImage' + UPDATE_MARKER).croppie({
@@ -207,43 +224,41 @@ defined('_JEXEC') or die; ?>
         let url = id === NEW_MARKER || marker.properties.url === "#" ? "" : marker.properties.url;
         let image = id === NEW_MARKER ? "" : marker.properties.image;
         let showCancel = "hidden"; //id === NEW_MARKER ? "hidden" : "submit";
-        let closeButton = id === NEW_MARKER ? "" : '<button class="mapboxgl-popup-close-button" type="button" aria-label="Close popup">×</button>';
 
         return '<form id="markerForm' + id + '" action="">' +
-            closeButton +
             '<div class="marker-form-with-image">' +
-                '<div class="marker-form">' +
-                    '<div id="app"></div>'+
-                    '<div id="result' + id + '"></div>' +
-                    '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
-                    '<select id="type' + id + '" name="type">' +
-                        '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
-                        '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
-                        '<option value="field" ' + fieldSelected + '>Terrain</option>' +
-                    '</select><br />' +
-                    '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
-                    '<input required autofocus id="label' + id + '" name="label' + id + '" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
-                    '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
-                    '<input required id="description' + id + '" name="description' + id + '" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
-                    '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
-                    '<input id="url' + id + '" name="url' + id + '" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
-                    '<input id="image' + id + '" type="file" accept="image/*" onchange="previewImage(\''+id+'\');">' +
-                    '<label for="image' + id + '">Choissisez une image...</label><span id="error-image' + id + '"></span>' +
-                    '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
-                    '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
-                    '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
-                    'Lng: ' + lngLat[0].toFixed(5) + '<br />Lat: ' + lngLat[1].toFixed(5) +
-                    '<br />' +
-                    '<p>' +
-                        '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
-                        '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
-                    '</p>' +
-                '</div>' +
-                '<div id="showImage'+id+'" class="marker-form-image">' +
-                    '<img id="previewImage'+id+'" src="'+image+'" alt="Prévisualisation"/>' +
-                '</div>' +
+            '<div class="marker-form">' +
+            '<div id="app"></div>'+
+            '<div id="result' + id + '"></div>' +
+            '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
+            '<select id="type' + id + '" name="type">' +
+            '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
+            '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
+            '<option value="field" ' + fieldSelected + '>Terrain</option>' +
+            '</select><br />' +
+            '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
+            '<input required autofocus id="label' + id + '" name="label' + id + '" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
+            '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
+            '<input required id="description' + id + '" name="description' + id + '" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
+            '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
+            '<input id="url' + id + '" name="url' + id + '" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
+            '<input id="image' + id + '" type="file" accept="image/*" onchange="previewImage(\''+id+'\');">' +
+            '<label for="image' + id + '">Choissisez une image...</label><span id="error-image' + id + '"></span>' +
+            '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
+            '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
+            '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
+            'Lng: ' + lngLat[0].toFixed(5) + '<br />Lat: ' + lngLat[1].toFixed(5) +
+            '<br />' +
+            '<p>' +
+            '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
+            '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
+            '</p>' +
             '</div>' +
-        '</form>';
+            '<div id="showImage'+id+'" class="marker-form-image">' +
+            '<img id="previewImage'+id+'" src="'+image+'" alt="Prévisualisation"/>' +
+            '</div>' +
+            '</div>' +
+            '</form>';
     }
 
     function previewImage(id) {
@@ -425,7 +440,7 @@ defined('_JEXEC') or die; ?>
             input.addEventListener('change', function () {
                 if (input.checked) {
                     marker.addTo(map);
-                    label.textContent = 'Retirer';
+                    label.textContent = 'Annuler';
                 } else {
                     marker.remove();
                     label.textContent = 'Ajouter';
@@ -458,6 +473,56 @@ defined('_JEXEC') or die; ?>
         map.addControl(new AddMarkerControl(), 'bottom-left');
     }
 
+    function renderListings(features) {
+        let empty = document.createElement('p');
+// Clear any existing listings
+        listingEl.innerHTML = '';
+        if (features.length) {
+            features.forEach(function(feature) {
+                let prop = feature.properties;
+                let item = document.createElement('a');
+                item.href = prop.url;
+                item.target = '_blank';
+                item.textContent = prop.label;
+                listingEl.appendChild(item);
+            });
+
+// Show the filter input
+            filterEl.parentNode.style.display = 'block';
+        } else if (features.length === 0 && filterEl.value !== '') {
+            empty.textContent = 'Aucun résultat';
+            listingEl.appendChild(empty);
+        } else {
+            empty.textContent = 'Déplacer la carte pour obtenir des éléments.';
+            listingEl.appendChild(empty);
+
+// Hide the filter input
+            filterEl.parentNode.style.display = 'none';
+            
+        }
+    }
+
+    function normalize(string) {
+        return string.trim().toLowerCase();
+    }
+
+    function getUniqueFeatures(array, comparatorProperty) {
+        let existingFeatureKeys = {};
+// Because features come from tiled vector data, feature geometries may be split
+// or duplicated across tile boundaries and, as a result, features may appear
+// multiple times in query results.
+        let uniqueFeatures = array.filter(function(el) {
+            if (existingFeatureKeys[el.properties[comparatorProperty]]) {
+                return false;
+            } else {
+                existingFeatureKeys[el.properties[comparatorProperty]] = true;
+                return true;
+            }
+        });
+
+        return uniqueFeatures;
+    }
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -465,9 +530,18 @@ defined('_JEXEC') or die; ?>
         center: [-72.937107, 46.286173],
         zoom: 6.5
     });
-    const popup = new mapboxgl.Popup();
+    const popup = new mapboxgl.Popup({
+        closeButton: false
+    });
     const url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
-    const marker = new mapboxgl.Marker({draggable: true});
+
+    const pin = document.createElement('div');
+    pin.id = 'marker';
+
+    const marker = new mapboxgl.Marker({
+        element: pin,
+        draggable: true
+    });
     addMapControls();
 
     map.on('load', function () {
@@ -485,5 +559,69 @@ defined('_JEXEC') or die; ?>
             coordinates.innerHTML = getMarkerFormHTML(markerToSave, NEW_MARKER);
         }
         marker.on('dragend', onDragEnd);
+
+        map.on('moveend', function() {
+            let features = map.queryRenderedFeatures({ layers: ['poi-toilet','poi-embassy','poi-ranger-station'] });
+
+            if (features) {
+                let uniqueFeatures = getUniqueFeatures(features, 'id');
+// Populate features for the listing overlay.
+                renderListings(uniqueFeatures);
+
+// Clear the input container
+                filterEl.value = '';
+
+// Store the current features in sn `markers` variable to
+// later use for filtering on `keyup`.
+                markers = uniqueFeatures;
+            }
+        });
+
+        Object.keys(markerType).forEach(function (markerProperties) {
+            if (markerType.hasOwnProperty(markerProperties)) {
+                let icon = markerType[markerProperties].icon;
+                map.on('mousemove', 'poi-'+icon, function(e) {
+// Change the cursor style as a UI indicator.
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'poi-'+icon, function() {
+                    map.getCanvas().style.cursor = '';
+                });
+            }
+        });
+
+        filterEl.addEventListener('keyup', function(e) {
+            let value = normalize(e.target.value);
+
+// Filter visible features that don't match the input value.
+            let filtered = markers.filter(function(feature) {
+                let name = normalize(feature.properties.label);
+                return name.indexOf(value) > -1;
+            });
+
+// Populate the sidebar with filtered results
+            renderListings(filtered);
+// Set the filter to populate features into the layer.
+            if (filtered.length) {
+                Object.keys(markerType).forEach(function (markerProperties) {
+                    if (markerType.hasOwnProperty(markerProperties)) {
+                        let icon = markerType[markerProperties].icon;
+                        map.setFilter('poi-'+icon, [
+                            'match',
+                            ['get', 'label'],
+                            filtered.map(function (feature) {
+                                return feature.properties.label;
+                            }),
+                            true,
+                            false
+                        ]);
+                    }
+                });
+            }
+        });
+
+// Call this function on initialization
+// passing an empty array to render an empty state
+        renderListings([]);
     });
 </script>
