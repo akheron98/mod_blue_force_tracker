@@ -6,22 +6,29 @@ defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet"/>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet"/>
-
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
 <script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
+<link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/bootstrap.min.css">
+<script src="/modules/mod_blue_force_tracker/tmpl/js/bootstrap.min.js"></script>
 
-<div class="blue_force_tracker">
-    <div id="infoMap" class="infoMap">
-        <fieldset>
-            <input
-                    id="feature-filter"
-                    type="text"
-                    placeholder="Recherche"
-            />
-        </fieldset>
-        <div id="feature-listing" class="listing"></div>
+<div class="container-fluid" style="padding:0px;">
+    <div class="row no-gutters" style="margin-left:0px;">
+        <div class="col-lg-10">
+            <div style="height:<?php echo $height; ?>px" id="map"></div>
+        </div>
+        <div class="col-lg-2">
+             <div class="infoMap" id="infoMap">
+                <fieldset>
+                    <input
+                            id="feature-filter"
+                            type="text"
+                            placeholder="Recherche"
+                    />
+                </fieldset>
+                <div id="feature-listing" class="listing"></div>
+             </div>
+        </div>
     </div>
-    <div style="height:<?php echo $height; ?>px" id="map"></div>
 </div>
 
 <script>
@@ -498,7 +505,7 @@ defined('_JEXEC') or die; ?>
 
 // Hide the filter input
             filterEl.parentNode.style.display = 'none';
-            
+
         }
     }
 

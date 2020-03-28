@@ -1,8 +1,8 @@
 #map {
-    position: relative;
-    top: 0;
-    bottom: 0;
-    width: 100%;
+    /*position: relative;*/
+    /*top: 0;*/
+    /*bottom: 0;*/
+    /*width: 100%;*/
 }
 
 #marker {
@@ -312,7 +312,7 @@ cardImage {
 }
 
 .infoMap {
-    width: 200px;
+    width: 100%;
     background: rgb(1, 42, 127);
     color: #fff;
     outline: 1px solid #fff;
@@ -343,6 +343,7 @@ cardImage {
 
 .infoMap .listing {
     overflow: auto;
+    width:100%;
     max-height: 100%;
 }
 
