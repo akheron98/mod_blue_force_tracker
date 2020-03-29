@@ -9,7 +9,6 @@ defined('_JEXEC') or die; ?>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
 <script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/bootstrap.min.css">
-<script src="/modules/mod_blue_force_tracker/tmpl/js/bootstrap.min.js"></script>
 
 <div class="container-fluid" style="padding:0px;">
     <div class="row no-gutters" style="margin-left:0px;">
@@ -25,7 +24,7 @@ defined('_JEXEC') or die; ?>
                             placeholder="Recherche"
                     />
                 </fieldset>
-                <div id="feature-listing" class="listing"></div>
+                <div id="feature-listing"></div>  <!-- listing list-group -->
              </div>
         </div>
     </div>
@@ -71,7 +70,7 @@ defined('_JEXEC') or die; ?>
         geometry: {
             type: "Point",
             coordinates: [
-                -72.937107, 46.286173
+                -73.61027, 45.49917
             ]
         }
     };
@@ -159,34 +158,19 @@ defined('_JEXEC') or die; ?>
                         markerToShow['type'] = e.features[0].type;
                         markerToShow['properties'] = e.features[0].properties;
                         const coordinates = markerToShow.geometry.coordinates.slice();
-                        const label = markerToShow.properties.label;
-                        const description = markerToShow.properties.description;
-                        const url = markerToShow.properties.url === EMPTY_STRING ? "#" : markerToShow.properties.url;
                         const userID = markerToShow.properties.owner;
                         let buttonMAJHtml = "";
                         let buttonSupprimerHTml = "";
-                        let labelHtml = '<h4><b>' + label + '</b></h4>';
-                        let descriptionHtml = '<p>' + description + '</p>';
                         if (userID === joomlaUserId) {
                             buttonMAJHtml = '<button onclick=\'return editMarker(' + JSON.stringify(markerToShow) + ');\' id=\'updateMarker' + userID + '\' class=\'updateMarker\'><i class=\'fas fa-edit\' style=\'padding:0\'></i></button>';
                             buttonSupprimerHTml = '<button onclick="return deleteMarker(\'' + markerToShow.properties.id + '\');" id="supprimerMarker' + userID + '" class="supprimerMarker"><i class="fas fa-trash" style="padding:0"></i></button>';
                         }
-                        let image = markerToShow.properties.image;
-
-                        if (!image || image === "#") {
-                            image = "./images/image_non_trouvee.png";
-                        }
                         const container = '<div id="result"></div>' +
-                            '<a href="' + url + '" target="_blank">' +
-                            '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
-                            '</a>' +
-                            '<div id="cardContainer" class="container">' +
-                            labelHtml +
-                            descriptionHtml +
+                            getMarkerCard(markerToShow) +
                             buttonMAJHtml +
                             buttonSupprimerHTml +
                             '</div>';
-                        const html = '<div id="card" class="card"></div>';
+                        const html = '<div id="card" class="markerCard"></div>';
 
                         // Ensure that if the map is zoomed out such that multiple
                         // copies of the feature are visible, the popup appears
@@ -446,6 +430,7 @@ defined('_JEXEC') or die; ?>
             //When the checkbox changes, update the visibility of the layer.
             input.addEventListener('change', function () {
                 if (input.checked) {
+                    marker.setLngLat(defaultMarker.geometry.coordinates);
                     marker.addTo(map);
                     label.textContent = 'Annuler';
                 } else {
@@ -480,6 +465,23 @@ defined('_JEXEC') or die; ?>
         map.addControl(new AddMarkerControl(), 'bottom-left');
     }
 
+    function getMarkerCard(feature) {
+        const label = feature.properties.label;
+        const description = feature.properties.description;
+        const url = feature.properties.url === EMPTY_STRING ? "#" : feature.properties.url;
+        let image = feature.properties.image;
+
+        if (!image || image === "#") {
+            image = "./images/image_non_trouvee.png";
+        }
+        return '<a href="' + url + '" target="_blank">' +
+            '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
+            '</a>' +
+            '<div id="cardContainer" class="container">' +
+            '<h4><b>' + label + '</b></h4>' +
+            '<p>' + description + '</p>';
+    }
+
     function renderListings(features) {
         let empty = document.createElement('p');
 // Clear any existing listings
@@ -487,14 +489,46 @@ defined('_JEXEC') or die; ?>
         if (features.length) {
             features.forEach(function(feature) {
                 let prop = feature.properties;
-                let item = document.createElement('a');
-                item.href = prop.url;
-                item.target = '_blank';
-                item.textContent = prop.label;
-                listingEl.appendChild(item);
+                let html =
+                    '<button class="listingHeader">' +
+                        prop.label +
+                    '</button>' +
+                    '<div class="listingDetail" id="listing'+prop.id+'">' +
+                    '    <input type="hidden" id="lnglisting'+prop.id+'" value="'+feature.geometry.coordinates[0]+'" />' +
+                    '    <input type="hidden" id="latlisting'+prop.id+'" value="'+feature.geometry.coordinates[1]+'" />' +
+                         getMarkerCard(feature) +
+                    '</div>';
+                listingEl.innerHTML += html;
             });
 
-// Show the filter input
+            let acc = document.getElementsByClassName("listingHeader");
+            let i;
+            for (i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    /* Toggle between adding and removing the "active" class,
+                    to highlight the button that controls the panel */
+                    this.classList.toggle("listingActive");
+
+                    /* Toggle between hiding and showing the active panel */
+                    let panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                        panel.style.display = "none";
+                    } else {
+                        panel.style.display = "block";
+                    }
+                });
+                acc[i].addEventListener("mouseover", function() {
+                    let panel = this.nextElementSibling;
+                    let lng = jQuery("#lng"+ panel.id).val();
+                    let lat = jQuery("#lat"+ panel.id).val();
+                    marker.setLngLat([lng, lat]);
+                    marker.setOffset([0,-13]);
+                    marker.addTo(map);
+                });
+                acc[i].addEventListener("mouseout", function() {
+                    marker.remove();
+                });
+            }
             filterEl.parentNode.style.display = 'block';
         } else if (features.length === 0 && filterEl.value !== '') {
             empty.textContent = 'Aucun résultat';
@@ -502,10 +536,7 @@ defined('_JEXEC') or die; ?>
         } else {
             empty.textContent = 'Déplacer la carte pour obtenir des éléments.';
             listingEl.appendChild(empty);
-
-// Hide the filter input
             filterEl.parentNode.style.display = 'none';
-
         }
     }
 
@@ -547,7 +578,8 @@ defined('_JEXEC') or die; ?>
 
     const marker = new mapboxgl.Marker({
         element: pin,
-        draggable: true
+        draggable: true,
+        offset: [0,-13]
     });
     addMapControls();
 
