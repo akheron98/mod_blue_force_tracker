@@ -98,7 +98,6 @@ defined('_JEXEC') or die; ?>
 
     function editMarker(markerToEdit) {
         document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, UPDATE_MARKER);
-        document.getElementsByClassName("marker-form-with-image")[0].classList.add('marker-form-with-image-width');
 
         if (document.getElementById("previewImage" + UPDATE_MARKER) && document.getElementById("previewImage" + UPDATE_MARKER).src) {
             cropper = jQuery('#previewImage' + UPDATE_MARKER).croppie({
@@ -215,9 +214,10 @@ defined('_JEXEC') or die; ?>
         let url = id === NEW_MARKER || marker.properties.url === "#" ? "" : marker.properties.url;
         let image = id === NEW_MARKER ? "" : marker.properties.image;
         let showCancel = "hidden"; //id === NEW_MARKER ? "hidden" : "submit";
+        let croppieSpace = id === NEW_MARKER ? "" : "marker-form-with-image-width";
 
         return '<form id="markerForm' + id + '" action="">' +
-            '<div class="marker-form-with-image">' +
+            '<div class="marker-form-with-image '+croppieSpace+'">' +
             '<div class="marker-form">' +
             '<div id="app"></div>'+
             '<div id="result' + id + '"></div>' +
