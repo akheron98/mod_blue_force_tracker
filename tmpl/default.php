@@ -74,7 +74,8 @@ defined('_JEXEC') or die; ?>
             ]
         }
     };
-    let cropper;
+    let cropperNew;
+    let cropperEdit;
 
     function uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -98,21 +99,19 @@ defined('_JEXEC') or die; ?>
 
     function editMarker(markerToEdit) {
         document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, UPDATE_MARKER);
+        let imageSrc = markerToEdit.properties.image;
 
-        if (document.getElementById("previewImage" + UPDATE_MARKER) && document.getElementById("previewImage" + UPDATE_MARKER).src) {
-            cropper = jQuery('#previewImage' + UPDATE_MARKER).croppie({
-                viewport: {
-                    width: 200,
-                    height: 200,
-                }
-            });
-            cropper.croppie('bind', {
-                url: document.getElementById("previewImage" + UPDATE_MARKER).src,
-                zoom: 0
-            });
-
-            document.getElementById("showImage" + UPDATE_MARKER).style.display = 'block';
-        }
+        cropperEdit = jQuery("#previewImage" + UPDATE_MARKER).croppie({
+            viewport: {
+                width: 200,
+                height: 200,
+            }
+        });
+        cropperEdit.croppie('bind', {
+            url: imageSrc,
+            zoom: 0
+        });
+        document.getElementById("showImage" + UPDATE_MARKER).style.display = 'block';
     }
 
     function showMarker() {
@@ -202,11 +201,11 @@ defined('_JEXEC') or die; ?>
         let teamSelected = '';
         let eventSelected = '';
         let fieldSelected = '';
-        if (marker.properties.type === 'team') {
+        if (marker.properties.type === markerType.team.string) {
             teamSelected = 'selected';
-        } else if (marker.properties.type === 'field') {
+        } else if (marker.properties.type === markerType.field.string) {
             fieldSelected = 'selected';
-        } else if (marker.properties.type === 'event') {
+        } else if (marker.properties.type === markerType.event.string) {
             eventSelected = 'selected';
         }
         let label = id === NEW_MARKER ? "" : marker.properties.label;
@@ -223,9 +222,9 @@ defined('_JEXEC') or die; ?>
             '<div id="result' + id + '"></div>' +
             '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
             '<select id="type' + id + '" name="type">' +
-            '<option value="team" ' + teamSelected + '>&Eacute;quipe</option>' +
-            '<option value="event" ' + eventSelected + '>&Eacute;v&eacute;nement</option>' +
-            '<option value="field" ' + fieldSelected + '>Terrain</option>' +
+            '<option value="'+markerType.team.string+'" ' + teamSelected + '>'+getTypeLabel(markerType.team.string, "FR-ca")+'</option>' +
+            '<option value="'+markerType.event.string+'" ' + eventSelected + '>'+getTypeLabel(markerType.event.string, "FR-ca")+'</option>' +
+            '<option value="'+markerType.field.string+'" ' + fieldSelected + '>'+getTypeLabel(markerType.field.string, "FR-ca")+'</option>' +
             '</select><br />' +
             '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
             '<input required autofocus id="label' + id + '" name="label' + id + '" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
@@ -238,16 +237,13 @@ defined('_JEXEC') or die; ?>
             '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
             '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
             '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
-            'Lng: ' + lngLat[0].toFixed(5) + '<br />Lat: ' + lngLat[1].toFixed(5) +
-            '<br />' +
             '<p>' +
             '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
             '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
             '</p>' +
             '</div>' +
             '<div id="showImage'+id+'" class="marker-form-image">' +
-            '<img id="previewImage'+id+'" src="'+image+'" alt="Prévisualisation"/>' +
-            '</div>' +
+                '<img id="previewImage'+id+'" src="#" alt="Prévisualisation" />' +
             '</div>' +
             '</form>';
     }
@@ -258,18 +254,21 @@ defined('_JEXEC') or die; ?>
             oFReader.readAsDataURL(document.getElementById("image" + id).files[0]);
 
             oFReader.onload = function () {
-                document.getElementById("previewImage" + id).src = oFReader.result;
+                let previewImage = jQuery("#previewImage" + id);
+                previewImage.attr("src",oFReader.result);
 
-                if (!document.getElementById("previewImage" + UPDATE_MARKER) || !document.getElementById("previewImage" + UPDATE_MARKER).src) {
-                    cropper = jQuery('#previewImage' + id).croppie({
+                if (id === NEW_MARKER && (!cropperNew || !cropperNew[0].src)) {
+                    cropperNew = previewImage.croppie({
                         viewport: {
                             width: 200,
                             height: 200
                         }
                     });
+                    console.log(cropperNew);
                 }
+                let cropper = id === NEW_MARKER ? cropperNew : cropperEdit;
                 cropper.croppie('bind', {
-                    url: document.getElementById("previewImage" + id).src,
+                    url: previewImage.attr("src"),
                 });
             };
             document.getElementById("showImage" + id).style.display = 'block';
@@ -297,8 +296,9 @@ defined('_JEXEC') or die; ?>
             markerToSave.geometry.coordinates = [jQuery("#lng" + id).val(), jQuery("#lat" + id).val()];
 
             markerToSave.properties.image = EMPTY_STRING;
-            let imageBlob = document.getElementById("previewImage" + id).src;
+            let imageBlob = jQuery("#previewImage" + id).attr("src");
             if (imageBlob) {
+                let cropper = id === NEW_MARKER ? cropperNew : cropperEdit;
                 cropper.croppie('result', {
                     type: 'canvas',
                     size: 'viewport',
@@ -403,9 +403,9 @@ defined('_JEXEC') or die; ?>
             dataType: 'json'
         });
         ajaxRequest.done(function () {
-            jQuery("#result" + id).html('Opération réussie!');
             callback();
             map.getSource('places').setData(url);
+            renderListings([]);
         });
         /* On failure of request this function will be called  */
         ajaxRequest.fail(function (request) {
@@ -561,6 +561,17 @@ defined('_JEXEC') or die; ?>
         return uniqueFeatures;
     }
 
+    function refreshListing() {
+        let features = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station']});
+
+        if (features) {
+            let uniqueFeatures = getUniqueFeatures(features, 'id');
+            renderListings(uniqueFeatures);
+            filterEl.value = '';
+            markers = uniqueFeatures;
+        }
+    }
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -600,20 +611,7 @@ defined('_JEXEC') or die; ?>
         marker.on('dragend', onDragEnd);
 
         map.on('moveend', function() {
-            let features = map.queryRenderedFeatures({ layers: ['poi-toilet','poi-embassy','poi-ranger-station'] });
-
-            if (features) {
-                let uniqueFeatures = getUniqueFeatures(features, 'id');
-// Populate features for the listing overlay.
-                renderListings(uniqueFeatures);
-
-// Clear the input container
-                filterEl.value = '';
-
-// Store the current features in sn `markers` variable to
-// later use for filtering on `keyup`.
-                markers = uniqueFeatures;
-            }
+            refreshListing();
         });
 
         Object.keys(markerType).forEach(function (markerProperties) {
