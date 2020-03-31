@@ -40,6 +40,7 @@ defined('_JEXEC') or die; ?>
     const connectedUser = joomlaUserId > 0;
     const NEW_MARKER = "newMarker";
     const UPDATE_MARKER = "updateMarker";
+    let markerOriginalPos = null;
     const markerType = {
         team : {
             icon : 'toilet',
@@ -211,7 +212,6 @@ defined('_JEXEC') or die; ?>
         let label = id === NEW_MARKER ? "" : marker.properties.label;
         let description = id === NEW_MARKER ? "" : marker.properties.description;
         let url = id === NEW_MARKER || marker.properties.url === "#" ? "" : marker.properties.url;
-        let image = id === NEW_MARKER ? "" : marker.properties.image;
         let showCancel = "hidden"; //id === NEW_MARKER ? "hidden" : "submit";
         let croppieSpace = id === NEW_MARKER ? "" : "marker-form-with-image-width";
 
@@ -324,7 +324,10 @@ defined('_JEXEC') or die; ?>
     }
 
     function saveNewMarker(markerToSave, id) {
-        persistMarker(markerToSave, 'POST',id, function(){marker.remove();});
+        persistMarker(markerToSave, 'POST',id, function(){
+            marker.remove();
+            markerOriginalPos = null;
+        });
         document.getElementById('addMarkerLabel').textContent = 'Ajouter';
         document.getElementById('addMarkerInput').checked = false;
         new Promise(r => setTimeout(r, 2000)).then(function () {
@@ -432,9 +435,11 @@ defined('_JEXEC') or die; ?>
                 if (input.checked) {
                     marker.setLngLat(defaultMarker.geometry.coordinates);
                     marker.addTo(map);
+                    markerOriginalPos = marker.getLngLat();
                     label.textContent = 'Annuler';
                 } else {
                     marker.remove();
+                    markerOriginalPos = null;
                     label.textContent = 'Ajouter';
                     document.getElementById('coordinates').style.display = 'none';
                 }
@@ -526,7 +531,11 @@ defined('_JEXEC') or die; ?>
                     marker.addTo(map);
                 });
                 acc[i].addEventListener("mouseout", function() {
-                    marker.remove();
+                    if (!markerOriginalPos) {
+                        marker.remove();
+                    } else {
+                        marker.setLngLat(markerOriginalPos);
+                    }
                 });
             }
             filterEl.parentNode.style.display = 'block';
@@ -605,6 +614,7 @@ defined('_JEXEC') or die; ?>
             coordinates.style.display = 'block';
             let markerToSave = jQuery.extend({}, defaultMarker);
             let lngLat = marker.getLngLat();
+            markerOriginalPos = lngLat;
             markerToSave.geometry.coordinates = [lngLat.lng, lngLat.lat];
             coordinates.innerHTML = getMarkerFormHTML(markerToSave, NEW_MARKER);
         }
