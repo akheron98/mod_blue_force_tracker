@@ -10,8 +10,8 @@ defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/bootstrap.min.css">
 
-<div class="container-fluid" style="padding:0px;">
-    <div class="row no-gutters" style="margin-left:0px;">
+<div class="container-fluid" style="padding:0;">
+    <div class="row no-gutters" style="margin-left:0;">
         <div class="col-lg-10">
             <div style="height:<?php echo $height; ?>px" id="map"></div>
         </div>
@@ -38,8 +38,6 @@ defined('_JEXEC') or die; ?>
     const URL_REGEX = /^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
     const joomlaUserId = "<?php echo $userID;?>";
     const connectedUser = joomlaUserId > 0;
-    const NEW_MARKER = "newMarker";
-    const UPDATE_MARKER = "updateMarker";
     let markerOriginalPos = null;
     const markerType = {
         team : {
@@ -99,10 +97,11 @@ defined('_JEXEC') or die; ?>
     }
 
     function editMarker(markerToEdit) {
-        document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit, UPDATE_MARKER);
+        document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit);
         let imageSrc = markerToEdit.properties.image;
+        let id = markerToEdit.properties.id;
 
-        cropperEdit = jQuery("#previewImage" + UPDATE_MARKER).croppie({
+        cropperEdit = jQuery("#previewImage" + id).croppie({
             viewport: {
                 width: 200,
                 height: 200,
@@ -112,7 +111,7 @@ defined('_JEXEC') or die; ?>
             url: imageSrc,
             zoom: 0
         });
-        document.getElementById("showImage" + UPDATE_MARKER).style.display = 'block';
+        document.getElementById("showImage" + id).style.display = 'block';
     }
 
     function showMarker() {
@@ -152,7 +151,7 @@ defined('_JEXEC') or die; ?>
                     });
 
                     map.on('click', layerID, async function (e) {
-                        let markerToShow = new Object();
+                        let markerToShow = {};
                         markerToShow['geometry'] = e.features[0].geometry;
                         markerToShow['type'] = e.features[0].type;
                         markerToShow['properties'] = e.features[0].properties;
@@ -197,8 +196,9 @@ defined('_JEXEC') or die; ?>
         });
     }
 
-    function getMarkerFormHTML(marker, id) {
+    function getMarkerFormHTML(marker) {
         const lngLat = marker.geometry.coordinates;
+        let id = marker.properties.id;
         let teamSelected = '';
         let eventSelected = '';
         let fieldSelected = '';
@@ -209,11 +209,11 @@ defined('_JEXEC') or die; ?>
         } else if (marker.properties.type === markerType.event.string) {
             eventSelected = 'selected';
         }
-        let label = id === NEW_MARKER ? "" : marker.properties.label;
-        let description = id === NEW_MARKER ? "" : marker.properties.description;
-        let url = id === NEW_MARKER || marker.properties.url === "#" ? "" : marker.properties.url;
-        let showCancel = "hidden"; //id === NEW_MARKER ? "hidden" : "submit";
-        let croppieSpace = id === NEW_MARKER ? "" : "marker-form-with-image-width";
+        let label = id !== "0" ? marker.properties.label : "";
+        let description = id !== "0" ? marker.properties.description : "";
+        let url = id !== "0" ? (marker.properties.url === "#" ? "" : marker.properties.url) : "";
+
+        let croppieSpace = id !== "0" ? "marker-form-with-image-width" : "";
 
         return '<form id="markerForm' + id + '" action="">' +
             '<div class="marker-form-with-image '+croppieSpace+'">' +
@@ -230,15 +230,15 @@ defined('_JEXEC') or die; ?>
             '<input required autofocus id="label' + id + '" name="label' + id + '" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
             '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
             '<input required id="description' + id + '" name="description' + id + '" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
+            getMarkerDetailHtml(marker) +
             '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
             '<input id="url' + id + '" name="url' + id + '" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
-            '<input id="image' + id + '" type="file" accept="image/*" onchange="previewImage(\''+id+'\');">' +
+            '<input id="image' + id + '" type="file" accept="image/*" onchange="previewImage(\''+ id +'\');">' +
             '<label for="image' + id + '">Choissisez une image...</label><span id="error-image' + id + '"></span>' +
             '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
             '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
             '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
             '<p>' +
-            '<input type="'+ showCancel +'" id="cancelSave' + id + '" name="cancelSave" onclick="return cancelEditing(\'' + id + '\');" value="&#xf060" />' +
             '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
             '</p>' +
             '</div>' +
@@ -246,6 +246,10 @@ defined('_JEXEC') or die; ?>
                 '<img id="previewImage'+id+'" src="#" alt="Prévisualisation" />' +
             '</div>' +
             '</form>';
+    }
+
+    function getMarkerDetailHtml(marker) {
+        return "";
     }
 
     function previewImage(id) {
@@ -257,16 +261,15 @@ defined('_JEXEC') or die; ?>
                 let previewImage = jQuery("#previewImage" + id);
                 previewImage.attr("src",oFReader.result);
 
-                if (id === NEW_MARKER && (!cropperNew || !cropperNew[0].src)) {
+                if (id === "0" && (!cropperNew || !cropperNew[0].src)) {
                     cropperNew = previewImage.croppie({
                         viewport: {
                             width: 200,
                             height: 200
                         }
                     });
-                    console.log(cropperNew);
                 }
-                let cropper = id === NEW_MARKER ? cropperNew : cropperEdit;
+                let cropper = id !== "0" ? cropperEdit : cropperNew;
                 cropper.croppie('bind', {
                     url: previewImage.attr("src"),
                 });
@@ -275,17 +278,11 @@ defined('_JEXEC') or die; ?>
         }
     }
 
-    function cancelEditing(id) {
-        document.getElementById('markerForm' + id).style.display='none';
-        document.getElementById('card').style.display='block';
-        return false;
-    }
-
     function getMarkerToSaveFromForm(id) {
         return new Promise(resolve => {
             let markerToSave = jQuery.extend({}, defaultMarker);
             let markerId = jQuery("#id" + id).val();
-            markerToSave.properties.id = id === NEW_MARKER ? uuidv4() : markerId;
+            markerToSave.properties.id = id !== "0" ? markerId : uuidv4();
             markerToSave.properties.type = jQuery("#type" + id).val();
             markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
             markerToSave.properties.label = jQuery("#label" + id).val();
@@ -298,7 +295,7 @@ defined('_JEXEC') or die; ?>
             markerToSave.properties.image = EMPTY_STRING;
             let imageBlob = jQuery("#previewImage" + id).attr("src");
             if (imageBlob) {
-                let cropper = id === NEW_MARKER ? cropperNew : cropperEdit;
+                let cropper = id !== "0" ? cropperEdit : cropperNew;
                 cropper.croppie('result', {
                     type: 'canvas',
                     size: 'viewport',
@@ -318,13 +315,13 @@ defined('_JEXEC') or die; ?>
 
     function deleteMarker(idToDelete) {
         if (confirm("Êtes-vous sur de vouloir supprimer votre point d'intérêt ?")) {
-            persistMarker({id:idToDelete}, 'DELETE',UPDATE_MARKER, function(){popup.remove();});
+            persistMarker({id:idToDelete}, 'DELETE', function(){popup.remove();});
         }
         return false;
     }
 
     function saveNewMarker(markerToSave, id) {
-        persistMarker(markerToSave, 'POST',id, function(){
+        persistMarker(markerToSave, 'POST', function(){
             marker.remove();
             markerOriginalPos = null;
         });
@@ -381,16 +378,16 @@ defined('_JEXEC') or die; ?>
         let saveButton = jQuery("#markerSave" + id);
         saveButton[0].disabled = true;
         getMarkerToSaveFromForm(id).then(function(markerToSave) {
-            if (id === NEW_MARKER) {
-                saveNewMarker(markerToSave,id);
+            if (id !== "0") {
+                persistMarker(markerToSave, 'PUT', function(){popup.remove();});
             } else {
-                persistMarker(markerToSave, 'PUT',id, function(){popup.remove();});
+                saveNewMarker(markerToSave,id);
             }
         });
         return false;
     }
 
-    async function persistMarker(markerToSave, method, id, callback) {
+    async function persistMarker(markerToSave, method, callback) {
         const ajaxRequest = jQuery.ajax({
             method: method,
             url: url,
@@ -412,7 +409,7 @@ defined('_JEXEC') or die; ?>
         });
         /* On failure of request this function will be called  */
         ajaxRequest.fail(function (request) {
-            jQuery("#result" + id).html('There is error while submit:' + request.responseText);
+            jQuery("#result" + markerToSave.properties.id).html('There is error while submit:' + request.responseText);
         });
     }
 
@@ -555,10 +552,8 @@ defined('_JEXEC') or die; ?>
 
     function getUniqueFeatures(array, comparatorProperty) {
         let existingFeatureKeys = {};
-// Because features come from tiled vector data, feature geometries may be split
-// or duplicated across tile boundaries and, as a result, features may appear
-// multiple times in query results.
-        let uniqueFeatures = array.filter(function(el) {
+
+        return array.filter(function (el) {
             if (existingFeatureKeys[el.properties[comparatorProperty]]) {
                 return false;
             } else {
@@ -566,8 +561,6 @@ defined('_JEXEC') or die; ?>
                 return true;
             }
         });
-
-        return uniqueFeatures;
     }
 
     function refreshListing() {
@@ -616,7 +609,7 @@ defined('_JEXEC') or die; ?>
             let lngLat = marker.getLngLat();
             markerOriginalPos = lngLat;
             markerToSave.geometry.coordinates = [lngLat.lng, lngLat.lat];
-            coordinates.innerHTML = getMarkerFormHTML(markerToSave, NEW_MARKER);
+            coordinates.innerHTML = getMarkerFormHTML(markerToSave);
         }
         marker.on('dragend', onDragEnd);
 
@@ -627,8 +620,7 @@ defined('_JEXEC') or die; ?>
         Object.keys(markerType).forEach(function (markerProperties) {
             if (markerType.hasOwnProperty(markerProperties)) {
                 let icon = markerType[markerProperties].icon;
-                map.on('mousemove', 'poi-'+icon, function(e) {
-// Change the cursor style as a UI indicator.
+                map.on('mousemove', 'poi-'+icon, function() {
                     map.getCanvas().style.cursor = 'pointer';
                 });
                 map.on('mouseleave', 'poi-'+icon, function() {
