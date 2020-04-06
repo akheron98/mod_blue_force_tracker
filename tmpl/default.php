@@ -31,7 +31,7 @@ defined('_JEXEC') or die; ?>
 </div>
 
 <script>
-    let markers = [];
+    let features = [];
     const filterEl = document.getElementById('feature-filter');
     const listingEl = document.getElementById('feature-listing');
     const EMPTY_STRING = "#";
@@ -39,7 +39,7 @@ defined('_JEXEC') or die; ?>
     const joomlaUserId = "<?php echo $userID;?>";
     const connectedUser = joomlaUserId > 0;
     let markerOriginalPos = null;
-    const markerType = {
+    const featureType = {
         team : {
             icon : 'toilet',
             string : "team"
@@ -53,17 +53,17 @@ defined('_JEXEC') or die; ?>
             string : "event"
         }
     };
-
-    const defaultMarker = {
+    let feature = {}; 
+    const defaultFeature = {
         type: "Feature",
         properties: {
             id: "0",
             type: "field",
             icon: "ranger-station",
-            label: "Nom",
-            description: "Description",
-            url: "Lien site internet",
-            image: "Lien image",
+            label: "",
+            description: "",
+            url: "",
+            image: "",
             owner:"",
         },
         geometry: {
@@ -73,8 +73,24 @@ defined('_JEXEC') or die; ?>
             ]
         }
     };
-    let cropperNew;
-    let cropperEdit;
+    let cropper;
+    let cropperOptions = {
+        viewport: {
+            width: 200,
+            height: 200
+        },
+        boundary: {width: 290, height: 200},
+    };
+
+    function resetCroppie() { destroyCroppie(); initCroppie(); }
+
+    function destroyCroppie() {
+        if (cropper) {
+            cropper.croppie('destroy');
+        }
+    }
+
+    function initCroppie() { cropper = jQuery('#cropper').croppie(cropperOptions); }
 
     function uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -85,40 +101,22 @@ defined('_JEXEC') or die; ?>
 
     function getTypeLabel(type, language) {
         switch (type) {
-            case markerType.team.string :
+            case featureType.team.string :
                 return language === "FR-ca" ? "Équipe" : "Team";
-            case  markerType.field.string :
+            case  featureType.field.string :
                 return language === "FR-ca" ? "Terrain" : "Field";
-            case  markerType.event.string :
+            case  featureType.event.string :
                 return language === "FR-ca" ? "Événement" : "Event";
             default:
                 return language === "FR-ca" ? "Type introuvable!" : "Type not found";
         }
     }
 
-    function editMarker(markerToEdit) {
-        document.getElementById("card").innerHTML = getMarkerFormHTML(markerToEdit);
-        let imageSrc = markerToEdit.properties.image;
-        let id = markerToEdit.properties.id;
-
-        cropperEdit = jQuery("#previewImage" + id).croppie({
-            viewport: {
-                width: 200,
-                height: 200,
-            }
-        });
-        cropperEdit.croppie('bind', {
-            url: imageSrc,
-            zoom: 0
-        });
-        document.getElementById("showImage" + id).style.display = 'block';
-    }
-
-    function showMarker() {
-        Object.keys(markerType).forEach(function (markerProperties) {
-            if (markerType.hasOwnProperty(markerProperties)) {
-                const symbol = markerType[markerProperties].icon;
-                const layerID = "poi-" + symbol; //feature['markerId'];
+    function showFeaturesOnMap() {
+        Object.keys(featureType).forEach(function (featureProperties) {
+            if (featureType.hasOwnProperty(featureProperties)) {
+                const symbol = featureType[featureProperties].icon;
+                const layerID = "poi-" + symbol; //feature['featureId'];
                 if (!map.getLayer(layerID)) {
                     map.addLayer({
                         'id': layerID,
@@ -139,7 +137,7 @@ defined('_JEXEC') or die; ?>
 
                     const label = document.createElement('label');
                     label.setAttribute('for', layerID);
-                    label.textContent = getTypeLabel(markerProperties, "FR-ca");
+                    label.textContent = getTypeLabel(featureProperties, "FR-ca");
                     filterGroup.appendChild(label);
 
                     input.addEventListener('change', function (e) {
@@ -151,24 +149,25 @@ defined('_JEXEC') or die; ?>
                     });
 
                     map.on('click', layerID, async function (e) {
-                        let markerToShow = {};
-                        markerToShow['geometry'] = e.features[0].geometry;
-                        markerToShow['type'] = e.features[0].type;
-                        markerToShow['properties'] = e.features[0].properties;
-                        const coordinates = markerToShow.geometry.coordinates.slice();
-                        const userID = markerToShow.properties.owner;
+                        cancelAddFeature();
+                        feature = {};
+                        feature['geometry'] = e.features[0].geometry;
+                        feature['type'] = e.features[0].type;
+                        feature['properties'] = e.features[0].properties;
+                        const coordinates = feature.geometry.coordinates.slice();
+                        const userID = feature.properties.owner;
                         let buttonMAJHtml = "";
                         let buttonSupprimerHTml = "";
                         if (userID === joomlaUserId) {
-                            buttonMAJHtml = '<button onclick=\'return editMarker(' + JSON.stringify(markerToShow) + ');\' id=\'updateMarker' + userID + '\' class=\'updateMarker\'><i class=\'fas fa-edit\' style=\'padding:0\'></i></button>';
-                            buttonSupprimerHTml = '<button onclick="return deleteMarker(\'' + markerToShow.properties.id + '\');" id="supprimerMarker' + userID + '" class="supprimerMarker"><i class="fas fa-trash" style="padding:0"></i></button>';
+                            buttonMAJHtml = '<button onclick=\'return editFeature();\' id=\'updateFeature' + userID + '\' class=\'updateFeature\'><i class=\'fas fa-edit\' style=\'padding:0\'></i></button>';
+                            buttonSupprimerHTml = '<button onclick="return deleteFeature();" id="supprimerFeature' + userID + '" class="supprimerFeature"><i class="fas fa-trash" style="padding:0"></i></button>';
                         }
                         const container = '<div id="result"></div>' +
-                            getMarkerCard(markerToShow) +
+                            getFeatureCard(feature) +
                             buttonMAJHtml +
                             buttonSupprimerHTml +
                             '</div>';
-                        const html = '<div id="card" class="markerCard"></div>';
+                        const html = '<div id="card" class="featureCard"></div>';
 
                         // Ensure that if the map is zoomed out such that multiple
                         // copies of the feature are visible, the popup appears
@@ -196,173 +195,153 @@ defined('_JEXEC') or die; ?>
         });
     }
 
-    function getMarkerFormHTML(marker) {
-        const lngLat = marker.geometry.coordinates;
-        let id = marker.properties.id;
-        let teamSelected = '';
-        let eventSelected = '';
-        let fieldSelected = '';
-        if (marker.properties.type === markerType.team.string) {
-            teamSelected = 'selected';
-        } else if (marker.properties.type === markerType.field.string) {
-            fieldSelected = 'selected';
-        } else if (marker.properties.type === markerType.event.string) {
-            eventSelected = 'selected';
-        }
-        let label = id !== "0" ? marker.properties.label : "";
-        let description = id !== "0" ? marker.properties.description : "";
-        let url = id !== "0" ? (marker.properties.url === "#" ? "" : marker.properties.url) : "";
-
-        let croppieSpace = id !== "0" ? "marker-form-with-image-width" : "";
-
-        return '<form id="markerForm' + id + '" action="">' +
-            '<div class="marker-form-with-image '+croppieSpace+'">' +
-            '<div class="marker-form">' +
-            '<div id="app"></div>'+
-            '<div id="result' + id + '"></div>' +
-            '<h6>Votre point d&#39;int&eacute;r&ecirc;t</h6>' +
-            '<select id="type' + id + '" name="type">' +
-            '<option value="'+markerType.team.string+'" ' + teamSelected + '>'+getTypeLabel(markerType.team.string, "FR-ca")+'</option>' +
-            '<option value="'+markerType.event.string+'" ' + eventSelected + '>'+getTypeLabel(markerType.event.string, "FR-ca")+'</option>' +
-            '<option value="'+markerType.field.string+'" ' + fieldSelected + '>'+getTypeLabel(markerType.field.string, "FR-ca")+'</option>' +
-            '</select><br />' +
-            '<label for="label' + id + '">Titre</label><span id="error-label' + id + '"></span>' +
-            '<input required autofocus id="label' + id + '" name="label' + id + '" placeholder="Titre de votre point d\'intérêt" value="'+label+'" type="text" width="100px;" maxlength="50"><br />' +
-            '<label for="description' + id + '">Description</label><span id="error-description' + id + '"></span>' +
-            '<input required id="description' + id + '" name="description' + id + '" placeholder="Courte description" value="'+description+'" type="text" width="100px;" maxlength="140"><br />' +
-            getMarkerDetailHtml(marker) +
-            '<label for="url' + id + '">Adresse site web</label><span id="error-url' + id + '"></span>' +
-            '<input id="url' + id + '" name="url' + id + '" placeholder="http://www.example.com" value="'+url+'" type="url" width="100px;" ><br />' +
-            '<input id="image' + id + '" type="file" accept="image/*" onchange="previewImage(\''+ id +'\');">' +
-            '<label for="image' + id + '">Choissisez une image...</label><span id="error-image' + id + '"></span>' +
-            '<input id="lng' + id + '" type="hidden" value="'+lngLat[0]+'" />'+
-            '<input id="lat' + id + '" type="hidden" value="'+lngLat[1]+'" />'+
-            '<input id="id' + id + '" type="hidden" value="'+marker.properties.id+'" />'+
-            '<p>' +
-            '<input type="submit" id="markerSave' + id + '" name="markerSave" onclick="return saveMarker(\'' + id + '\');" value="&#xf0c7" />' +
-            '</p>' +
-            '</div>' +
-            '<div id="showImage'+id+'" class="marker-form-image">' +
-                '<img id="previewImage'+id+'" src="#" alt="Prévisualisation" />' +
-            '</div>' +
-            '</form>';
-    }
-
-    function getMarkerDetailHtml(marker) {
-        return "";
-    }
-
-    function previewImage(id) {
-        if (document.getElementById("image" + id)) {
+    function loadImage() {
+        let image = document.getElementById("image");
+        if (image) {
             let oFReader = new FileReader();
-            oFReader.readAsDataURL(document.getElementById("image" + id).files[0]);
-
+            oFReader.readAsDataURL(image.files[0]);
             oFReader.onload = function () {
-                let previewImage = jQuery("#previewImage" + id);
-                previewImage.attr("src",oFReader.result);
-
-                if (id === "0" && (!cropperNew || !cropperNew[0].src)) {
-                    cropperNew = previewImage.croppie({
-                        viewport: {
-                            width: 200,
-                            height: 200
-                        }
-                    });
-                }
-                let cropper = id !== "0" ? cropperEdit : cropperNew;
-                cropper.croppie('bind', {
-                    url: previewImage.attr("src"),
-                });
+                feature.properties.image = oFReader.result;
+                showImage();
             };
-            document.getElementById("showImage" + id).style.display = 'block';
         }
     }
 
-    function getMarkerToSaveFromForm(id) {
-        return new Promise(resolve => {
-            let markerToSave = jQuery.extend({}, defaultMarker);
-            let markerId = jQuery("#id" + id).val();
-            markerToSave.properties.id = id !== "0" ? markerId : uuidv4();
-            markerToSave.properties.type = jQuery("#type" + id).val();
-            markerToSave.properties.icon = markerType[markerToSave.properties.type].icon;
-            markerToSave.properties.label = jQuery("#label" + id).val();
-            markerToSave.properties.description = jQuery("#description" + id).val();
-            let url = jQuery("#url" + id).val();
-            markerToSave.properties.url = url === "" ? EMPTY_STRING : url;
-            markerToSave.properties.owner = "<?php echo $userID; ?>";
-            markerToSave.geometry.coordinates = [jQuery("#lng" + id).val(), jQuery("#lat" + id).val()];
+    const activityTypeSelectForm =
+        '<label for "activity">Type d\'activité</label>' +
+        '<select id="activity" >' +
+        '   <option value="airsoft">Airsoft</option>' +
+        '   <option value="paintball">Paintball</option>' +
+        '</select>';
 
-            markerToSave.properties.image = EMPTY_STRING;
-            let imageBlob = jQuery("#previewImage" + id).attr("src");
-            if (imageBlob) {
-                let cropper = id !== "0" ? cropperEdit : cropperNew;
-                cropper.croppie('result', {
-                    type: 'canvas',
-                    size: 'viewport',
-                    resultSize: {
-                        width: 200,
-                        height: 200
-                    }
-                }).then(function (resp) {
-                    markerToSave.properties.image = resp;
-                    resolve(markerToSave);
+    const fieldDetails =
+        '<h6>Caractéristiques du terrain</h6>' +
+        '<label for "fieldRules">Règles</label>' +
+        '<textarea id="fieldRules"></textarea>'+
+        '<br />' +
+        '<div class="spread">' +
+        '   <label class="detailSwitchLabel" for="fieldUrban">Village(s)</label>'+
+        '   <div class="custom-control custom-switch">' +
+        '       <input type="checkbox" class="custom-control-input" id="fieldUrban">' +
+        '       <label class="custom-control-label" for="fieldUrban"></label>' +
+        '   </div>' +
+        '</div>' +
+        '<div class="spread">' +
+        '   <label class="detailSwitchLabel" for="fieldMeal">Nourriture vendue sur place</label>'+
+        '   <div class="custom-control custom-switch spread">' +
+        '       <input type="checkbox" class="custom-control-input" id="fieldMeal">' +
+        '       <label class="custom-control-label" for="fieldMeal"></label>' +
+        '   </div>' +
+        '</div>' +
+        '';
+
+    const eventDetails =
+        '<h6>Caractéristiques de l\'événement</h6>' +
+        activityTypeSelectForm +
+        '<label for "eventDate">Date de l\'événement</label>' +
+        '<input required type="date" id="eventDate" value="" />'+
+        '<label for "eventDebut">Début</label>' +
+        '<input required type="time" id="eventDebut" value="" />'+
+        '<label for "eventFin">Fin</label>' +
+        '<input required type="time" id="eventFin" value="" />' +
+        '<label for "eventCout">Coût</label>' +
+        '<input required type="number" id="eventCout" value="" />';
+
+    const teamDetails =
+        '<h6>Caractéristiques de l\'équipe</h6>' +
+        activityTypeSelectForm +
+        '<div class="spread">' +
+        '   <label class="detailSwitchLabel" for="teamTraining">Entrainement d\'équipe</label>'+
+        '   <div class="custom-control custom-switch">' +
+        '       <input type="checkbox" class="custom-control-input" id="teamTraining">' +
+        '       <label class="custom-control-label" for="teamTraining"></label>' +
+        '   </div>' +
+        '</div>';
+
+    function setFeatureDetails() {
+        switch (jQuery('#featureType').val()) {
+            case featureType.field.string :
+                jQuery("#details").html(fieldDetails);
+                jQuery("#eventDate").val(feature.properties['eventDate']);
+                jQuery("#eventDebut").val(feature.properties['eventDebut']);
+                jQuery("#eventFin").val(feature.properties['eventFin']);
+                jQuery("#eventCout").val(feature.properties['eventCout']);
+                break;
+            case featureType.event.string :
+                jQuery("#details").html(eventDetails);
+                jQuery("#eventDate").val(feature.properties['eventDate']);
+                jQuery("#eventDebut").val(feature.properties['eventDebut']);
+                jQuery("#eventFin").val(feature.properties['eventFin']);
+                jQuery("#eventCout").val(feature.properties['eventCout']);
+                break;
+            case featureType.team.string :
+                jQuery("#details").html(teamDetails);
+                jQuery("#eventDate").val(feature.properties['eventDate']);
+                jQuery("#eventDebut").val(feature.properties['eventDebut']);
+                jQuery("#eventFin").val(feature.properties['eventFin']);
+                jQuery("#eventCout").val(feature.properties['eventCout']);
+                break;
+            default:
+                jQuery("#details").html("Type invalide");
+        }
+    }
+
+    function setFeaturePropertiesFromForm() {
+        return new Promise(resolve => {
+            feature.properties.type = jQuery("#type").val();
+            feature.properties.icon = featureType[feature.properties.type].icon;
+            feature.properties.label = jQuery("#label").val();
+            feature.properties.description = jQuery("#description").val();
+            let url = jQuery("#url").val();
+            feature.properties.url = url === "" ? EMPTY_STRING : url;
+            feature.properties.owner = "<?php echo $userID; ?>";
+            let lngLat = marker.getLngLat();
+            feature.geometry.coordinates = [lngLat.lng, lngLat.lat];
+            feature.properties.image = EMPTY_STRING;
+
+            if (cropper && cropper[0].src) {
+                cropper.croppie('result', cropperOptions).then(function (resp) {
+                    feature.properties.image = resp;
+                    resolve();
                 });
             } else {
-                resolve(markerToSave);
+                resolve();
             }
-        });
-    }
-
-    function deleteMarker(idToDelete) {
-        if (confirm("Êtes-vous sur de vouloir supprimer votre point d'intérêt ?")) {
-            persistMarker({id:idToDelete}, 'DELETE', function(){popup.remove();});
-        }
-        return false;
-    }
-
-    function saveNewMarker(markerToSave, id) {
-        persistMarker(markerToSave, 'POST', function(){
-            marker.remove();
-            markerOriginalPos = null;
-        });
-        document.getElementById('addMarkerLabel').textContent = 'Ajouter';
-        document.getElementById('addMarkerInput').checked = false;
-        new Promise(r => setTimeout(r, 2000)).then(function () {
-            document.getElementById("coordinates").style.display = 'none';
-            document.getElementById("markerForm" + id).reset();
-            marker.setLngLat([-73.61027, 45.49917]);
-        });
-        return false;
+        })
     }
 
     function isUrlValid(url) {
         return URL_REGEX.test(url);
     }
 
-    function clearErrorMessage(id) {
-        document.getElementById('error-label'+id).innerHTML = "";
-        document.getElementById('error-description'+id).innerHTML = "";
-        document.getElementById('error-url'+id).innerHTML = "";
-        document.getElementById('error-image'+id).innerHTML = "";
+    function clearErrorMessage() {
+        document.getElementById('error-label').innerHTML = "";
+        document.getElementById('error-description').innerHTML = "";
+        document.getElementById('error-url').innerHTML = "";
+        document.getElementById('error-image').innerHTML = "";
     }
 
-    function validerMarkerForm(id) {
+    function validerFeatureForm() {
+        return true;
         let success = true;
-        clearErrorMessage(id);
+        clearErrorMessage();
 
-        if (!jQuery("#label" + id).val()) {
-            document.getElementById('error-label'+id).innerHTML = " Requis! *";
+        if (!jQuery("#label").val()) {
+            document.getElementById('error-label').innerHTML = " Requis! *";
+            document.getElementById('label').className += ' invalid';
             success = false;
         }
 
-        if (!jQuery("#description" + id).val()) {
-            document.getElementById('error-description'+id).innerHTML = " Requis! *";
+        if (!jQuery("#description").val()) {
+            document.getElementById('error-description').innerHTML = " Requis! *";
+            document.getElementById('description').className += ' invalid';
             success = false;
         }
 
-        let url = jQuery("#url" + id).val();
+        let url = jQuery("#url").val();
         if (url && !isUrlValid(url)) {
-            document.getElementById('error-url'+id).innerHTML = " Invalide *";
+            document.getElementById('error-url').innerHTML = " Invalide *";
+            document.getElementById('url').className += ' invalid';
             success = false;
         }
 
@@ -370,24 +349,43 @@ defined('_JEXEC') or die; ?>
     }
 
 
-    function saveMarker(id) {
-        if (!validerMarkerForm(id)) {
-            console.log("should end here");
+    function saveFeature() {
+        if (!validerFeatureForm()) {
             return false;
         }
-        let saveButton = jQuery("#markerSave" + id);
-        saveButton[0].disabled = true;
-        getMarkerToSaveFromForm(id).then(function(markerToSave) {
-            if (id !== "0") {
-                persistMarker(markerToSave, 'PUT', function(){popup.remove();});
+        setFeaturePropertiesFromForm().then(function() {
+            if (feature.properties.id === "0") {
+                insertFeature();
             } else {
-                saveNewMarker(markerToSave,id);
+                updateFeature();
             }
         });
         return false;
     }
 
-    async function persistMarker(markerToSave, method, callback) {
+    function insertFeature() {
+        feature.properties.id = uuidv4();
+        persistFeature('POST', function() {
+            popup.remove();
+            marker.remove();
+            markerOriginalPos = null;
+        });
+    }
+
+    function updateFeature() {
+        persistFeature('PUT', function() {
+            popup.remove();
+        });
+    }
+
+    function deleteFeature() {
+        if (confirm("Êtes-vous sur de vouloir supprimer votre point d'intérêt ?")) {
+            persistFeature('DELETE', function(){popup.remove();});
+        }
+        return false;
+    }
+
+    async function persistFeature(method, callback) {
         const ajaxRequest = jQuery.ajax({
             method: method,
             url: url,
@@ -399,7 +397,7 @@ defined('_JEXEC') or die; ?>
             },
             contentType: 'application/json',
             crossDomain: true,
-            data: JSON.stringify(markerToSave),
+            data: JSON.stringify(method === "DELETE" ? {id:feature.properties.id} : feature),
             dataType: 'json'
         });
         ajaxRequest.done(function () {
@@ -409,39 +407,53 @@ defined('_JEXEC') or die; ?>
         });
         /* On failure of request this function will be called  */
         ajaxRequest.fail(function (request) {
-            jQuery("#result" + markerToSave.properties.id).html('There is error while submit:' + request.responseText);
+            jQuery("#result").html('There is error while submit:' + request.responseText);
         });
     }
 
-    function showAddButton(marker) {
+    function addAddButton() {
         if (connectedUser) {
             let addGroup = document.getElementById('add-group');
             let input = document.createElement('input');
             input.type = 'checkbox';
-            input.id = 'addMarkerInput';
+            input.id = 'addFeatureInput';
             input.checked = false;
             addGroup.appendChild(input);
 
             let label = document.createElement('label');
-            label.setAttribute('for', 'addMarkerInput');
-            label.setAttribute('id', 'addMarkerLabel');
+            label.setAttribute('for', 'addFeatureInput');
+            label.setAttribute('id', 'addFeatureLabel');
             label.textContent = 'Ajouter';
             addGroup.appendChild(label);
             //When the checkbox changes, update the visibility of the layer.
             input.addEventListener('change', function () {
                 if (input.checked) {
-                    marker.setLngLat(defaultMarker.geometry.coordinates);
-                    marker.addTo(map);
-                    markerOriginalPos = marker.getLngLat();
-                    label.textContent = 'Annuler';
+                    addNewFeature();
                 } else {
-                    marker.remove();
-                    markerOriginalPos = null;
-                    label.textContent = 'Ajouter';
-                    document.getElementById('coordinates').style.display = 'none';
+                    cancelAddFeature();
                 }
             });
         }
+    }
+
+    function addNewFeature() {
+        feature = jQuery.extend({}, defaultFeature);
+        feature.properties.id = "0";
+        let centerScreenCoordinates = map.getBounds().getCenter();
+        marker.setLngLat(centerScreenCoordinates);
+        marker.addTo(map);
+        markerOriginalPos = centerScreenCoordinates;
+        document.getElementById('addFeatureLabel').textContent =  'Annuler';
+    }
+
+    function cancelAddFeature() {
+        marker.remove();
+        markerOriginalPos = null;
+        document.getElementById('addFeatureLabel').textContent = 'Ajouter';
+        document.getElementById('addFeatureInput').checked = false;
+        destroyCroppie();
+        jQuery("#featureInformations").hide();
+        jQuery("#featureForm")[0].reset();
     }
 
     function addMapControls() {
@@ -456,7 +468,7 @@ defined('_JEXEC') or die; ?>
         );
         map.addControl(new GroupFilterControl(), 'top-right');
         if (connectedUser) {
-            map.addControl(new AddMarkerButtonControl(), 'top-right');
+            map.addControl(new AddFeatureButtonControl(), 'top-right');
         }
         map.addControl(
             new mapboxgl.NavigationControl({
@@ -464,12 +476,10 @@ defined('_JEXEC') or die; ?>
                     showZoom: true
                 }
             }), 'top-left');
-        map.addControl(new AddMarkerControl(), 'bottom-left');
+        map.addControl(new AddFeatureControl(), 'bottom-left');
     }
 
-    function getMarkerCard(feature) {
-        const label = feature.properties.label;
-        const description = feature.properties.description;
+    function getFeatureCard(feature) {
         const url = feature.properties.url === EMPTY_STRING ? "#" : feature.properties.url;
         let image = feature.properties.image;
 
@@ -477,11 +487,11 @@ defined('_JEXEC') or die; ?>
             image = "./images/image_non_trouvee.png";
         }
         return '<a href="' + url + '" target="_blank">' +
-            '<img class="cardImage" src="' + image + '" alt="' + label + '">' +
+            '<img id="cardImage" class="cardImage" src="' + image + '" alt="' + feature.properties.label + '">' +
             '</a>' +
             '<div id="cardContainer" class="container">' +
-            '<h4><b>' + label + '</b></h4>' +
-            '<p>' + description + '</p>';
+            '<h4><b>' + feature.properties.label + '</b></h4>' +
+            '<p>' + feature.properties.description + '</p>';
     }
 
     function renderListings(features) {
@@ -498,7 +508,7 @@ defined('_JEXEC') or die; ?>
                     '<div class="listingDetail" id="listing'+prop.id+'">' +
                     '    <input type="hidden" id="lnglisting'+prop.id+'" value="'+feature.geometry.coordinates[0]+'" />' +
                     '    <input type="hidden" id="latlisting'+prop.id+'" value="'+feature.geometry.coordinates[1]+'" />' +
-                         getMarkerCard(feature) +
+                         getFeatureCard(feature) +
                     '</div>';
                 listingEl.innerHTML += html;
             });
@@ -570,8 +580,63 @@ defined('_JEXEC') or die; ?>
             let uniqueFeatures = getUniqueFeatures(features, 'id');
             renderListings(uniqueFeatures);
             filterEl.value = '';
-            markers = uniqueFeatures;
+            features = uniqueFeatures;
         }
+    }
+
+    function editFeature() {
+        showfeatureInformations();
+        return false;
+    }
+
+    function showImage() {
+        if (feature.properties.image) {
+            resetCroppie();
+            bindImageToCropper(feature.properties.image);
+        }
+    }
+
+    function bindImageToCropper(image) {
+        jQuery("#labelImportPhoto").hide();
+        cropper.croppie('bind', {
+            url : image,
+            zoom: 1
+        });
+    }
+
+    function showfeatureInformationsPanel() {
+        const featureInformations = document.getElementById("featureInformations");
+        featureInformations.style.display = 'block';
+    }
+
+    function setFeatureTypeList() {
+        Object.keys(featureType).forEach(function (featureProperties) {
+            if (featureType.hasOwnProperty(featureProperties)) {
+                let type = featureType[featureProperties];
+                jQuery("#featureType").append(new Option(getTypeLabel(type.string, "FR-ca"), type.string));
+            }
+        });
+    }
+
+    function setSelectedFeatureType() {
+        jQuery("#featureType").val(feature.properties.type);
+    }
+
+    function showfeatureInformations() {
+        setFeatureTypeList();
+        setSelectedFeatureType();
+        showfeatureInformationsPanel();
+
+        jQuery("#label").val(feature.properties.label);
+        jQuery("#description").val(feature.properties.description);
+        jQuery("#url").val(feature.properties.url === "#" ? "" : feature.properties.url);
+
+        setFeatureDetails();
+
+        let lngLat = marker.getLngLat();
+        markerOriginalPos = lngLat;
+        resetTabs();
+        showTab(currentTab); // Display the current tab
     }
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
@@ -584,6 +649,7 @@ defined('_JEXEC') or die; ?>
     const popup = new mapboxgl.Popup({
         closeButton: false
     });
+    popup.on('close', cancelAddFeature);
     const url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
 
     const pin = document.createElement('div');
@@ -598,28 +664,18 @@ defined('_JEXEC') or die; ?>
 
     map.on('load', function () {
         map.addSource('places', { type: 'geojson', data: url });
-        showMarker();
-        marker.setLngLat([-73.61027, 45.49917]);
-        showAddButton(marker);
-
-        function onDragEnd() {
-            const coordinates = document.getElementById("coordinates");
-            coordinates.style.display = 'block';
-            let markerToSave = jQuery.extend({}, defaultMarker);
-            let lngLat = marker.getLngLat();
-            markerOriginalPos = lngLat;
-            markerToSave.geometry.coordinates = [lngLat.lng, lngLat.lat];
-            coordinates.innerHTML = getMarkerFormHTML(markerToSave);
-        }
-        marker.on('dragend', onDragEnd);
+        showFeaturesOnMap();
+        addAddButton();
+        jQuery("#featureInformations").html(featureForm);
+        marker.on('dragend', showfeatureInformations);
 
         map.on('moveend', function() {
             refreshListing();
         });
 
-        Object.keys(markerType).forEach(function (markerProperties) {
-            if (markerType.hasOwnProperty(markerProperties)) {
-                let icon = markerType[markerProperties].icon;
+        Object.keys(featureType).forEach(function (featureProperties) {
+            if (featureType.hasOwnProperty(featureProperties)) {
+                let icon = featureType[featureProperties].icon;
                 map.on('mousemove', 'poi-'+icon, function() {
                     map.getCanvas().style.cursor = 'pointer';
                 });
@@ -633,7 +689,7 @@ defined('_JEXEC') or die; ?>
             let value = normalize(e.target.value);
 
 // Filter visible features that don't match the input value.
-            let filtered = markers.filter(function(feature) {
+            let filtered = features.filter(function(feature) {
                 let name = normalize(feature.properties.label);
                 return name.indexOf(value) > -1;
             });
@@ -642,9 +698,9 @@ defined('_JEXEC') or die; ?>
             renderListings(filtered);
 // Set the filter to populate features into the layer.
             if (filtered.length) {
-                Object.keys(markerType).forEach(function (markerProperties) {
-                    if (markerType.hasOwnProperty(markerProperties)) {
-                        let icon = markerType[markerProperties].icon;
+                Object.keys(featureType).forEach(function (featureProperties) {
+                    if (featureType.hasOwnProperty(featureProperties)) {
+                        let icon = featureType[featureProperties].icon;
                         map.setFilter('poi-'+icon, [
                             'match',
                             ['get', 'label'],
@@ -663,4 +719,147 @@ defined('_JEXEC') or die; ?>
 // passing an empty array to render an empty state
         renderListings([]);
     });
+
+    function resetTabs() {
+        currentTab = 0;
+        let i, x = document.getElementsByClassName("tab");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = 'none';
+        }
+    }
+
+    let currentTab = 0; // Current tab is set to be the first tab (0)
+
+    function showTab(n) {
+        // This function will display the specified tab of the form ...
+        let x = document.getElementsByClassName("tab");
+        x[n].style.display = "block";
+        // ... and fix the Previous/Next buttons:
+        if (n === 0) {
+            document.getElementById("prevBtn").style.display = "none";
+        } else {
+            document.getElementById("prevBtn").style.display = "inline";
+        }
+        if (n === (x.length - 1)) {
+            jQuery("#importImageButton").show();
+            showImage();
+            document.getElementById("nextBtn").innerHTML = "&#xf0c7"; // save
+        } else {
+            jQuery("#importImageButton").hide();
+            document.getElementById("nextBtn").innerHTML = "&#xf061"; // next
+        }
+        // ... and run a function that displays the correct step indicator:
+        fixStepIndicator(n)
+    }
+
+    function nextPrev(n) {
+        // This function will figure out which tab to display
+        let x = document.getElementsByClassName("tab");
+        // Exit the function if any field in the current tab is invalid:
+        if (n === 1 && !validerFeatureForm()) return false;
+        // Hide the current tab:
+        x[currentTab].style.display = "none";
+        // Increase or decrease the current tab by 1:
+        currentTab = currentTab + n;
+        // if you have reached the end of the form... :
+        if (currentTab >= x.length) {
+            //...the form gets submitted:
+            if (saveFeature()) {
+                document.getElementById("nextBtn").innerHTML = "<div class=\"loader\"></div>";
+                new Promise(r => setTimeout(r, 2000)).then(function () {
+                    cancelAddFeature();
+                    resetTabs();
+                    return false;
+                });
+            } else {
+                currentTab = currentTab - 1;
+                return false;
+            }
+        } else {
+            showTab(currentTab);
+        }
+    }
+
+    // function validateForm() {
+    //     // This function deals with validation of the form fields
+    //     let x, y, i, valid = true;
+    //     x = document.getElementsByClassName("tab");
+    //     y = x[currentTab].getElementsByTagName("input");
+    //     // A loop that checks every input field in the current tab:
+    //     for (i = 0; i < y.length; i++) {
+    //         // If a field is empty...
+    //         if (y[i].value === "") {
+    //             // add an "invalid" class to the field:
+    //             y[i].className += " invalid";
+    //             // and set the current valid status to false:
+    //             valid = false;
+    //         }
+    //     }
+    //     // If the valid status is true, mark the step as finished and valid:
+    //     if (valid) {
+    //         document.getElementsByClassName("step")[currentTab].className += " finish";
+    //     }
+    //     return valid; // return the valid status
+    // }
+
+    function fixStepIndicator(n) {
+        // This function removes the "active" class of all steps...
+        let i, x = document.getElementsByClassName("step");
+        for (i = 0; i < x.length; i++) {
+            x[i].className = x[i].className.replace(" active", "");
+        }
+        //... and adds the "active" class to the current step:
+        x[n].className += " active";
+    }
+
+
+
+
+    const featureForm ='<div class="feature-form-with-image">' +
+            '               <div id="result"></div>' +
+            '               <div class="feature-form">' +
+            '                   <div class="formContent">' +
+            '                       <form id="featureForm" action="">' +
+            '                           <div class="tab">' +
+            '                               <h6>Votre point d\'intérêt</h6>' +
+            '                               <select id="featureType" onchange="setFeatureDetails()"></select><br />' +
+            '                               <label for="label">Titre</label><span id="error-label"></span>' +
+            '                               <input required autofocus id="label" name="label" placeholder="Titre de votre point d\'intérêt" value="" type="text" maxlength="50" /><br />' +
+            '                               <label for="description">Description</label><span id="error-description"></span>' +
+            '                               <textarea rows="2" required id="description" name="description" placeholder="Courte description" maxlength="140"></textarea><br />' +
+            '                               <label for="url">Adresse site web</label><span id="error-url"></span>' +
+            '                               <input id="url" name="url" placeholder="http://www.example.com" value="" type="url" width="100px;" ><br />' +
+            '                           </div>' +
+            '                           <div class="tab">' +
+            '                               <div id="details"></div>' +
+            '                           </div>' +
+            '                           <div class="tab">' +
+            '                               <h6 id="labelImportPhoto">Importez une photo de votre choix</h6>' +
+            '                               <div id="showImage">' +
+            '                                   <img id="cropper" src="" alt="Prévisualisation" style="display:none;" />' +
+            '                               </div>' +
+            '                           </div>' +
+            '                       </form>' +
+            '                   </div>' +
+            '                   <div>' +
+            '                       <div class="stepButtons">' +
+            '                           <div>' +
+            '                               <button type="button" id="prevBtn" onclick="nextPrev(-1)" class="stepButton">&#xf060</button>' +
+            '                           </div>' +
+            '                           <div id="importImageButton" style="display:none">' +
+            '                               <input id="image" type="file" accept="image/*" onchange="loadImage()">' +
+            '                               <label for="image">&#xf574</label>' +
+            '                           </div>' +
+            '                           <div>' +
+            '                               <button type="button" id="nextBtn" onclick="nextPrev(1)" class="stepButton"><span id="saveIcon">&#xf061</span></button>' +
+            '                           </div>' +
+            '                       </div>' +
+            '                       <div class="stepBullets">' +
+            '                           <span class="step"></span>' +
+            '                           <span class="step"></span>' +
+            '                           <span class="step"></span>' +
+            '                       </div>' +
+            '                   </div>' +
+            '               </div>' +
+            '           </div>';
 </script>

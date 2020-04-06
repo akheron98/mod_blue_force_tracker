@@ -13,7 +13,7 @@ class GroupFilterControl {
     }
 }
 
-class AddMarkerButtonControl {
+class AddFeatureButtonControl {
     onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
@@ -28,12 +28,12 @@ class AddMarkerButtonControl {
     }
 }
 
-class AddMarkerControl {
+class AddFeatureControl {
     onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
-        this._container.className = 'mapboxgl-ctrl coordinates';
-        this._container.id = 'coordinates';
+        this._container.className = 'mapboxgl-ctrl featureInformations';
+        this._container.id = 'featureInformations';
         return this._container;
     }
 
