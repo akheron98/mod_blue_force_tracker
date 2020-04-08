@@ -161,6 +161,7 @@ cardImage {
     width:50%;
     padding: 5px;
     border:0px;
+    display:none;
 }
 
 .updateFeature {
@@ -171,6 +172,7 @@ cardImage {
     width:50%;
     padding: 5px;
     border:0px;
+    display:none;
 }
 
 .feature-form label {
