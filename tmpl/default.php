@@ -41,5 +41,5 @@ defined('_JEXEC') or die; ?>
         center: [-72.937107, 46.286173],
         zoom: 6.5
     });
-    activateBlueForceTracker();
+    executeBlueForceTracker();
 </script>
