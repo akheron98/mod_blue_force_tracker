@@ -3,8 +3,8 @@
 defined('_JEXEC') or die; ?>
 <script src="/config-aws.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/customMapControl.js"></script>
-<script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl-1.8.1.js"></script>
-<link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl-1.8.1.css" rel="stylesheet"/>
+<script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl.js"></script>
+<link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl.css" rel="stylesheet"/>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet"/>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
 <script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
@@ -33,7 +33,9 @@ defined('_JEXEC') or die; ?>
 </div>
 
 <script>
-    const joomlaUserId = "<?php echo $userID;?>";
+    const urlFeature = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
+    const urlPost = "<?php echo JURI::root() . "modules/mod_blue_force_tracker/tmpl/gateway.php"?>";
+    const joomlaUserId = "<?php echo $joomlaUserId;?>";
     const connectedUser = joomlaUserId > 0;
     const map = new mapboxgl.Map({
         container: 'map',

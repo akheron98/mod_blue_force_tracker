@@ -1,6 +1,7 @@
 let features = [];
 const NEW_FEATURE_ID = "0";
 const EMPTY_STRING_SHARP = "#";
+const HTTP_SUCCESS_CODE = "200";
 let URL_REGEX;
 URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 let markerOriginalPos = null;
@@ -84,7 +85,7 @@ function showFeaturesOnMap() {
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
             const symbol = featureType[featureProperties].icon;
-            const layerID = "poi-" + symbol; //feature['featureId'];
+            const layerID = "poi-" + symbol;
             if (!map.getLayer(layerID)) {
                 map.addLayer({
                     'id': layerID,
@@ -124,9 +125,6 @@ function showFeaturesOnMap() {
                     feature['properties'] = e.features[0].properties;
                     const coordinates = feature.geometry.coordinates.slice();
 
-                    // Ensure that if the map is zoomed out such that multiple
-                    // copies of the feature are visible, the popup appears
-                    // over the copy being pointed to.
                     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                     }
@@ -141,12 +139,10 @@ function showFeaturesOnMap() {
                         document.getElementById("supprimerFeature").style.display = "block";
                     }
                 });
-                // Change the cursor to a pointer when the mouse is over the places layer.
                 map.on('mouseenter', layerID, function () {
                     map.getCanvas().style.cursor = 'pointer';
                 });
 
-                // Change it back to a pointer when it leaves.
                 map.on('mouseleave', layerID, function () {
                     map.getCanvas().style.cursor = '';
                 });
@@ -309,22 +305,20 @@ function startLoadingSpinner() {
 
 async function persistFeature(method) {
     startLoadingSpinner();
-    await jQuery.ajax({
-        method: method,
-        url: url,
-        headers: {
-            "Accept": "*/*",
-            "Authorization": "eyJraWQiOiJLTzRVMWZs",
-            "content-type": "application/json; charset=UTF-8",
-            "x-api-key": AWS_API_KEY
+    let returnedCode = await jQuery.ajax({
+        method: "POST",
+        url: urlPost,
+        data: {
+            data:JSON.stringify(method === "DELETE" ? {id:feature.properties.id} : feature),
+            method: method,
         },
-        contentType: 'application/json',
-        crossDomain: true,
-        data: JSON.stringify(method === "DELETE" ? {id:feature.properties.id} : feature),
-        dataType: 'json'
     });
-    map.getSource('places').setData(url);
-    renderListings([]);
+    if (returnedCode !== HTTP_SUCCESS_CODE) {
+        console.log("HTTP REQUEST CODE : " + returnedCode);
+    } else {
+        map.getSource('places').setData(urlFeature);
+        renderListings([]);
+    }
 }
 
 function addAddButton() {
@@ -341,7 +335,7 @@ function addAddButton() {
         label.setAttribute('id', 'addFeatureLabel');
         label.textContent = 'Ajouter';
         addGroup.appendChild(label);
-        //When the checkbox changes, update the visibility of the layer.
+
         input.addEventListener('change', function () {
             if (input.checked) {
                 addNewFeature();
@@ -575,7 +569,7 @@ function showfeatureInformations() {
 
     markerOriginalPos = marker.getLngLat();
     resetTabs();
-    showTab(currentTab); // Display the current tab
+    showTab(currentTab);
 }
 
 function resetTabs() {
@@ -586,13 +580,12 @@ function resetTabs() {
     }
 }
 
-let currentTab = 0; // Current tab is set to be the first tab (0)
+let currentTab = 0;
 
 function showTab(n) {
-    // This function will display the specified tab of the form ...
     let x = document.getElementsByClassName("tab");
     x[n].style.display = "block";
-    // ... and fix the Previous/Next buttons:
+
     if (n === 0) {
         document.getElementById("prevBtn").style.display = "none";
     } else {
@@ -606,7 +599,6 @@ function showTab(n) {
         document.getElementById("importImageButton").style.display = 'none';
         document.getElementById("nextBtn").innerHTML = "&#xf061"; // next
     }
-    // ... and run a function that displays the correct step indicator:
     fixStepIndicator(n)
 }
 
@@ -615,15 +607,10 @@ function timeout(ms) {
 }
 
 async function nextPrev(n) {
-    // This function will figure out which tab to display
     let x = document.getElementsByClassName("tab");
-    // Exit the function if any field in the current tab is invalid:
     if (n === 1 && !validerFeatureForm()) return false;
-    // Increase or decrease the current tab by 1:
     currentTab = currentTab + n;
-    // if you have reached the end of the form... :
     if (currentTab >= x.length) {
-        //...the form gets submitted:
         let isSaved = await saveFeature();
         if (isSaved) {
             await timeout(3000);
@@ -666,12 +653,10 @@ async function nextPrev(n) {
 // }
 
 function fixStepIndicator(n) {
-    // This function removes the "active" class of all steps...
     let i, x = document.getElementsByClassName("step");
     for (i = 0; i < x.length; i++) {
         x[i].className = x[i].className.replace(" active", "");
     }
-    //... and adds the "active" class to the current step:
     x[n].className += " active";
 }
 
@@ -739,13 +724,12 @@ const marker = new mapboxgl.Marker({
     draggable: true,
     offset: [0,-13]
 });
-const url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
 
 function executeBlueForceTracker() {
     map.on('load', function () {
         addMapControls();
         setOnClosePopup();
-        map.addSource('places', {type: 'geojson', data: url});
+        map.addSource('places', {type: 'geojson', data: urlFeature});
         showFeaturesOnMap();
         addAddButton();
         document.getElementById("featureInformations").innerHTML = featureForm;
