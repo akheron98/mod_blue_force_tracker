@@ -85,6 +85,15 @@ const fieldDetails = `<h6>Caractéristiques du terrain</h6>
     </div>
 `;
 
+const featureCardDetails_field = `
+    <label for="card_details_fieldRules">Règles du terrain</label>
+    <p id="card_details_fieldRules"></p>
+    <label for="card_details_fieldUrban">Environnement urbain</label>
+    <p id="card_details_fieldUrban"></p>
+    <label for="card_details_fieldMeal">Nourriture vendue sur place</label>
+    <p id="card_details_fieldMeal"></p>
+`;
+
 const eventDetails = `
     <h6>Caractéristiques de l'événement</h6>
     ${activityTypeSelectForm}
@@ -102,6 +111,20 @@ const eventDetails = `
     <input required type="number" id="details_eventCout" class="featureDetailsSelector" value="" />
 `;
 
+const featureCardDetails_event = `
+    <label for="card_details_activity">Type d'activité</label>
+    <p id="card_details_activity"></p>
+    <label for="card_details_eventDate">Date de l'événement</label>
+    <p id="card_details_eventDate"></p>
+    <label for="card_details_eventDebut">Heure de début</label>
+    <p id="card_details_eventDebut"></p>
+    <label for="card_details_eventFin">Heure de fin</label>
+    <p id="card_details_eventFin"></p>
+    <label for="card_details_eventCout">Coùt de l'événement</label>
+    <p id="card_details_eventCout"></p>
+`;
+
+
 const teamDetails = `
     <h6>Caractéristiques de l'équipe</h6>
     ${activityTypeSelectForm}
@@ -112,6 +135,17 @@ const teamDetails = `
             <label class="custom-control-label" for="details_teamTraining"></label>   
         </div>
     </div>
+`;
+
+const featureCardDetails_team = `
+    <label for="card_details_activity">Type d'activité</label>
+    <p id="card_details_activity"></p>
+    <label for="card_details_teamTraining">Entrainement d'équipe</label>
+    <p id="card_details_teamTraining"></p>
+`;
+
+const featureCardDetails = `
+    <div class="cardDetails" id="featureCardDetailInformations"></div>
 `;
 
 const featureCardInformations = `
@@ -129,7 +163,12 @@ const featureCardInformations = `
 const featureCard = `
         <div id="card" class="featureCard">
             <div id="result"></div>
+            <div id="cardContent">
             ${featureCardInformations}
+            </div>
+            <div class="showMoreFeatureInfo">
+                <a onclick="return flipCard();" id="showMoreInfo" class="showMoreFeatureInfoButton" href="#"><i class="fas fa-chevron-circle-right" style="padding:0;"></i></a>
+            </div>
             <div class="spread">
                 <button onclick="return editFeature();" id="updateFeature" class="updateFeature"><i class="fas fa-edit" style="padding:0;"></i></button>
                 <button onclick="return deleteFeature();" id="supprimerFeature" class="supprimerFeature"><i class="fas fa-trash" style="padding:0;"></i></button>

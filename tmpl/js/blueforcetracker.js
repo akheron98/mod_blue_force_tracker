@@ -3,6 +3,7 @@ const NEW_FEATURE_ID = "0";
 const EMPTY_STRING_SHARP = "#";
 const HTTP_SUCCESS_CODE = "200";
 const INVALID_FIELD_BG = "invalid";
+let cardSide = "RECTO";
 let URL_REGEX;
 URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 let markerOriginalPos = null;
@@ -162,6 +163,61 @@ function loadImage() {
             showImage();
         };
     }
+}
+
+function flipCard() {
+    let cardContent = document.getElementById("cardContent");
+    if (cardSide === "VERSO") {
+        cardContent.innerHTML = featureCardInformations;
+        setFeatureCardInformation(feature);
+        cardSide = "RECTO";
+    } else {
+        cardContent.innerHTML = featureCardDetails;
+        setFeatureCardDetailsInformations();
+        cardSide = "VERSO";
+    }
+    return false;
+}
+
+function setFeatureCardDetailsInformations() {
+    let details = document.getElementById("featureCardDetailInformations");
+    switch (feature.properties.type) {
+        case featureType.field.string :
+            details.innerHTML = featureCardDetails_field;
+            setInputDetailValue("card_details_fieldRules");
+            setCheckboxDetailValue('card_details_fieldUrban');
+            setCheckboxDetailValue('card_details_fieldMeal');
+            break;
+        case featureType.event.string :
+            details.innerHTML = featureCardDetails_event;
+            setInputDetailValue("card_details_activity");
+            setInputDetailValue("card_details_eventDate");
+            setInputDetailValue("card_details_eventDebut");
+            setInputDetailValue("card_details_eventFin");
+            setInputDetailValue("card_details_eventCout");
+            break;
+        case featureType.team.string :
+            details.innerHTML = featureCardDetails_team;
+            setInputDetailValue("card_details_activity");
+            setCheckboxDetailValue('card_details_teamTraining');
+            break;
+        default:
+            details.innerHTML = "Type invalide";
+    }
+}
+
+function setCheckboxDetailValue(elementId) {
+    let id = elementId.replace("card_","");
+    if (feature.properties[id]) {
+        document.getElementById(elementId).innerText = 'Oui';
+    } else {
+        document.getElementById(elementId).innerText = 'Non';
+    }
+}
+
+function setInputDetailValue(elementId) {
+    let id = elementId.replace("card_","");
+    document.getElementById(elementId).innerText = feature.properties[id] ? feature.properties[id] : "";
 }
 
 function setFeatureDetails() {
@@ -444,6 +500,7 @@ function cancelAddFeature() {
 function resetFeature() {
     destroyCroppie();
     removeMarker();
+    cardSide = "RECTO";
     feature = jQuery.extend(true, {}, defaultFeature);
     document.getElementById("featureInformations").style.display = "none";
     document.getElementById('featureForm').reset();
