@@ -169,26 +169,37 @@ function setFeatureDetails() {
     switch (document.getElementById("featureType").value) {
         case featureType.field.string :
             details.innerHTML = fieldDetails;
-            let rules = feature.properties['details_fieldRules'];
-            document.getElementById("details_fieldRules").value = rules ? rules : "";
-            document.getElementById("details_fieldUrban").setAttribute('checked', feature.properties['details_fieldUrban']);
-            document.getElementById("details_fieldMeal").setAttribute('checked', feature.properties['details_fieldMeal']);
+            setInputValue("details_fieldRules");
+            setCheckboxValue('details_fieldUrban');
+            setCheckboxValue('details_fieldMeal');
             break;
         case featureType.event.string :
             details.innerHTML = eventDetails;
-            document.getElementById("details_activity").value = feature.properties['details_activity'];
-            document.getElementById("details_eventDate").value = feature.properties['details_eventDate'];
-            document.getElementById("details_eventDebut").value = feature.properties['details_eventDebut'];
-            document.getElementById("details_eventFin").value = feature.properties['details_eventFin'];
-            document.getElementById("details_eventCout").value = feature.properties['details_eventCout'];
+            setInputValue("details_activity");
+            setInputValue("details_eventDate");
+            setInputValue("details_eventDebut");
+            setInputValue("details_eventFin");
+            setInputValue("details_eventCout");
             break;
         case featureType.team.string :
             details.innerHTML = teamDetails;
-            document.getElementById("details_activity").value = feature.properties['details_activity'];
-            document.getElementById("details_teamTraining").setAttribute('checked', feature.properties['details_teamTraining']);
+            setInputValue("details_activity");
+            setCheckboxValue('details_teamTraining');
             break;
         default:
             details.innerHTML = "Type invalide";
+    }
+}
+
+function setInputValue(elementId) {
+    document.getElementById(elementId).value = feature.properties[elementId] ? feature.properties[elementId] : "";
+}
+
+function setCheckboxValue(elementId) {
+    if (feature.properties[elementId]) {
+        document.getElementById(elementId).setAttribute('checked', 'true');
+    } else {
+        document.getElementById(elementId).removeAttribute('checked');
     }
 }
 
@@ -219,7 +230,7 @@ async function setFeaturePropertiesFromForm() {
         let lngLat = marker.getLngLat();
         feature.geometry.coordinates = [lngLat.lng, lngLat.lat];
     }
-    if (cropper) {
+    if (cropper && cropper.elements && cropper.elements.preview) {
         feature.properties.image = await cropper.result();
     } else {
         feature.properties.image = EMPTY_STRING_SHARP;
@@ -473,7 +484,7 @@ function setFeatureCardInformation(feature, featureId) {
 
     if (feature.properties.url === EMPTY_STRING_SHARP) {
         let avatar = document.getElementById("cardAvatar" + id);
-        avatar.replaceChild(imageElement, url);    
+        avatar.replaceChild(imageElement, url);
     } else {
         url.setAttribute("href", feature.properties.url);
     }
@@ -632,9 +643,12 @@ function showfeatureInformations() {
     setSelectedFeatureType();
     showfeatureInformationsPanel();
 
-    document.getElementById("label").value = feature.properties.label;
-    document.getElementById("description").value = feature.properties.description;
-    document.getElementById("url").value = feature.properties.url === EMPTY_STRING_SHARP ? "" : feature.properties.url;
+    setInputValue("label");
+    setInputValue("description");
+    if (feature.properties.url === EMPTY_STRING_SHARP) {
+        feature.properties.url = "";
+    }
+    setInputValue("url");
 
     setFeatureDetails();
 
