@@ -2,6 +2,7 @@ let features = [];
 const NEW_FEATURE_ID = "0";
 const EMPTY_STRING_SHARP = "#";
 const HTTP_SUCCESS_CODE = "200";
+const INVALID_FIELD_BG = "invalid";
 let URL_REGEX;
 URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 let markerOriginalPos = null;
@@ -230,43 +231,103 @@ function isUrlValid(url) {
 }
 
 function clearErrorMessage() {
-    document.getElementById('error-label').innerHTML = "";
-    document.getElementById('error-description').innerHTML = "";
-    document.getElementById('error-url').innerHTML = "";
-    document.getElementById('error-image').innerHTML = "";
+    clearError('error-label');
+    clearError('error-description');
+    clearError('error-url');
+
+    clearError('error-details_fieldRules');
+
+    clearError('error-details_activity');
+
+    clearError('error-details_eventDate');
+    clearError('error-details_eventDebut');
+    clearError('error-details_eventFin');
+    clearError('error-details_eventCout');
+
+    clearError('error-image');
 }
 
-function validerFeatureForm() {
-    return true;
-    let success = true;
+function clearError(id) {
+    let error = document.getElementById(id);
+    if (error) {
+        document.getElementById(id).innerHTML = ""
+        document.getElementById(id).classList.remove(INVALID_FIELD_BG);
+    }
+}
+
+function validerFeatureForm(tab) {
     clearErrorMessage();
 
+    if (tab.id === "basicInformations") {
+        return validateBasicInformation();
+    } else if (tab.id === "detailInformations") {
+        return validateDetailInformation();
+    } else if (tab.id === "imageInformations") {
+        return validateImageInformation();
+    }
+    return true;
+}
+
+function validateImageInformation() {
+    return true;
+}
+
+function validateDetailInformation() {
+    let success = true;
+
+    switch (document.getElementById("featureType").value) {
+        case featureType.field.string :
+            success = validateFieldNotEmpty("details_fieldRules");
+            break;
+        case featureType.event.string :
+            success = validateFieldNotEmpty("details_activity");
+            success = validateFieldNotEmpty("details_eventDate") && success;
+            success = validateFieldNotEmpty("details_eventDebut") && success;
+            success = validateFieldNotEmpty("details_eventFin") && success;
+            success = validateFieldNotEmpty("details_eventCout") && success;
+
+            break;
+        case featureType.team.string :
+            success = validateFieldNotEmpty("details_activity");
+            break;
+    }
+    return success;
+}
+
+function validateFieldNotEmpty(id) {
+    if (!document.getElementById(id).value) {
+        document.getElementById('error-'+id).innerHTML = " Requis! *";
+        document.getElementById(id).classList.add(INVALID_FIELD_BG);
+        return false;
+    }
+    return true;
+}
+
+
+function validateBasicInformation() {
+    let success = true;
     if (!document.getElementById("label").value) {
         document.getElementById('error-label').innerHTML = " Requis! *";
-        document.getElementById('label').className += ' invalid';
+        document.getElementById('label').classList.add(INVALID_FIELD_BG);
         success = false;
     }
 
     if (!document.getElementById("description").value) {
         document.getElementById('error-description').innerHTML = " Requis! *";
-        document.getElementById('description').className += ' invalid';
+        document.getElementById('description').classList.add(INVALID_FIELD_BG);
         success = false;
     }
 
     let url = document.getElementById("url").value;
     if (url && !isUrlValid(url)) {
         document.getElementById('error-url').innerHTML = " Invalide *";
-        document.getElementById('url').className += ' invalid';
+        document.getElementById('url').classList.add(INVALID_FIELD_BG);
         success = false;
     }
-
     return success;
 }
 
 async function saveFeature() {
-    if (!validerFeatureForm()) {
-        return false;
-    }
     await setFeaturePropertiesFromForm();
     if (feature.properties.id === NEW_FEATURE_ID) {
         await insertFeature();
@@ -281,7 +342,7 @@ async function insertFeature() {
     feature.properties.id = uuidv4();
     await persistFeature('POST');
     popup.remove();
-    removeMarker();
+    resetFeature();
 }
 
 async function updateFeature() {
@@ -347,10 +408,11 @@ function addAddButton() {
 }
 
 function addNewFeature() {
-    feature = jQuery.extend({}, defaultFeature);
+    feature = jQuery.extend(true, {}, defaultFeature);
     feature.properties.id = NEW_FEATURE_ID;
     addMarkerToMapsCenter();
     document.getElementById('addFeatureLabel').textContent =  'Annuler';
+    showfeatureInformations();
 }
 
 function addMarkerToMapsCenter() {
@@ -371,7 +433,7 @@ function cancelAddFeature() {
 function resetFeature() {
     destroyCroppie();
     removeMarker();
-    feature = jQuery.extend({}, defaultFeature);
+    feature = jQuery.extend(true, {}, defaultFeature);
     document.getElementById("featureInformations").style.display = "none";
     document.getElementById('featureForm').reset();
 }
@@ -406,8 +468,15 @@ function addMapControls() {
 
 function setFeatureCardInformation(feature, featureId) {
     let id = featureId ? featureId : "";
-    document.getElementById("featureUrl" + id).setAttribute("href", feature.properties.url);
+    let url = document.getElementById("featureUrl" + id);
     let imageElement = document.getElementById("cardImage" + id);
+
+    if (feature.properties.url === EMPTY_STRING_SHARP) {
+        let avatar = document.getElementById("cardAvatar" + id);
+        avatar.replaceChild(imageElement, url);    
+    } else {
+        url.setAttribute("href", feature.properties.url);
+    }
     if (feature.properties.image && feature.properties.image !== EMPTY_STRING_SHARP) {
         imageElement.setAttribute("src", feature.properties.image);
     } else {
@@ -420,6 +489,7 @@ function setFeatureCardInformation(feature, featureId) {
 
 function getUniqueFeatureCardInformations(id) {
     let uniqueCard = featureCardInformations.replace("featureUrl", "featureUrl" + id);
+    uniqueCard = uniqueCard.replace("cardAvatar", "cardAvatar" + id);
     uniqueCard = uniqueCard.replace("cardImage", "cardImage" + id);
     uniqueCard = uniqueCard.replace("cardContainer", "cardContainer" + id);
     uniqueCard = uniqueCard.replace("featureLabel", "featureLabel" + id);
@@ -558,6 +628,7 @@ function setSelectedFeatureType() {
 }
 
 function showfeatureInformations() {
+    clearErrorMessage();
     setSelectedFeatureType();
     showfeatureInformationsPanel();
 
@@ -608,7 +679,7 @@ function timeout(ms) {
 
 async function nextPrev(n) {
     let x = document.getElementsByClassName("tab");
-    if (n === 1 && !validerFeatureForm()) return false;
+    if (n === 1 && !validerFeatureForm(x[currentTab])) return false;
     currentTab = currentTab + n;
     if (currentTab >= x.length) {
         let isSaved = await saveFeature();
@@ -629,28 +700,6 @@ async function nextPrev(n) {
     }
     return false;
 }
-
-// function validateForm() {
-//     // This function deals with validation of the form fields
-//     let x, y, i, valid = true;
-//     x = document.getElementsByClassName("tab");
-//     y = x[currentTab].getElementsByTagName("input");
-//     // A loop that checks every input field in the current tab:
-//     for (i = 0; i < y.length; i++) {
-//         // If a field is empty...
-//         if (y[i].value === "") {
-//             // add an "invalid" class to the field:
-//             y[i].className += " invalid";
-//             // and set the current valid status to false:
-//             valid = false;
-//         }
-//     }
-//     // If the valid status is true, mark the step as finished and valid:
-//     if (valid) {
-//         document.getElementsByClassName("step")[currentTab].className += " finish";
-//     }
-//     return valid; // return the valid status
-// }
 
 function fixStepIndicator(n) {
     let i, x = document.getElementsByClassName("step");

@@ -4,7 +4,7 @@ const featureForm = `
         <div class="feature-form">                   
             <div class="formContent">                       
                 <form id="featureForm" action="">                           
-                    <div class="tab">                               
+                    <div class="tab" id="basicInformations">                               
                         <h6>Votre point d'intérêt</h6>                               
                         <select id="featureType" onchange="setFeatureDetails()"></select>
                         <br />                               
@@ -21,10 +21,10 @@ const featureForm = `
                         <input id="url" name="url" placeholder="http://www.example.com" value="" type="url" width="100px;" >
                         <br />                           
                     </div>                           
-                    <div class="tab">                               
+                    <div class="tab" id="detailInformations">                               
                         <div id="details"></div>                           
                     </div>                           
-                    <div class="tab">                               
+                    <div class="tab" id="imageInformations">                               
                         <h6 id="labelImportPhoto">Importez une photo de votre choix</h6>                               
                         <div id="showImage">                                   
                             <img id="cropper" src="" alt="Prévisualisation" style="display:none;" />                               
@@ -57,6 +57,7 @@ const featureForm = `
 
 const activityTypeSelectForm = `
     <label for "details_activity">Type d'activité</label>
+    <span id="error-details_activity"></span>
     <select id="details_activity" class="featureDetailsSelector">   
         <option value="airsoft">Airsoft</option>   
         <option value="paintball">Paintball</option>
@@ -65,6 +66,7 @@ const activityTypeSelectForm = `
 
 const fieldDetails = `<h6>Caractéristiques du terrain</h6>
     <label for "details_fieldRules">Règles</label>
+    <span id="error-details_fieldRules"></span>
     <textarea id="details_fieldRules" class="featureDetailsSelector"></textarea>
     <br />
     <div class="spread">   
@@ -87,12 +89,16 @@ const eventDetails = `
     <h6>Caractéristiques de l'événement</h6>
     ${activityTypeSelectForm}
     <label for "details_eventDate">Date de l'événement</label>
+    <span id="error-details_eventDate"></span>
     <input required type="date" id="details_eventDate" class="featureDetailsSelector" value="" />
     <label for "details_eventDebut">Début</label>
+    <span id="error-details_eventDebut"></span>
     <input required type="time" id="details_eventDebut" class="featureDetailsSelector" value="" />
     <label for "details_eventFin">Fin</label>
+    <span id="error-details_eventFin"></span>
     <input required type="time" id="details_eventFin" class="featureDetailsSelector" value="" />
     <label for "details_eventCout">Coût</label>
+    <span id="error-details_eventCout"></span>
     <input required type="number" id="details_eventCout" class="featureDetailsSelector" value="" />
 `;
 
@@ -109,9 +115,11 @@ const teamDetails = `
 `;
 
 const featureCardInformations = `
-    <a id="featureUrl" href="#" target="_blank">
-        <img id="cardImage" class="cardImage" src="" alt="">
-    </a>
+    <div id="cardAvatar">
+        <a id="featureUrl" href="" target="_blank">
+            <img id="cardImage" class="cardImage" src="" alt="">
+        </a>
+    </div>
     <div id="cardContainer" class="container">
         <h4 id="featureLabel"></h4>
         <p id="featureDescription"></p>

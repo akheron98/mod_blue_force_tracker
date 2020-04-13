@@ -5,7 +5,7 @@ defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/customMapControl.js"></script>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/mapbox-gl.js"></script>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/mapbox-gl.css" rel="stylesheet"/>
-<link href="/modules/mod_blue_force_tracker/tmpl/css/blue-force-tracker.css" rel="stylesheet"/>
+<link href="/modules/mod_blue_force_tracker/tmpl/css/blueforcetracker.css" rel="stylesheet"/>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
 <script src="/modules/mod_blue_force_tracker/tmpl/js/croppie.min.js"></script>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/bootstrap.min.css">

@@ -418,7 +418,7 @@ cardImage {
     margin-top:10px;
 }
 
-input.invalid {
+.invalid {
     background-color: #75000b !important;
 }
 
