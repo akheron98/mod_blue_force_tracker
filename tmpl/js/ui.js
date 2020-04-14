@@ -144,6 +144,17 @@ const featureCardDetails_team = `
     <p id="card_details_teamTraining"></p>
 `;
 
+const shopDetails = `<h6>Caractéristiques de la boutique</h6>
+    <label for "details_shopHours">Heures d'ouvertures</label>
+    <span id="error-details_shopHours"></span>
+    <textarea id="details_shopHours" class="featureDetailsSelector"></textarea>
+`;
+
+const featureCardDetails_shop = `
+    <label for="card_details_shopHours">Heures d'ouvertures</label>
+    <p id="card_details_shopHours"></p>
+`;
+
 const featureCardDetails = `
     <div class="cardDetails" id="featureCardDetailInformations"></div>
 `;

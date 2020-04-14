@@ -1,4 +1,5 @@
 let features = [];
+let stats = {};
 const NEW_FEATURE_ID = "0";
 const EMPTY_STRING_SHARP = "#";
 const HTTP_SUCCESS_CODE = "200";
@@ -19,6 +20,10 @@ const featureType = {
     event : {
         icon : 'embassy',
         string : "event"
+    },
+    shop : {
+        icon : 'grocery',
+        string : "shop"
     }
 };
 let feature = {};
@@ -78,9 +83,29 @@ function getTypeLabel(type, language) {
             return language === "FR-ca" ? "Terrain" : "Field";
         case  featureType.event.string :
             return language === "FR-ca" ? "Événement" : "Event";
+        case  featureType.shop.string :
+            return language === "FR-ca" ? "Boutique" : "Shop";
         default:
             return language === "FR-ca" ? "Type introuvable!" : "Type not found";
     }
+}
+
+function showStats() {
+    let stats = document.getElementById('featuresStats');
+    Object.keys(featureType).forEach(function (featureProperties) {
+        if (featureType.hasOwnProperty(featureProperties)) {
+            let statContainer = document.createElement("div");
+            statContainer.className = "statContainer";
+            let statTitle = document.createElement("h2");
+            statTitle.innerText = getTypeLabel(featureProperties, "FR-ca") + "s";
+            let statValue = document.createElement("h2");
+            statValue.id = "stat_" + featureProperties;
+            statValue.innerText = "0";
+            statContainer.appendChild(statTitle);
+            statContainer.appendChild(statValue);
+            stats.appendChild(statContainer);
+        }
+    });
 }
 
 function showFeaturesOnMap() {
@@ -201,6 +226,10 @@ function setFeatureCardDetailsInformations() {
             setInputDetailValue("card_details_activity");
             setCheckboxDetailValue('card_details_teamTraining');
             break;
+        case featureType.shop.string :
+            details.innerHTML = featureCardDetails_shop;
+            setInputDetailValue("card_details_shopHours");
+            break;
         default:
             details.innerHTML = "Type invalide";
     }
@@ -241,6 +270,10 @@ function setFeatureDetails() {
             details.innerHTML = teamDetails;
             setInputValue("details_activity");
             setCheckboxValue('details_teamTraining');
+            break;
+        case featureType.shop.string :
+            details.innerHTML = shopDetails;
+            setInputValue("details_shopHours");
             break;
         default:
             details.innerHTML = "Type invalide";
@@ -356,6 +389,9 @@ function validateDetailInformation() {
             break;
         case featureType.team.string :
             success = validateFieldNotEmpty("details_activity");
+            break;
+        case featureType.shop.string :
+            success = validateFieldNotEmpty("details_shopHours");
             break;
     }
     return success;
@@ -569,8 +605,10 @@ function renderListings(features) {
     const listingEl = document.getElementById('feature-listing');
     const empty = document.createElement('p');
     listingEl.innerHTML = '';
+    resetStats();
     if (features.length) {
         features.forEach(function(feature) {
+            statCount(feature);
             let prop = feature.properties;
             let html =
                 '<button class="listingHeader">' +
@@ -584,6 +622,7 @@ function renderListings(features) {
             listingEl.innerHTML += html;
             setFeatureCardInformation(feature, prop.id);
         });
+        resetCount();
 
         let acc = document.getElementsByClassName("listingHeader");
         let i;
@@ -645,9 +684,40 @@ function getUniqueFeatures(array, comparatorProperty) {
     });
 }
 
+function refreshStats() {
+    let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station', 'poi-grocery']});
+    resetStats();
+    if (renderedFeatures.length) {
+        renderedFeatures.forEach(function(feature) {
+            statCount(feature);
+        });
+        resetCount();
+    }
+}
+
+function statCount(feature) {
+    if (!stats[feature.properties.type]) {
+        stats[feature.properties.type] = 0;
+    }
+    stats[feature.properties.type] = stats[feature.properties.type] + 1;
+    document.getElementById("stat_" + feature.properties.type).innerText = stats[feature.properties.type];
+}
+
+function resetStats() {
+    Object.keys(featureType).forEach(function (featureProperties) {
+        if (featureType.hasOwnProperty(featureProperties)) {
+            document.getElementById("stat_" + featureProperties).innerText = 0;
+        }
+    });
+}
+
+function resetCount() {
+    stats = {};
+}
+
 function refreshListing() {
     const filterEl = document.getElementById('feature-filter');
-    let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station']});
+    let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station', 'poi-grocery']});
 
     if (features) {
         let uniqueFeatures = getUniqueFeatures(renderedFeatures, 'id');
@@ -846,6 +916,7 @@ const marker = new mapboxgl.Marker({
 });
 
 function executeBlueForceTracker() {
+    showStats();
     map.on('load', function () {
         addMapControls();
         setOnClosePopup();
@@ -857,5 +928,8 @@ function executeBlueForceTracker() {
         marker.on('dragend', showfeatureInformations);
         generateFeatureMouseOver();
         activateFeatureList();
+    });
+    map.on('render', function() {
+        refreshStats();
     });
 }

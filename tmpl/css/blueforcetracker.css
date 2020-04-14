@@ -482,3 +482,26 @@
     font-weight: bold;
     margin-bottom: 0;
 }
+
+.featuresStats {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    overflow:hidden;
+    background: #0a223b;
+    border-bottom: solid 1px #fff;
+}
+
+.featuresStats h2 {
+    color: #fff;
+    margin:0;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.statContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
