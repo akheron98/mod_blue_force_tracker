@@ -684,8 +684,23 @@ function getUniqueFeatures(array, comparatorProperty) {
     });
 }
 
+function getActiveLayers() {
+    let layers = {
+        layers: []
+    }
+    Object.keys(featureType).forEach(function (featureProperties) {
+        if (featureType.hasOwnProperty(featureProperties)) {
+            const symbol = featureType[featureProperties].icon;
+            if (map.getLayer('poi-'+symbol)) {
+                layers.layers.push('poi-'+symbol);
+            }
+        }
+    });
+    return layers;
+}
+
 function refreshStats() {
-    let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station', 'poi-grocery']});
+    let renderedFeatures = map.queryRenderedFeatures(getActiveLayers());
     resetStats();
     if (renderedFeatures.length) {
         renderedFeatures.forEach(function(feature) {
