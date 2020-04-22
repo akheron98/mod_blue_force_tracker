@@ -37,6 +37,7 @@ defined('_JEXEC') or die; ?>
     const urlFeature = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
     const urlPost = "<?php echo JURI::root() . "modules/mod_blue_force_tracker/tmpl/gateway.php"?>";
     const joomlaUserId = "<?php echo $joomlaUserId;?>";
+    const isAdmin = "<?php echo $isAdmin;?>";
     const connectedUser = joomlaUserId > 0;
     const map = new mapboxgl.Map({
         container: 'map',

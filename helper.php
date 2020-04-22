@@ -18,4 +18,8 @@ class ModBlueForceTrackerHelper
 
         return $user->get('id');
     }
+
+    public static function isAdmin() {
+        return JFactory::getUser()->authorise('core.admin');
+    }
 }

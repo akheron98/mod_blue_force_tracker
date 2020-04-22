@@ -161,7 +161,7 @@ function showFeaturesOnMap() {
                         .addTo(map);
                     setFeatureCardInformation(feature);
                     const userID = feature.properties.owner;
-                    if (userID === joomlaUserId) {
+                    if (userID === joomlaUserId || isAdmin) {
                         document.getElementById("updateFeature").style.display = "block";
                         document.getElementById("supprimerFeature").style.display = "block";
                     }
