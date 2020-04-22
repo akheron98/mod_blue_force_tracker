@@ -13,11 +13,7 @@ defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/blueforcetracker.js"></script>
 
 <div class="container-fluid" style="padding:0;">
-    <div class="row no-gutters" style="margin-left:0;">
-        <div class="col-lg-12">
-            <div id="featuresStats" class="featuresStats"></div>
-        </div>
-    </div>
+    <div id="featuresStats" class="row" style="margin-left:0;"></div>
     <div class="row no-gutters" style="margin-left:0;">
         <div class="col-lg-10">
             <div style="height:<?php echo $height; ?>px" id="map"></div>

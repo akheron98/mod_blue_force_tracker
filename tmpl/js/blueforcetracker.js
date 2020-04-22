@@ -95,7 +95,7 @@ function showStats() {
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
             let statContainer = document.createElement("div");
-            statContainer.className = "statContainer";
+            statContainer.className = "statContainer col-xl";
             let statTitle = document.createElement("h2");
             statTitle.innerText = getTypeLabel(featureProperties, "FR-ca") + "s";
             let statValue = document.createElement("h2");
