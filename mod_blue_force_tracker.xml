@@ -13,16 +13,16 @@
         <filename>tmpl/gateway.php</filename>
         <filename>tmpl/userService.php</filename>
         <filename>tmpl/index.html</filename>
-        <filename>js/blueforcetracker.js</filename>
-        <filename>js/croppie.js</filename>
-        <filename>js/customMapControl.js</filename>
-        <filename>js/mapbox-gl.js</filename>
-        <filename>js/ui.js</filename>
-        <filename>css/blueforcetracker.css</filename>
-        <filename>css/bootstrap.min.css</filename>
-        <filename>css/croppie.css</filename>
-        <filename>css/mapbox-gl.css</filename>
-        <filename>assets/marker.png</filename>
+        <filename>tmpl/js/blueforcetracker.js</filename>
+        <filename>tmpl/js/croppie.js</filename>
+        <filename>tmpl/js/customMapControl.js</filename>
+        <filename>tmpl/js/mapbox-gl.js</filename>
+        <filename>tmpl/js/ui.js</filename>
+        <filename>tmpl/css/blueforcetracker.css</filename>
+        <filename>tmpl/css/bootstrap.min.css</filename>
+        <filename>tmpl/css/croppie.css</filename>
+        <filename>tmpl/css/mapbox-gl.css</filename>
+        <filename>tmpl/assets/marker.png</filename>
         <filename>updates/blueforcetracker_update.xml</filename>
     </files>
     <config>
