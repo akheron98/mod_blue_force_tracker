@@ -8,5 +8,5 @@ if (isset($_GET['uid'])) {
     $user = JFactory::getUser($_GET['uid']);
     echo $user->get('username');
 } else {
-    echo "N/A";
+    echo "anonyme";
 }

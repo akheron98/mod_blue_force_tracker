@@ -180,7 +180,7 @@ const featureCard = `
             </div>
             <div class="spread">
                 <span style="padding-left:10px;color:lightslategray;"><span id="userName"></span></span>
-                <a onclick="return flipCard();" id="showMoreInfo" class="showMoreFeatureInfoButton" href="#"><i class="fas fa-chevron-circle-right" style="padding:0;"></i></a>
+                <a id="showMoreInfo" class="showMoreFeatureInfoButton" href="#"><i id="flipArrow" class="fas fa-chevron-circle-right" style="padding:0;"></i></a>
             </div>
             <div class="spread">
                 <button onclick="return editFeature();" id="updateFeature" class="updateFeature"><i class="fas fa-edit" style="padding:0;"></i></button>

@@ -159,7 +159,31 @@ function showFeaturesOnMap() {
                     popup.setLngLat(coordinates)
                         .setHTML(featureCard)
                         .addTo(map);
-                    await setFeatureCardInformation(feature);
+                    document.getElementById('showMoreInfo').addEventListener('click', e => {
+                        e.preventDefault();
+                        let cardContent = document.getElementById("cardContent");
+                        if (cardSide === "VERSO") {
+                            cardContent.innerHTML = featureCardInformations;
+                            setFeatureCardInformation(feature);
+                            document.getElementById('flipArrow').className = "fas fa-chevron-circle-right";
+                            cardSide = "RECTO";
+                        } else {
+                            cardContent.innerHTML = featureCardDetails;
+                            setFeatureCardDetailsInformations();
+                            document.getElementById('flipArrow').className = "fas fa-chevron-circle-left";
+                            cardSide = "VERSO";
+                        }
+                        return false;
+                    });
+                    setFeatureCardInformation(feature);
+                    let userNameSpace = document.getElementById("userName");
+                    if (userNameSpace) {
+                        let response = await fetch(urlGetUser+"?uid="+feature.properties.owner)
+                        let username = await response.text();
+                        if (username) {
+                            userNameSpace.innerText = "Créé par " + username;
+                        }
+                    }
                     const userID = feature.properties.owner;
                     if (userID === joomlaUserId || isAdmin) {
                         document.getElementById("updateFeature").style.display = "block";
@@ -188,20 +212,6 @@ function loadImage() {
             showImage();
         };
     }
-}
-
-async function flipCard() {
-    let cardContent = document.getElementById("cardContent");
-    if (cardSide === "VERSO") {
-        cardContent.innerHTML = featureCardInformations;
-        await setFeatureCardInformation(feature);
-        cardSide = "RECTO";
-    } else {
-        cardContent.innerHTML = featureCardDetails;
-        setFeatureCardDetailsInformations();
-        cardSide = "VERSO";
-    }
-    return false;
 }
 
 function setFeatureCardDetailsInformations() {
@@ -481,7 +491,7 @@ async function persistFeature(method) {
         console.log("HTTP REQUEST CODE : " + returnedCode);
     } else {
         map.getSource('places').setData(urlFeature);
-        await renderListings([]);
+        renderListings([]);
     }
 }
 
@@ -570,16 +580,10 @@ function addMapControls() {
     map.addControl(new AddFeatureControl(), 'bottom-left');
 }
 
-async function setFeatureCardInformation(feature, featureId) {
+function setFeatureCardInformation(feature, featureId) {
     let id = featureId ? featureId : "";
     let url = document.getElementById("featureUrl" + id);
     let imageElement = document.getElementById("cardImage" + id);
-    let userNameSpace = document.getElementById("userName");
-    if (userNameSpace) {
-        let response = await fetch(urlGetUser+"?uid="+feature.properties.owner)
-        let username = await response.text();
-        userNameSpace.innerText = "Créé par " + username;
-    }
 
     if (feature.properties.url === EMPTY_STRING_SHARP) {
         let avatar = document.getElementById("cardAvatar" + id);
@@ -616,7 +620,7 @@ function getUniqueFeatureCardInformations(id) {
     return uniqueCard.replace("featureDescription", "featureDescription" + id);
 }
 
-async function renderListings(features) {
+function renderListings(features) {
     const filterEl = document.getElementById('feature-filter');
     const listingEl = document.getElementById('feature-listing');
     const empty = document.createElement('p');
@@ -636,7 +640,7 @@ async function renderListings(features) {
                 getUniqueFeatureCardInformations(prop.id) +
                 '</div>';
             listingEl.innerHTML += html;
-            await setFeatureCardInformation(feature, prop.id);
+            setFeatureCardInformation(feature, prop.id);
         }
         resetCount();
 
@@ -746,13 +750,13 @@ function resetCount() {
     stats = {};
 }
 
-async function refreshListing() {
+function refreshListing() {
     const filterEl = document.getElementById('feature-filter');
     let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station', 'poi-grocery']});
 
     if (features) {
         let uniqueFeatures = getUniqueFeatures(renderedFeatures, 'id');
-        await renderListings(uniqueFeatures);
+        renderListings(uniqueFeatures);
         filterEl.value = '';
         features = uniqueFeatures;
     }
@@ -881,11 +885,11 @@ function fixStepIndicator(n) {
     x[n].className += " active";
 }
 
-async function activateFeatureList() {
+function activateFeatureList() {
     const filterEl = document.getElementById('feature-filter');
 
     map.on('moveend', async function () {
-        await refreshListing();
+        refreshListing();
     });
     filterEl.addEventListener('keyup', async function (e) {
         let value = normalize(e.target.value);
@@ -895,7 +899,7 @@ async function activateFeatureList() {
             return name.indexOf(value) > -1;
         });
 
-        await renderListings(filtered);
+        renderListings(filtered);
 
         if (filtered.length) {
             Object.keys(featureType).forEach(function (featureProperties) {
@@ -914,7 +918,7 @@ async function activateFeatureList() {
             });
         }
     });
-    await renderListings([]);
+    renderListings([]);
 }
 
 function generateFeatureMouseOver() {
