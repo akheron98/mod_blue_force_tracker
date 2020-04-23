@@ -25,5 +25,7 @@ require_once dirname(__FILE__) . '/helper.php';
 $height = $params->get('height', '1');
 $width = $params->get('width', '1');
 $joomlaUserId = modBlueForceTrackerHelper::getUserId();
+$joomlaUserName = modBlueForceTrackerHelper::getUserName();
+$hasAddAccess = modBlueForceTrackerHelper::hasAddAccess();
 $isAdmin = modBlueForceTrackerHelper::isAdmin();
 require JModuleHelper::getLayoutPath('mod_blue_force_tracker');

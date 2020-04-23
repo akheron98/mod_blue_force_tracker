@@ -10,7 +10,20 @@
         <filename>index.html</filename>
         <filename>helper.php</filename>
         <filename>tmpl/default.php</filename>
+        <filename>tmpl/gateway.php</filename>
+        <filename>tmpl/userService.php</filename>
         <filename>tmpl/index.html</filename>
+        <filename>js/blueforcetracker.js</filename>
+        <filename>js/croppie.js</filename>
+        <filename>js/customMapControl.js</filename>
+        <filename>js/mapbox-gl.js</filename>
+        <filename>js/ui.js</filename>
+        <filename>css/blueforcetracker.css</filename>
+        <filename>css/bootstrap.min.css</filename>
+        <filename>css/croppie.css</filename>
+        <filename>css/mapbox-gl.css</filename>
+        <filename>assets/marker.png</filename>
+        <filename>updates/blueforcetracker_update.xml</filename>
     </files>
     <config>
         <fields name="params">

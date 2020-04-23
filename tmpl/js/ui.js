@@ -176,8 +176,10 @@ const featureCard = `
             <div id="result"></div>
             <div id="cardContent">
             ${featureCardInformations}
+            <div id="cardLoading" class="spinner-border"></div>
             </div>
-            <div class="showMoreFeatureInfo">
+            <div class="spread">
+                <span style="padding-left:10px;color:lightslategray;"><span id="userName"></span></span>
                 <a onclick="return flipCard();" id="showMoreInfo" class="showMoreFeatureInfoButton" href="#"><i class="fas fa-chevron-circle-right" style="padding:0;"></i></a>
             </div>
             <div class="spread">

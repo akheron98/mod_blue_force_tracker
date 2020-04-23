@@ -19,6 +19,23 @@ class ModBlueForceTrackerHelper
         return $user->get('id');
     }
 
+    public static function getUserName() {
+        $user = JFactory::getUser();
+
+        return $user->get('username');
+    }
+
+    public static function hasAddAccess() {
+        $groups = JFactory::getUser()->getAuthorisedGroups();
+
+        foreach ($groups as $key => $id) {
+            if ($id == 11) {
+                return "true";
+            }
+        }
+        return "false";
+    }
+
     public static function isAdmin() {
         return JFactory::getUser()->authorise('core.admin');
     }

@@ -458,12 +458,14 @@
     color:#ddd;
     font-weight: bold;
     text-shadow: 2px 2px #000a21;
+    padding-right: 10px;
 }
 
 .showMoreFeatureInfoButton:hover {
     color:#fff;
     font-weight: bolder;
     text-decoration-line: none;
+    padding-right: 10px;
 }
 
 .cardDetails {
@@ -496,4 +498,9 @@
     flex-wrap: nowrap;
     background: #0a223b;
     border-bottom: solid 1px #fff;
+}
+
+#cardContent {
+    min-height: 200px;
+    text-align: center;
 }

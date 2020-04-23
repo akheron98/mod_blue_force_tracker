@@ -159,7 +159,7 @@ function showFeaturesOnMap() {
                     popup.setLngLat(coordinates)
                         .setHTML(featureCard)
                         .addTo(map);
-                    setFeatureCardInformation(feature);
+                    await setFeatureCardInformation(feature);
                     const userID = feature.properties.owner;
                     if (userID === joomlaUserId || isAdmin) {
                         document.getElementById("updateFeature").style.display = "block";
@@ -190,11 +190,11 @@ function loadImage() {
     }
 }
 
-function flipCard() {
+async function flipCard() {
     let cardContent = document.getElementById("cardContent");
     if (cardSide === "VERSO") {
         cardContent.innerHTML = featureCardInformations;
-        setFeatureCardInformation(feature);
+        await setFeatureCardInformation(feature);
         cardSide = "RECTO";
     } else {
         cardContent.innerHTML = featureCardDetails;
@@ -481,12 +481,12 @@ async function persistFeature(method) {
         console.log("HTTP REQUEST CODE : " + returnedCode);
     } else {
         map.getSource('places').setData(urlFeature);
-        renderListings([]);
+        await renderListings([]);
     }
 }
 
 function addAddButton() {
-    if (connectedUser) {
+    if (connectedUser && hasAddAccess) {
         let addGroup = document.getElementById('add-group');
         let input = document.createElement('input');
         input.type = 'checkbox';
@@ -570,14 +570,22 @@ function addMapControls() {
     map.addControl(new AddFeatureControl(), 'bottom-left');
 }
 
-function setFeatureCardInformation(feature, featureId) {
+async function setFeatureCardInformation(feature, featureId) {
     let id = featureId ? featureId : "";
     let url = document.getElementById("featureUrl" + id);
     let imageElement = document.getElementById("cardImage" + id);
+    let userNameSpace = document.getElementById("userName");
+    if (userNameSpace) {
+        let response = await fetch(urlGetUser+"?uid="+feature.properties.owner)
+        let username = await response.text();
+        userNameSpace.innerText = "Créé par " + username;
+    }
 
     if (feature.properties.url === EMPTY_STRING_SHARP) {
         let avatar = document.getElementById("cardAvatar" + id);
-        avatar.replaceChild(imageElement, url);
+        if (avatar) {
+            avatar.replaceChild(imageElement, url);
+        }
     } else {
         url.setAttribute("href", feature.properties.url);
     }
@@ -587,8 +595,15 @@ function setFeatureCardInformation(feature, featureId) {
         imageElement.setAttribute("src","./images/image_non_trouvee.png");
     }
     imageElement.setAttribute("alt", feature.properties.label);
-    document.getElementById("featureLabel" + id).innerHTML = feature.properties.label;
-    document.getElementById("featureDescription" + id).innerHTML = feature.properties.description;
+    let featureLabel = document.getElementById("featureLabel" + id);
+    if (featureLabel) {
+        featureLabel.innerHTML = feature.properties.label;
+        document.getElementById("featureDescription" + id).innerHTML = feature.properties.description;
+    }
+    const cardLoading = document.getElementById('cardLoading' + id);
+    if (cardLoading) {
+        cardLoading.style.display = 'none';
+    }
 }
 
 function getUniqueFeatureCardInformations(id) {
@@ -597,17 +612,18 @@ function getUniqueFeatureCardInformations(id) {
     uniqueCard = uniqueCard.replace("cardImage", "cardImage" + id);
     uniqueCard = uniqueCard.replace("cardContainer", "cardContainer" + id);
     uniqueCard = uniqueCard.replace("featureLabel", "featureLabel" + id);
+    uniqueCard = uniqueCard.replace("cardLoading", "cardLoading" + id);
     return uniqueCard.replace("featureDescription", "featureDescription" + id);
 }
 
-function renderListings(features) {
+async function renderListings(features) {
     const filterEl = document.getElementById('feature-filter');
     const listingEl = document.getElementById('feature-listing');
     const empty = document.createElement('p');
     listingEl.innerHTML = '';
     resetStats();
     if (features.length) {
-        features.forEach(function(feature) {
+        for (const feature of features) {
             statCount(feature);
             let prop = feature.properties;
             let html =
@@ -620,8 +636,8 @@ function renderListings(features) {
                 getUniqueFeatureCardInformations(prop.id) +
                 '</div>';
             listingEl.innerHTML += html;
-            setFeatureCardInformation(feature, prop.id);
-        });
+            await setFeatureCardInformation(feature, prop.id);
+        }
         resetCount();
 
         let acc = document.getElementsByClassName("listingHeader");
@@ -730,13 +746,13 @@ function resetCount() {
     stats = {};
 }
 
-function refreshListing() {
+async function refreshListing() {
     const filterEl = document.getElementById('feature-filter');
     let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station', 'poi-grocery']});
 
     if (features) {
         let uniqueFeatures = getUniqueFeatures(renderedFeatures, 'id');
-        renderListings(uniqueFeatures);
+        await renderListings(uniqueFeatures);
         filterEl.value = '';
         features = uniqueFeatures;
     }
@@ -865,13 +881,13 @@ function fixStepIndicator(n) {
     x[n].className += " active";
 }
 
-function activateFeatureList() {
+async function activateFeatureList() {
     const filterEl = document.getElementById('feature-filter');
 
-    map.on('moveend', function () {
-        refreshListing();
+    map.on('moveend', async function () {
+        await refreshListing();
     });
-    filterEl.addEventListener('keyup', function (e) {
+    filterEl.addEventListener('keyup', async function (e) {
         let value = normalize(e.target.value);
 
         let filtered = features.filter(function (feature) {
@@ -879,7 +895,7 @@ function activateFeatureList() {
             return name.indexOf(value) > -1;
         });
 
-        renderListings(filtered);
+        await renderListings(filtered);
 
         if (filtered.length) {
             Object.keys(featureType).forEach(function (featureProperties) {
@@ -898,7 +914,7 @@ function activateFeatureList() {
             });
         }
     });
-    renderListings([]);
+    await renderListings([]);
 }
 
 function generateFeatureMouseOver() {
@@ -932,7 +948,7 @@ const marker = new mapboxgl.Marker({
 
 function executeBlueForceTracker() {
     showStats();
-    map.on('load', function () {
+    map.on('load', async function () {
         addMapControls();
         setOnClosePopup();
         map.addSource('places', {type: 'geojson', data: urlFeature});
@@ -942,7 +958,7 @@ function executeBlueForceTracker() {
         setFeatureTypeList();
         marker.on('dragend', showfeatureInformations);
         generateFeatureMouseOver();
-        activateFeatureList();
+        await activateFeatureList();
     });
     map.on('render', function() {
         refreshStats();
