@@ -7,21 +7,21 @@ defined('_JEXEC') or die; ?>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/bootstrap.min.css">
 
 <div class="container-fluid" style="padding:0;">
-    <div id="featuresStats" class="row" style="margin-left:0;"></div>
+    <div id="bft-featuresStats" class="row" style="margin-left:0;"></div>
     <div class="row no-gutters" style="margin-left:0;">
         <div class="col-lg-10">
-            <div style="height:<?php echo $height; ?>px" id="map"></div>
+            <div style="height:<?php echo $height; ?>px" id="bft-map"></div>
         </div>
         <div class="col-lg-2">
-             <div class="infoMap" id="infoMap">
+             <div class="bft-infoMap" id="bft-infoMap">
                 <fieldset>
                     <input
-                            id="feature-filter"
+                            id="bft-feature-filter"
                             type="text"
                             placeholder="Recherche"
                     />
                 </fieldset>
-                <div id="feature-listing"></div>  <!-- listing list-group -->
+                <div id="bft-feature-listing"></div>  <!-- listing list-group -->
              </div>
         </div>
     </div>
@@ -34,7 +34,7 @@ defined('_JEXEC') or die; ?>
 <script src="/modules/mod_blue_force_tracker/tmpl/js/blueforcetracker.js"></script>
 <script>
     const map = new mapboxgl.Map({
-        container: 'map',
+        container: 'bft-map',
         style: 'mapbox://styles/akheron/ck7rh7pw12b5c1is1hbldygdh',
         center: [-72.937107, 46.286173],
         zoom: 6.5

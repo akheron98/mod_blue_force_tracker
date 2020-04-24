@@ -1,11 +1,4 @@
-#map {
-    /*position: relative;*/
-    /*top: 0;*/
-    /*bottom: 0;*/
-    /*width: 100%;*/
-}
-
-#marker {
+#bft-marker {
     background-image: url("/modules/mod_blue_force_tracker/tmpl/assets/marker.png");
     background-size: cover;
     width: 50px;
@@ -18,7 +11,7 @@
     padding: 0;
 }
 
-.filter-group, .add-group {
+.bft-filter-group, .bft-add-group {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;
     z-index: 1;
@@ -27,20 +20,20 @@
     color: #fff;
 }
 
-.filter-group input[type='checkbox']:first-child+label, .add-group input[type='checkbox']:first-child+label {
+.bft-filter-group input[type='checkbox']:first-child+label, .bft-add-group input[type='checkbox']:first-child+label {
     border-radius: 3px 3px 0 0;
 }
 
-.filter-group label:last-child, .add-group label:last-child {
+.bft-filter-group label:last-child, .bft-add-group label:last-child {
     border-radius: 0 0 3px 3px;
     border: none;
 }
 
-.filter-group input[type='checkbox'], .add-group input[type='checkbox'] {
+.bft-filter-group input[type='checkbox'], .bft-add-group input[type='checkbox'] {
     display: none;
 }
 
-.filter-group input[type='checkbox']+label {
+.bft-filter-group input[type='checkbox']+label {
     background-color: #6e6b6f;
     display: block;
     cursor: pointer;
@@ -49,24 +42,24 @@
     color: #ccc;
 }
 
-.filter-group input[type='checkbox']+label, .add-group input[type='checkbox']+label {
+.bft-filter-group input[type='checkbox']+label, .bft-add-group input[type='checkbox']+label {
     background-color: #6e6b6f;
     text-transform: capitalize;
 }
 
-.filter-group input[type='checkbox']+label:hover, .filter-group input[type='checkbox']:checked+label {
+.bft-filter-group input[type='checkbox']+label:hover, .bft-filter-group input[type='checkbox']:checked+label {
     background-color: #0254FE;
     color: #fff;
 }
 
-.filter-group input[type='checkbox']:checked+label:before {
+.bft-filter-group input[type='checkbox']:checked+label:before {
     font-family: "Font Awesome 5 Free", serif;
     font-weight: 900;
     content: "\f00c";
     margin-right: 5px;
 }
 
-.add-group input[type='checkbox']+label {
+.bft-add-group input[type='checkbox']+label {
     background-color: #0254FE;
     display: block;
     cursor: pointer;
@@ -75,12 +68,12 @@
     color: #fff;
 }
 
-.add-group input[type='checkbox']:checked+label:hover, .add-group input[type='checkbox']:checked+label {
+.bft-add-group input[type='checkbox']:checked+label:hover, .bft-add-group input[type='checkbox']:checked+label {
     background-color: #fe000b;
     color: #fff
 }
 
-.add-group input[type='checkbox']:checked+label:before {
+.bft-add-group input[type='checkbox']:checked+label:before {
     font-family: "Font Awesome 5 Free", serif;
     font-weight: 900;
     content: "\f00d";
@@ -96,7 +89,7 @@
     background: #fff;
 }
 
-.featureCard {
+.bft-featureCard {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     transition: 0.3s;
     width: 200px;
@@ -105,11 +98,11 @@
     color: #fff;
 }
 
-.featureCard:hover {
+.bft-featureCard:hover {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 }
 
-.cardImage {
+.bft-cardImage {
     background: #222;
     border-radius: 5px;
     object-fit: cover;
@@ -118,24 +111,24 @@
     max-height: 200px!important;
 }
 
-.container h4 {
+.bft-container h4 {
     margin-top: 5px;
     margin-bottom: 5px;
 }
 
-.container {
+.bft-container {
     padding: 2px 2px;
     width: 180px;
 }
 
-.featureInformations {
+.bft-featureInformations {
     color: #fff;
     font-size: 11px;
     line-height: 18px;
     display: none;
 }
 
-.container input[type=text] {
+.bft-container input[type=text] {
     font-size: 11px;
     background: #222;
     color: #fff;
@@ -145,15 +138,15 @@
     border:1px solid #7ac9b7;
 }
 
-.container h4 {
+.bft-container h4 {
     text-align: center;
 }
 
-.container p {
+.bft-container p {
     color:lightgray;
 }
 
-.supprimerFeature {
+.bft-supprimerFeature {
     background-color: rgba(0,0,0,0);
     color: #fe000b;
     text-shadow: 2px 2px #000a21;
@@ -164,7 +157,7 @@
     display:none;
 }
 
-.updateFeature {
+.bft-updateFeature {
     background-color: rgba(0,0,0,0);
     color: #00a600;
     text-shadow: 2px 2px #000a21;
@@ -175,12 +168,12 @@
     display:none;
 }
 
-.feature-form label {
+.bft-feature-form label {
     font-size: 11px;
     line-height: 2px;
 }
 
-.feature-form select, .feature-form input[type=text], .feature-form input[type=url], .feature-form input[type=date], .feature-form input[type=time], .feature-form input[type=number], .feature-form textarea {
+.bft-feature-form select, .bft-feature-form input[type=text], .bft-feature-form input[type=url], .bft-feature-form input[type=date], .bft-feature-form input[type=time], .bft-feature-form input[type=number], .bft-feature-form textarea {
     font-size: 11px;
     background: #222;
     margin-bottom: 2px;
@@ -192,7 +185,7 @@
     resize: none;
 }
 
-.feature-form input[type=submit] {
+.bft-feature-form input[type=submit] {
     background-color: rgba(0,0,0,0);
     color: #0254fe;
     width:50%;
@@ -203,14 +196,14 @@
     font-weight: 900;
 }
 
-.feature-form p {
+.bft-feature-form p {
     text-align: center;
     margin-bottom: 2px!important;
     margin-top: 5px;
     padding: 5px;
 }
 
-.feature-form h6 {
+.bft-feature-form h6 {
     text-align: center;
     font-weight: 900;
     margin-bottom: 20px!important;
@@ -218,7 +211,7 @@
     padding: 5px;
 }
 
-.feature-form {
+.bft-feature-form {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -230,20 +223,20 @@
     z-index: 2;
 }
 
-.feature-form span {
+.bft-feature-form span {
     color:red;
     text-align:right;
     font-weight: 900;
     padding-left: 10px;
 }
 
-.feature-form input[type="file"] {
+.bft-feature-form input[type="file"] {
     height: 0;
     overflow: hidden;
     width: 0;
 }
 
-.feature-form input[type="file"] + label {
+.bft-feature-form input[type="file"] + label {
     border: none;
     padding: 0;
     font-family: "Font Awesome 5 Free", serif;
@@ -257,40 +250,40 @@
     justify-content: center;
 }
 
-.feature-form input[type="file"]:focus + label,
-.feature-form input[type="file"] + label:hover {
+.bft-feature-form input[type="file"]:focus + label,
+.bft-feature-form input[type="file"] + label:hover {
     color: #f3f3f3;
 }
 
-.feature-form input[type="file"]:focus + label {
+.bft-feature-form input[type="file"]:focus + label {
     outline: -webkit-focus-ring-color auto 5px;
 }
 
-/*.feature-form-image {*/
+/*.bft-feature-form-image {*/
 /*    display: none;*/
 /*    !*margin-left: 10px;*!*/
 /*    !*width: 350px;*!*/
 /*    z-index: 1;*/
 /*}*/
 
-.feature-form-with-image-width {
+.bft-feature-form-with-image-width {
     /*width: 600px;*/
 }
 
-.feature-form-with-image {
+.bft-feature-form-with-image {
     /*display: flex;*/
     /*flex-direction: row;*/
     /*flex-wrap: nowrap;*/
     /*z-index: 1;*/
 }
 
-.blue_force_tracker {
+.bft-blue_force_tracker {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
 }
 
-.infoMap {
+.bft-infoMap {
     width: 100%;
     margin-left: 1px;
     background: rgb(1, 42, 127);
@@ -300,7 +293,7 @@
     overflow: hidden;
 }
 
-.infoMap fieldset {
+.bft-infoMap fieldset {
     display: none;
     background: #012a7f;
     border: none;
@@ -308,7 +301,7 @@
     margin: 0;
 }
 
-.infoMap input {
+.bft-infoMap input {
     font-size: 11px;
     background: #222;
     color: #fff;
@@ -321,7 +314,7 @@
     display: block;
 }
 
-.infoMap p {
+.bft-infoMap p {
     text-decoration: none;
     color: #fff!important;
     font-size: 12px;
@@ -331,7 +324,7 @@
 }
 
 /* Style the buttons that are used to open and close the accordion panel */
-.listingHeader {
+.bft-listingHeader {
     background-color: #0254fe;
     color: #ffffff;
     cursor: pointer;
@@ -343,13 +336,13 @@
     transition: 0.4s;
 }
 
-/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.listingActive, .listingHeader:hover {
+/* Add a background color to the button if it is clicked on (add the .bft-active class with JS), and when you move the mouse over it (hover) */
+.bft-listingActive, .bft-listingHeader:hover {
     background-color: #0252bf;
 }
 
-/* Style the accordion panel. Note: hidden by default */
-.listingDetail {
+/* Style the accordion panel.bft- Note: hidden by default */
+.bft-listingDetail {
     text-align: center;
     padding: 10px;
     background-color: #001d58;
@@ -357,12 +350,12 @@
     overflow: hidden;
 }
 
-.tab {
+.bft-tab {
     display: none;
     margin-top: 10px;
 }
 
-.step {
+.bft-step {
     height: 15px;
     width: 15px;
     margin: 0 2px;
@@ -374,16 +367,16 @@
 }
 
 /* Mark the active step: */
-.step.active {
+.bft-step.bft-active {
     opacity: 1;
 }
 
 /* Mark the steps that are finished and valid: */
-.step.finish {
+.bft-step.bft-finish {
     background-color: #4CAF50;
 }
 
-.stepButton {
+.bft-stepButton {
     border: none;
     border-radius: 5px;
     background-color: #0254fe;
@@ -394,11 +387,11 @@
     text-shadow: 2px 2px #000a21;
 }
 
-.stepButton:hover {
+.bft-stepButton:hover {
     background-color: #0252bf !important;
 }
 
-.stepButtons {
+.bft-stepButtons {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -408,16 +401,16 @@
     margin-top:10px;
 }
 
-.stepBullets {
+.bft-stepBullets {
     text-align:center;
     margin-top:10px;
 }
 
-.invalid {
+.bft-invalid {
     background-color: #75000b !important;
 }
 
-.loader {
+.bft-loader {
     border: 2px solid #f3f3f3; /* Light grey */
     border-top: 2px solid #3498db; /* Blue */
     border-radius: 50%;
@@ -432,7 +425,7 @@
     100% { transform: rotate(360deg); }
 }
 
-.spread {
+.bft-spread {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -441,58 +434,58 @@
     overflow:hidden;
 }
 
-.detailSwitchLabel {
+.bft-detailSwitchLabel {
     line-height: 24px!important;
     margin-top:0;
     margin-bottom:0;
     height: 24px;
 }
 
-.showMoreFeatureInfo {
+.bft-showMoreFeatureInfo {
     width:100%;
     text-align: right;
     padding-right: 10px;
 }
 
-.showMoreFeatureInfoButton, .showMoreFeatureInfoButton:active, .showMoreFeatureInfoButton:focus {
+.bft-showMoreFeatureInfoButton, .bft-showMoreFeatureInfoButton:active, .bft-showMoreFeatureInfoButton:focus {
     color:#ddd;
     font-weight: bold;
     text-shadow: 2px 2px #000a21;
     padding-right: 10px;
 }
 
-.showMoreFeatureInfoButton:hover {
+.bft-showMoreFeatureInfoButton:hover {
     color:#fff;
     font-weight: bolder;
     text-decoration-line: none;
     padding-right: 10px;
 }
 
-.cardDetails {
+.bft-cardDetails {
     padding : 10px;
 }
 
-.cardDetails p {
+.bft-cardDetails p {
     font-size: 10px;
     font-weight: normal;
     color:#ddd;
     margin-bottom: 5px;
 }
 
-.cardDetails label {
+.bft-cardDetails label {
     font-size: 11px;
     font-weight: bold;
     margin-bottom: 0;
 }
 
-.statContainer h2 {
+.bft-statContainer h2 {
     color: #fff;
     margin:0;
     padding-left: 15px;
     padding-right: 15px;
 }
 
-.statContainer {
+.bft-statContainer {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -500,6 +493,6 @@
     border-bottom: solid 1px #fff;
 }
 
-#cardContent {
+#bft-cardContent {
     min-height: 200px;
 }

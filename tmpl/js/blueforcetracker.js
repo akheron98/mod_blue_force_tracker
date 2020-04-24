@@ -3,7 +3,7 @@ let stats = {};
 const NEW_FEATURE_ID = "0";
 const EMPTY_STRING_SHARP = "#";
 const HTTP_SUCCESS_CODE = "200";
-const INVALID_FIELD_BG = "invalid";
+const INVALID_FIELD_BG = "bft-invalid";
 let cardSide = "RECTO";
 let URL_REGEX;
 URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
@@ -64,7 +64,7 @@ function destroyCroppie() {
 }
 
 function initCroppie() {
-    let el = document.getElementById("cropper");
+    let el = document.getElementById("bft-cropper");
     cropper = new Croppie(el, cropperOptions);
 }
 
@@ -91,15 +91,15 @@ function getTypeLabel(type, language) {
 }
 
 function showStats() {
-    let stats = document.getElementById('featuresStats');
+    let stats = document.getElementById('bft-featuresStats');
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
             let statContainer = document.createElement("div");
-            statContainer.className = "statContainer col-xl";
+            statContainer.className = "bft-statContainer col-xl";
             let statTitle = document.createElement("h2");
             statTitle.innerText = getTypeLabel(featureProperties, "FR-ca") + "s";
             let statValue = document.createElement("h2");
-            statValue.id = "stat_" + featureProperties;
+            statValue.id = "bft-stat_" + featureProperties;
             statValue.innerText = "0";
             statContainer.appendChild(statTitle);
             statContainer.appendChild(statValue);
@@ -112,7 +112,7 @@ function showFeaturesOnMap() {
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
             const symbol = featureType[featureProperties].icon;
-            const layerID = "poi-" + symbol;
+            const layerID = "bft-poi-" + symbol;
             if (!map.getLayer(layerID)) {
                 map.addLayer({
                     'id': layerID,
@@ -124,7 +124,7 @@ function showFeaturesOnMap() {
                     },
                     'filter': ['==', 'icon', symbol]
                 });
-                let filterGroup = document.getElementById('filter-group');
+                let filterGroup = document.getElementById('bft-filter-group');
                 const input = document.createElement('input');
                 input.type = 'checkbox';
                 input.id = layerID;
@@ -159,24 +159,24 @@ function showFeaturesOnMap() {
                     popup.setLngLat(coordinates)
                         .setHTML(featureCard)
                         .addTo(map);
-                    document.getElementById('showMoreInfo').addEventListener('click', e => {
+                    document.getElementById('bft-showMoreInfo').addEventListener('click', e => {
                         e.preventDefault();
-                        let cardContent = document.getElementById("cardContent");
+                        let cardContent = document.getElementById("bft-cardContent");
                         if (cardSide === "VERSO") {
                             cardContent.innerHTML = featureCardInformations;
                             setFeatureCardInformation(feature);
-                            document.getElementById('flipArrow').className = "fas fa-chevron-circle-right";
+                            document.getElementById('bft-flipArrow').className = "fas fa-chevron-circle-right";
                             cardSide = "RECTO";
                         } else {
                             cardContent.innerHTML = featureCardDetails;
                             setFeatureCardDetailsInformations();
-                            document.getElementById('flipArrow').className = "fas fa-chevron-circle-left";
+                            document.getElementById('bft-flipArrow').className = "fas fa-chevron-circle-left";
                             cardSide = "VERSO";
                         }
                         return false;
                     });
                     setFeatureCardInformation(feature);
-                    let userNameSpace = document.getElementById("userName");
+                    let userNameSpace = document.getElementById("bft-userName");
                     if (userNameSpace) {
                         let response = await fetch(urlGetUser+"?uid="+feature.properties.owner)
                         let username = await response.text();
@@ -186,8 +186,8 @@ function showFeaturesOnMap() {
                     }
                     const userID = feature.properties.owner;
                     if (userID === joomlaUserId || isAdmin) {
-                        document.getElementById("updateFeature").style.display = "block";
-                        document.getElementById("supprimerFeature").style.display = "block";
+                        document.getElementById("bft-updateFeature").style.display = "block";
+                        document.getElementById("bft-supprimerFeature").style.display = "block";
                     }
                 });
                 map.on('mouseenter', layerID, function () {
@@ -203,7 +203,7 @@ function showFeaturesOnMap() {
 }
 
 function loadImage() {
-    let image = document.getElementById("image");
+    let image = document.getElementById("bft-image");
     if (image) {
         let oFReader = new FileReader();
         oFReader.readAsDataURL(image.files[0]);
@@ -215,30 +215,30 @@ function loadImage() {
 }
 
 function setFeatureCardDetailsInformations() {
-    let details = document.getElementById("featureCardDetailInformations");
+    let details = document.getElementById("bft-featureCardDetailInformations");
     switch (feature.properties.type) {
         case featureType.field.string :
             details.innerHTML = featureCardDetails_field;
-            setInputDetailValue("card_details_fieldRules");
-            setCheckboxDetailValue('card_details_fieldUrban');
-            setCheckboxDetailValue('card_details_fieldMeal');
+            setInputDetailValue("bft-card_details_fieldRules");
+            setCheckboxDetailValue('bft-card_details_fieldUrban');
+            setCheckboxDetailValue('bft-card_details_fieldMeal');
             break;
         case featureType.event.string :
             details.innerHTML = featureCardDetails_event;
-            setInputDetailValue("card_details_activity");
-            setInputDetailValue("card_details_eventDate");
-            setInputDetailValue("card_details_eventDebut");
-            setInputDetailValue("card_details_eventFin");
-            setInputDetailValue("card_details_eventCout");
+            setInputDetailValue("bft-card_details_activity");
+            setInputDetailValue("bft-card_details_eventDate");
+            setInputDetailValue("bft-card_details_eventDebut");
+            setInputDetailValue("bft-card_details_eventFin");
+            setInputDetailValue("bft-card_details_eventCout");
             break;
         case featureType.team.string :
             details.innerHTML = featureCardDetails_team;
-            setInputDetailValue("card_details_activity");
-            setCheckboxDetailValue('card_details_teamTraining');
+            setInputDetailValue("bft-card_details_activity");
+            setCheckboxDetailValue('bft-card_details_teamTraining');
             break;
         case featureType.shop.string :
             details.innerHTML = featureCardDetails_shop;
-            setInputDetailValue("card_details_shopHours");
+            setInputDetailValue("bft-card_details_shopHours");
             break;
         default:
             details.innerHTML = "Type invalide";
@@ -246,7 +246,7 @@ function setFeatureCardDetailsInformations() {
 }
 
 function setCheckboxDetailValue(elementId) {
-    let id = elementId.replace("card_","");
+    let id = elementId.replace("bft-card_","");
     if (feature.properties[id]) {
         document.getElementById(elementId).innerText = 'Oui';
     } else {
@@ -255,35 +255,35 @@ function setCheckboxDetailValue(elementId) {
 }
 
 function setInputDetailValue(elementId) {
-    let id = elementId.replace("card_","");
+    let id = elementId.replace("bft-card_","");
     document.getElementById(elementId).innerText = feature.properties[id] ? feature.properties[id] : "";
 }
 
 function setFeatureDetails() {
-    let details = document.getElementById("details");
-    switch (document.getElementById("featureType").value) {
+    let details = document.getElementById("bft-details");
+    switch (document.getElementById("bft-featureType").value) {
         case featureType.field.string :
             details.innerHTML = fieldDetails;
-            setInputValue("details_fieldRules");
-            setCheckboxValue('details_fieldUrban');
-            setCheckboxValue('details_fieldMeal');
+            setInputValue("bft-details_fieldRules");
+            setCheckboxValue('bft-details_fieldUrban');
+            setCheckboxValue('bft-details_fieldMeal');
             break;
         case featureType.event.string :
             details.innerHTML = eventDetails;
-            setInputValue("details_activity");
-            setInputValue("details_eventDate");
-            setInputValue("details_eventDebut");
-            setInputValue("details_eventFin");
-            setInputValue("details_eventCout");
+            setInputValue("bft-details_activity");
+            setInputValue("bft-details_eventDate");
+            setInputValue("bft-details_eventDebut");
+            setInputValue("bft-details_eventFin");
+            setInputValue("bft-details_eventCout");
             break;
         case featureType.team.string :
             details.innerHTML = teamDetails;
-            setInputValue("details_activity");
-            setCheckboxValue('details_teamTraining');
+            setInputValue("bft-details_activity");
+            setCheckboxValue('bft-details_teamTraining');
             break;
         case featureType.shop.string :
             details.innerHTML = shopDetails;
-            setInputValue("details_shopHours");
+            setInputValue("bft-details_shopHours");
             break;
         default:
             details.innerHTML = "Type invalide";
@@ -304,23 +304,24 @@ function setCheckboxValue(elementId) {
 
 function setFeatureDetailsFromForm() {
     let details = feature.properties;
-    let featureDetails = document.getElementsByClassName("featureDetailsSelector");
+    let featureDetails = document.getElementsByClassName("bft-featureDetailsSelector");
     for (let i = 0; i < featureDetails.length; i++) {
         let uniqueFeatureDetails = document.getElementById(featureDetails[i].id);
+        let itemId = featureDetails[i].id.replace("bft-","");
         if (uniqueFeatureDetails.type === "checkbox") {
-            details[featureDetails[i].id] = uniqueFeatureDetails.checked;
+            details[itemId] = uniqueFeatureDetails.checked;
         } else {
-            details[featureDetails[i].id] = uniqueFeatureDetails.value;
+            details[itemId] = uniqueFeatureDetails.value;
         }
     }
 }
 
 async function setFeaturePropertiesFromForm() {
-    feature.properties.type = document.getElementById("featureType").value;
+    feature.properties.type = document.getElementById("bft-featureType").value;
     feature.properties.icon = featureType[feature.properties.type].icon;
-    feature.properties.label = document.getElementById("label").value;
-    feature.properties.description = document.getElementById("description").value;
-    let url = document.getElementById("url").value;
+    feature.properties.label = document.getElementById("bft-label").value;
+    feature.properties.description = document.getElementById("bft-description").value;
+    let url = document.getElementById("bft-url").value;
     feature.properties.url = url === "" ? EMPTY_STRING_SHARP : url;
     feature.properties.owner = joomlaUserId;
     setFeatureDetailsFromForm();
@@ -341,20 +342,20 @@ function isUrlValid(url) {
 }
 
 function clearErrorMessage() {
-    clearError('error-label');
-    clearError('error-description');
-    clearError('error-url');
+    clearError('bft-error-label');
+    clearError('bft-error-description');
+    clearError('bft-error-url');
 
-    clearError('error-details_fieldRules');
+    clearError('bft-error-details_fieldRules');
 
-    clearError('error-details_activity');
+    clearError('bft-error-details_activity');
 
-    clearError('error-details_eventDate');
-    clearError('error-details_eventDebut');
-    clearError('error-details_eventFin');
-    clearError('error-details_eventCout');
+    clearError('bft-error-details_eventDate');
+    clearError('bft-error-details_eventDebut');
+    clearError('bft-error-details_eventFin');
+    clearError('bft-error-details_eventCout');
 
-    clearError('error-image');
+    clearError('bft-error-image');
 }
 
 function clearError(id) {
@@ -368,11 +369,11 @@ function clearError(id) {
 function validerFeatureForm(tab) {
     clearErrorMessage();
 
-    if (tab.id === "basicInformations") {
+    if (tab.id === "bft-basicInformations") {
         return validateBasicInformation();
-    } else if (tab.id === "detailInformations") {
+    } else if (tab.id === "bft-detailInformations") {
         return validateDetailInformation();
-    } else if (tab.id === "imageInformations") {
+    } else if (tab.id === "bft-imageInformations") {
         return validateImageInformation();
     }
     return true;
@@ -385,23 +386,23 @@ function validateImageInformation() {
 function validateDetailInformation() {
     let success = true;
 
-    switch (document.getElementById("featureType").value) {
+    switch (document.getElementById("bft-featureType").value) {
         case featureType.field.string :
-            success = validateFieldNotEmpty("details_fieldRules");
+            success = validateFieldNotEmpty("bft-details_fieldRules");
             break;
         case featureType.event.string :
-            success = validateFieldNotEmpty("details_activity");
-            success = validateFieldNotEmpty("details_eventDate") && success;
-            success = validateFieldNotEmpty("details_eventDebut") && success;
-            success = validateFieldNotEmpty("details_eventFin") && success;
-            success = validateFieldNotEmpty("details_eventCout") && success;
+            success = validateFieldNotEmpty("bft-details_activity");
+            success = validateFieldNotEmpty("bft-details_eventDate") && success;
+            success = validateFieldNotEmpty("bft-details_eventDebut") && success;
+            success = validateFieldNotEmpty("bft-details_eventFin") && success;
+            success = validateFieldNotEmpty("bft-details_eventCout") && success;
 
             break;
         case featureType.team.string :
-            success = validateFieldNotEmpty("details_activity");
+            success = validateFieldNotEmpty("bft-details_activity");
             break;
         case featureType.shop.string :
-            success = validateFieldNotEmpty("details_shopHours");
+            success = validateFieldNotEmpty("bft-details_shopHours");
             break;
     }
     return success;
@@ -409,7 +410,7 @@ function validateDetailInformation() {
 
 function validateFieldNotEmpty(id) {
     if (!document.getElementById(id).value) {
-        document.getElementById('error-'+id).innerHTML = " Requis! *";
+        document.getElementById('bft-error-'+id).innerHTML = " Requis! *";
         document.getElementById(id).classList.add(INVALID_FIELD_BG);
         return false;
     }
@@ -419,22 +420,22 @@ function validateFieldNotEmpty(id) {
 
 function validateBasicInformation() {
     let success = true;
-    if (!document.getElementById("label").value) {
-        document.getElementById('error-label').innerHTML = " Requis! *";
-        document.getElementById('label').classList.add(INVALID_FIELD_BG);
+    if (!document.getElementById("bft-label").value) {
+        document.getElementById('bft-error-label').innerHTML = " Requis! *";
+        document.getElementById('bft-label').classList.add(INVALID_FIELD_BG);
         success = false;
     }
 
-    if (!document.getElementById("description").value) {
-        document.getElementById('error-description').innerHTML = " Requis! *";
-        document.getElementById('description').classList.add(INVALID_FIELD_BG);
+    if (!document.getElementById("bft-description").value) {
+        document.getElementById('bft-error-description').innerHTML = " Requis! *";
+        document.getElementById('bft-description').classList.add(INVALID_FIELD_BG);
         success = false;
     }
 
-    let url = document.getElementById("url").value;
+    let url = document.getElementById("bft-url").value;
     if (url && !isUrlValid(url)) {
-        document.getElementById('error-url').innerHTML = " Invalide *";
-        document.getElementById('url').classList.add(INVALID_FIELD_BG);
+        document.getElementById('bft-error-url').innerHTML = " Invalide *";
+        document.getElementById('bft-url').classList.add(INVALID_FIELD_BG);
         success = false;
     }
     return success;
@@ -474,7 +475,7 @@ function deleteFeature() {
 }
 
 function startLoadingSpinner() {
-    document.getElementById("nextBtn").innerHTML = "<div class=\"loader\"></div>";
+    document.getElementById("bft-nextBtn").innerHTML = "<div class=\"bft-loader\"></div>";
 }
 
 async function persistFeature(method) {
@@ -497,16 +498,16 @@ async function persistFeature(method) {
 
 function addAddButton() {
     if (connectedUser && hasAddAccess) {
-        let addGroup = document.getElementById('add-group');
+        let addGroup = document.getElementById('bft-add-group');
         let input = document.createElement('input');
         input.type = 'checkbox';
-        input.id = 'addFeatureInput';
+        input.id = 'bft-addFeatureInput';
         input.checked = false;
         addGroup.appendChild(input);
 
         let label = document.createElement('label');
-        label.setAttribute('for', 'addFeatureInput');
-        label.setAttribute('id', 'addFeatureLabel');
+        label.setAttribute('for', 'bft-addFeatureInput');
+        label.setAttribute('id', 'bft-addFeatureLabel');
         label.textContent = 'Ajouter';
         addGroup.appendChild(label);
 
@@ -524,7 +525,7 @@ function addNewFeature() {
     feature = jQuery.extend(true, {}, defaultFeature);
     feature.properties.id = NEW_FEATURE_ID;
     addMarkerToMapsCenter();
-    document.getElementById('addFeatureLabel').textContent =  'Annuler';
+    document.getElementById('bft-addFeatureLabel').textContent =  'Annuler';
     showfeatureInformations();
 }
 
@@ -537,9 +538,9 @@ function addMarkerToMapsCenter() {
 
 function cancelAddFeature() {
     resetFeature();
-    const addFeatureLabel = document.getElementById('addFeatureLabel');
+    const addFeatureLabel = document.getElementById('bft-addFeatureLabel');
     if (addFeatureLabel) { addFeatureLabel.textContent = 'Ajouter'; }
-    const addFeatureInput = document.getElementById('addFeatureInput');
+    const addFeatureInput = document.getElementById('bft-addFeatureInput');
     if (addFeatureInput) { addFeatureInput.checked = false; }
 }
 
@@ -548,8 +549,8 @@ function resetFeature() {
     removeMarker();
     cardSide = "RECTO";
     feature = jQuery.extend(true, {}, defaultFeature);
-    document.getElementById("featureInformations").style.display = "none";
-    document.getElementById('featureForm').reset();
+    document.getElementById("bft-featureInformations").style.display = "none";
+    document.getElementById('bft-featureForm').reset();
 }
 
 function removeMarker() {
@@ -582,11 +583,11 @@ function addMapControls() {
 
 function setFeatureCardInformation(feature, featureId) {
     let id = featureId ? featureId : "";
-    let url = document.getElementById("featureUrl" + id);
-    let imageElement = document.getElementById("cardImage" + id);
+    let url = document.getElementById("bft-featureUrl" + id);
+    let imageElement = document.getElementById("bft-cardImage" + id);
 
     if (feature.properties.url === EMPTY_STRING_SHARP) {
-        let avatar = document.getElementById("cardAvatar" + id);
+        let avatar = document.getElementById("bft-cardAvatar" + id);
         if (avatar) {
             avatar.replaceChild(imageElement, url);
         }
@@ -596,33 +597,33 @@ function setFeatureCardInformation(feature, featureId) {
     if (feature.properties.image && feature.properties.image !== EMPTY_STRING_SHARP) {
         imageElement.setAttribute("src", feature.properties.image);
     } else {
-        imageElement.setAttribute("src","./images/image_non_trouvee.png");
+        imageElement.setAttribute("src","/modules/mod_blue_force_tracker/tmpl/assets/image_non_trouvee.png");
     }
     imageElement.setAttribute("alt", feature.properties.label);
-    let featureLabel = document.getElementById("featureLabel" + id);
+    let featureLabel = document.getElementById("bft-featureLabel" + id);
     if (featureLabel) {
         featureLabel.innerHTML = feature.properties.label;
-        document.getElementById("featureDescription" + id).innerHTML = feature.properties.description;
+        document.getElementById("bft-featureDescription" + id).innerHTML = feature.properties.description;
     }
-    const cardLoading = document.getElementById('cardLoading' + id);
+    const cardLoading = document.getElementById('bft-cardLoading' + id);
     if (cardLoading) {
         cardLoading.style.display = 'none';
     }
 }
 
 function getUniqueFeatureCardInformations(id) {
-    let uniqueCard = featureCardInformations.replace("featureUrl", "featureUrl" + id);
-    uniqueCard = uniqueCard.replace("cardAvatar", "cardAvatar" + id);
-    uniqueCard = uniqueCard.replace("cardImage", "cardImage" + id);
-    uniqueCard = uniqueCard.replace("cardContainer", "cardContainer" + id);
-    uniqueCard = uniqueCard.replace("featureLabel", "featureLabel" + id);
-    uniqueCard = uniqueCard.replace("cardLoading", "cardLoading" + id);
-    return uniqueCard.replace("featureDescription", "featureDescription" + id);
+    let uniqueCard = featureCardInformations.replace("bft-featureUrl", "bft-featureUrl" + id);
+    uniqueCard = uniqueCard.replace("bft-cardAvatar", "bft-cardAvatar" + id);
+    uniqueCard = uniqueCard.replace("bft-cardImage", "bft-cardImage" + id);
+    uniqueCard = uniqueCard.replace("bft-cardContainer", "bft-cardContainer" + id);
+    uniqueCard = uniqueCard.replace("bft-featureLabel", "bft-featureLabel" + id);
+    uniqueCard = uniqueCard.replace("bft-cardLoading", "bft-cardLoading" + id);
+    return uniqueCard.replace("bft-featureDescription", "bft-featureDescription" + id);
 }
 
 function renderListings(features) {
-    const filterEl = document.getElementById('feature-filter');
-    const listingEl = document.getElementById('feature-listing');
+    const filterEl = document.getElementById('bft-feature-filter');
+    const listingEl = document.getElementById('bft-feature-listing');
     const empty = document.createElement('p');
     listingEl.innerHTML = '';
     resetStats();
@@ -631,12 +632,12 @@ function renderListings(features) {
             statCount(feature);
             let prop = feature.properties;
             let html =
-                '<button class="listingHeader">' +
+                '<button class="bft-listingHeader">' +
                 prop.label +
                 '</button>' +
-                '<div class="listingDetail" id="listing'+prop.id+'">' +
-                '    <input type="hidden" id="lnglisting'+prop.id+'" value="'+feature.geometry.coordinates[0]+'" />' +
-                '    <input type="hidden" id="latlisting'+prop.id+'" value="'+feature.geometry.coordinates[1]+'" />' +
+                '<div class="bft-listingDetail" id="bft-listing'+prop.id+'">' +
+                '    <input type="hidden" id="bft-lngbft-listing'+prop.id+'" value="'+feature.geometry.coordinates[0]+'" />' +
+                '    <input type="hidden" id="bft-latbft-listing'+prop.id+'" value="'+feature.geometry.coordinates[1]+'" />' +
                 getUniqueFeatureCardInformations(prop.id) +
                 '</div>';
             listingEl.innerHTML += html;
@@ -644,13 +645,13 @@ function renderListings(features) {
         }
         resetCount();
 
-        let acc = document.getElementsByClassName("listingHeader");
+        let acc = document.getElementsByClassName("bft-listingHeader");
         let i;
         for (i = 0; i < acc.length; i++) {
             acc[i].addEventListener("click", function() {
                 /* Toggle between adding and removing the "active" class,
                 to highlight the button that controls the panel */
-                this.classList.toggle("listingActive");
+                this.classList.toggle("bft-listingActive");
 
                 /* Toggle between hiding and showing the active panel */
                 let panel = this.nextElementSibling;
@@ -662,8 +663,8 @@ function renderListings(features) {
             });
             acc[i].addEventListener("mouseover", function() {
                 let panel = this.nextElementSibling;
-                let lng = document.getElementById("lng"+ panel.id).value;
-                let lat = document.getElementById("lat"+ panel.id).value;
+                let lng = document.getElementById("bft-lng"+ panel.id).value;
+                let lat = document.getElementById("bft-lat"+ panel.id).value;
                 marker.setLngLat([lng, lat]);
                 marker.setOffset([0,-13]);
                 marker.addTo(map);
@@ -711,8 +712,8 @@ function getActiveLayers() {
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
             const symbol = featureType[featureProperties].icon;
-            if (map.getLayer('poi-'+symbol)) {
-                layers.layers.push('poi-'+symbol);
+            if (map.getLayer('bft-poi-'+symbol)) {
+                layers.layers.push('bft-poi-'+symbol);
             }
         }
     });
@@ -735,13 +736,13 @@ function statCount(feature) {
         stats[feature.properties.type] = 0;
     }
     stats[feature.properties.type] = stats[feature.properties.type] + 1;
-    document.getElementById("stat_" + feature.properties.type).innerText = stats[feature.properties.type];
+    document.getElementById("bft-stat_" + feature.properties.type).innerText = stats[feature.properties.type];
 }
 
 function resetStats() {
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
-            document.getElementById("stat_" + featureProperties).innerText = 0;
+            document.getElementById("bft-stat_" + featureProperties).innerText = 0;
         }
     });
 }
@@ -751,8 +752,8 @@ function resetCount() {
 }
 
 function refreshListing() {
-    const filterEl = document.getElementById('feature-filter');
-    let renderedFeatures = map.queryRenderedFeatures({layers: ['poi-toilet', 'poi-embassy', 'poi-ranger-station', 'poi-grocery']});
+    const filterEl = document.getElementById('bft-feature-filter');
+    let renderedFeatures = map.queryRenderedFeatures({layers: ['bft-poi-toilet', 'bft-poi-embassy', 'bft-poi-ranger-station', 'bft-poi-grocery']});
 
     if (features) {
         let uniqueFeatures = getUniqueFeatures(renderedFeatures, 'id');
@@ -774,7 +775,7 @@ function showImage() {
 }
 
 function bindImageToCropper() {
-    document.getElementById("labelImportPhoto").style.display = "none";
+    document.getElementById("bft-labelImportPhoto").style.display = "none";
     resetCroppie();
     cropper.bind({
         url : feature.properties.image,
@@ -783,21 +784,22 @@ function bindImageToCropper() {
 }
 
 function showfeatureInformationsPanel() {
-    const featureInformations = document.getElementById("featureInformations");
+    const featureInformations = document.getElementById("bft-featureInformations");
     featureInformations.style.display = 'block';
 }
 
 function setFeatureTypeList() {
     Object.keys(featureType).forEach(function (featureProperties) {
-        if (featureType.hasOwnProperty(featureProperties)) {
+        const bft_featureType = document.getElementById("bft-featureType");
+        if (featureType.hasOwnProperty(featureProperties) && bft_featureType) {
             let type = featureType[featureProperties];
-            document.getElementById("featureType").appendChild(new Option(getTypeLabel(type.string, "FR-ca"), type.string));
+            bft_featureType.appendChild(new Option(getTypeLabel(type.string, "FR-ca"), type.string));
         }
     });
 }
 
 function setSelectedFeatureType() {
-    document.getElementById("featureType").value = feature.properties.type;
+    document.getElementById("bft-featureType").value = feature.properties.type;
 }
 
 function showfeatureInformations() {
@@ -805,12 +807,12 @@ function showfeatureInformations() {
     setSelectedFeatureType();
     showfeatureInformationsPanel();
 
-    setInputValue("label");
-    setInputValue("description");
+    setInputValue("bft-label");
+    setInputValue("bft-description");
     if (feature.properties.url === EMPTY_STRING_SHARP) {
         feature.properties.url = "";
     }
-    setInputValue("url");
+    setInputValue("bft-url");
 
     setFeatureDetails();
 
@@ -821,7 +823,7 @@ function showfeatureInformations() {
 
 function resetTabs() {
     currentTab = 0;
-    let i, x = document.getElementsByClassName("tab");
+    let i, x = document.getElementsByClassName("bft-tab");
     for (i = 0; i < x.length; i++) {
         x[i].style.display = 'none';
     }
@@ -830,21 +832,21 @@ function resetTabs() {
 let currentTab = 0;
 
 function showTab(n) {
-    let x = document.getElementsByClassName("tab");
+    let x = document.getElementsByClassName("bft-tab");
     x[n].style.display = "block";
 
     if (n === 0) {
-        document.getElementById("prevBtn").style.display = "none";
+        document.getElementById("bft-prevBtn").style.display = "none";
     } else {
-        document.getElementById("prevBtn").style.display = "inline";
+        document.getElementById("bft-prevBtn").style.display = "inline";
     }
     if (n === (x.length - 1)) {
-        document.getElementById("importImageButton").style.display = 'block'
+        document.getElementById("bft-importImageButton").style.display = 'block'
         showImage();
-        document.getElementById("nextBtn").innerHTML = "&#xf0c7"; // save
+        document.getElementById("bft-nextBtn").innerHTML = "&#xf0c7"; // save
     } else {
-        document.getElementById("importImageButton").style.display = 'none';
-        document.getElementById("nextBtn").innerHTML = "&#xf061"; // next
+        document.getElementById("bft-importImageButton").style.display = 'none';
+        document.getElementById("bft-nextBtn").innerHTML = "&#xf061"; // next
     }
     fixStepIndicator(n)
 }
@@ -854,7 +856,7 @@ function timeout(ms) {
 }
 
 async function nextPrev(n) {
-    let x = document.getElementsByClassName("tab");
+    let x = document.getElementsByClassName("bft-tab");
     if (n === 1 && !validerFeatureForm(x[currentTab])) return false;
     currentTab = currentTab + n;
     if (currentTab >= x.length) {
@@ -878,15 +880,15 @@ async function nextPrev(n) {
 }
 
 function fixStepIndicator(n) {
-    let i, x = document.getElementsByClassName("step");
+    let i, x = document.getElementsByClassName("bft-step");
     for (i = 0; i < x.length; i++) {
-        x[i].className = x[i].className.replace(" active", "");
+        x[i].className = x[i].className.replace(" bft-active", "");
     }
-    x[n].className += " active";
+    x[n].className += " bft-active";
 }
 
 function activateFeatureList() {
-    const filterEl = document.getElementById('feature-filter');
+    const filterEl = document.getElementById('bft-feature-filter');
 
     map.on('moveend', async function () {
         refreshListing();
@@ -905,7 +907,7 @@ function activateFeatureList() {
             Object.keys(featureType).forEach(function (featureProperties) {
                 if (featureType.hasOwnProperty(featureProperties)) {
                     let icon = featureType[featureProperties].icon;
-                    map.setFilter('poi-' + icon, [
+                    map.setFilter('bft-poi-' + icon, [
                         'match',
                         ['get', 'label'],
                         filtered.map(function (feature) {
@@ -925,10 +927,10 @@ function generateFeatureMouseOver() {
     Object.keys(featureType).forEach(function (featureProperties) {
         if (featureType.hasOwnProperty(featureProperties)) {
             let icon = featureType[featureProperties].icon;
-            map.on('mousemove', 'poi-' + icon, function () {
+            map.on('mousemove', 'bft-poi-' + icon, function () {
                 map.getCanvas().style.cursor = 'pointer';
             });
-            map.on('mouseleave', 'poi-' + icon, function () {
+            map.on('mouseleave', 'bft-poi-' + icon, function () {
                 map.getCanvas().style.cursor = '';
             });
         }
@@ -943,7 +945,7 @@ function setOnClosePopup() {
     popup.on('close', cancelAddFeature);
 }
 const pin = document.createElement('div');
-pin.id = 'marker';
+pin.id = 'bft-marker';
 const marker = new mapboxgl.Marker({
     element: pin,
     draggable: true,
@@ -958,7 +960,7 @@ function executeBlueForceTracker() {
         map.addSource('places', {type: 'geojson', data: urlFeature});
         showFeaturesOnMap();
         addAddButton();
-        document.getElementById("featureInformations").innerHTML = featureForm;
+        document.getElementById("bft-featureInformations").innerHTML = featureForm;
         setFeatureTypeList();
         marker.on('dragend', showfeatureInformations);
         generateFeatureMouseOver();
