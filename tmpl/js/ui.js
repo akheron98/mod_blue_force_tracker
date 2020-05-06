@@ -58,13 +58,14 @@ const featureForm = `
 const activityTypeSelectForm = `
     <label for "details_activity">Type d'activité</label>
     <span id="bft-error-details_activity"></span>
-    <select id="bft-details_activity" class="bft-featureDetailsSelector">   
+    <select id="bft-details_activity" class="bft-featureDetailsSelector" multiple>   
         <option value="airsoft">Airsoft</option>   
         <option value="paintball">Paintball</option>
     </select>
 `;
 
 const fieldDetails = `<h6>Caractéristiques du terrain</h6>
+    ${activityTypeSelectForm}
     <label for "details_fieldRules">Règles</label>
     <span id="bft-error-details_fieldRules"></span>
     <textarea id="bft-details_fieldRules" class="bft-featureDetailsSelector"></textarea>
@@ -86,6 +87,8 @@ const fieldDetails = `<h6>Caractéristiques du terrain</h6>
 `;
 
 const featureCardDetails_field = `
+    <label for="bft-card_details_activity">Type d'activité</label>
+    <p id="bft-card_details_activity"></p>
     <label for="bft-card_details_fieldRules">Règles du terrain</label>
     <p id="bft-card_details_fieldRules"></p>
     <label for="bft-card_details_fieldUrban">Environnement urbain</label>
@@ -97,6 +100,12 @@ const featureCardDetails_field = `
 const eventDetails = `
     <h6>Caractéristiques de l'événement</h6>
     ${activityTypeSelectForm}
+    <label for "details_eventStyle">Style de jeu</label>
+    <span id="bft-error-details_eventStyle"></span>
+    <select id="bft-details_eventStyle" class="bft-featureDetailsSelector" multiple>   
+        <option value="milsim">Milsim</option>   
+        <option value="skirmish">Skirmish</option>
+    </select>
     <label for "details_eventDate">Date de l'événement</label>
     <span id="bft-error-details_eventDate"></span>
     <input required type="date" id="bft-details_eventDate" class="bft-featureDetailsSelector" value="" />
@@ -145,12 +154,15 @@ const featureCardDetails_team = `
 `;
 
 const shopDetails = `<h6>Caractéristiques de la boutique</h6>
+    ${activityTypeSelectForm}
     <label for "details_shopHours">Heures d'ouvertures</label>
     <span id="bft-error-details_shopHours"></span>
     <textarea id="bft-details_shopHours" class="bft-featureDetailsSelector"></textarea>
 `;
 
 const featureCardDetails_shop = `
+    <label for="bft-card_details_activity">Type d'activité</label>
+    <p id="bft-card_details_activity"></p>
     <label for="bft-card_details_shopHours">Heures d'ouvertures</label>
     <p id="bft-card_details_shopHours"></p>
 `;

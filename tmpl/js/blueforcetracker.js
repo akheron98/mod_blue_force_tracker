@@ -52,6 +52,10 @@ const cropperOptions = {
     boundary: {width: 290, height: 200},
 };
 
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 function resetCroppie() {
     destroyCroppie();
     initCroppie();
@@ -120,7 +124,7 @@ function showFeaturesOnMap() {
                     'source': 'places',
                     'layout': {
                         'icon-image': symbol + '-15',
-                        'icon-allow-overlap': true
+                        'icon-allow-overlap': true,
                     },
                     'filter': ['==', 'icon', symbol]
                 });
@@ -144,7 +148,8 @@ function showFeaturesOnMap() {
                     );
                 });
 
-                map.on('click', layerID, async function (e) {
+                map.on('click', layerID, function (e) {
+                    popup.remove();
                     cancelAddFeature();
                     feature = {};
                     feature['geometry'] = e.features[0].geometry;
@@ -178,11 +183,13 @@ function showFeaturesOnMap() {
                     setFeatureCardInformation(feature);
                     let userNameSpace = document.getElementById("bft-userName");
                     if (userNameSpace) {
-                        let response = await fetch(urlGetUser+"?uid="+feature.properties.owner)
-                        let username = await response.text();
-                        if (username) {
-                            userNameSpace.innerText = "Créé par " + username;
-                        }
+                        fetch(urlGetUser+"?uid="+feature.properties.owner).then(response => {
+                            response.text().then(username => {
+                                if (username) {
+                                    userNameSpace.innerText = "Créé par " + username;
+                                }
+                            });
+                        })
                     }
                     const userID = feature.properties.owner;
                     if (userID === joomlaUserId || isAdmin) {
@@ -200,6 +207,31 @@ function showFeaturesOnMap() {
             }
         }
     });
+    let toggleFilterGroup = document.getElementById('bft-toggle-filter-group');
+    let container = document.createElement("div");
+    container.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+    let button = document.createElement("button");
+    button.className = "mapboxgl-ctrl-icon bft-toggle-filter-group-button";
+    button.setAttribute("type", "button");
+    button.addEventListener('click', function (e) {
+        e.preventDefault();
+        let filterGroup = document.getElementById('bft-filter-group');
+        let buttonIcon = document.getElementById('bft-toggle-filter-group-button-icon');
+        if (!filterGroup.style.width || filterGroup.style.width === "0" || filterGroup.style.width === "0px") {
+            filterGroup.style.width = "130px";
+            buttonIcon.className = "fas fa-angle-double-right bft-toggle-icon";
+        } else {
+            filterGroup.style.width = "0";
+            buttonIcon.className = "fas fa-angle-double-left bft-toggle-icon";
+        }
+    });
+    let label = document.createElement("i");
+    label.id = "bft-toggle-filter-group-button-icon";
+    label.className = "fas fa-angle-double-left bft-toggle-icon";
+    button.appendChild(label);
+    container.appendChild(button);
+    toggleFilterGroup.appendChild(container);
+
 }
 
 function loadImage() {
@@ -216,6 +248,7 @@ function loadImage() {
 
 function setFeatureCardDetailsInformations() {
     let details = document.getElementById("bft-featureCardDetailInformations");
+
     switch (feature.properties.type) {
         case featureType.field.string :
             details.innerHTML = featureCardDetails_field;
@@ -225,7 +258,6 @@ function setFeatureCardDetailsInformations() {
             break;
         case featureType.event.string :
             details.innerHTML = featureCardDetails_event;
-            setInputDetailValue("bft-card_details_activity");
             setInputDetailValue("bft-card_details_eventDate");
             setInputDetailValue("bft-card_details_eventDebut");
             setInputDetailValue("bft-card_details_eventFin");
@@ -233,7 +265,6 @@ function setFeatureCardDetailsInformations() {
             break;
         case featureType.team.string :
             details.innerHTML = featureCardDetails_team;
-            setInputDetailValue("bft-card_details_activity");
             setCheckboxDetailValue('bft-card_details_teamTraining');
             break;
         case featureType.shop.string :
@@ -243,6 +274,7 @@ function setFeatureCardDetailsInformations() {
         default:
             details.innerHTML = "Type invalide";
     }
+    setMultipleInputDetailValue("bft-card_details_activity");
 }
 
 function setCheckboxDetailValue(elementId) {
@@ -259,6 +291,39 @@ function setInputDetailValue(elementId) {
     document.getElementById(elementId).innerText = feature.properties[id] ? feature.properties[id] : "";
 }
 
+function setMultipleInputDetailValue(elementId) {
+    const property = elementId.replace("bft-card_","");
+    const elementValues = feature.properties[property];
+    let items = elementValues;
+    if (elementValues && elementValues.includes("[") && elementValues.includes("]")) {
+        items = JSON.parse(elementValues);
+    }
+    let text = "";
+    if (items && Array.isArray(items)) {
+        items.map((item, index) => {
+            text = text + item.capitalize() + separator(items.length, index);
+        });
+    } else if (items) {
+        text = items.capitalize() + " seulement.";
+    } else {
+        text = "Non défini";
+    }
+    document.getElementById(elementId).innerText = text;
+}
+
+function separator(size, index) {
+    if (size === 1) {
+        return " seulement.";
+    }
+    if (size - 1 === index) {
+        return "";
+    }
+    if (size - 2 === index) {
+        return " et ";
+    }
+    return ", ";
+}
+
 function setFeatureDetails() {
     let details = document.getElementById("bft-details");
     switch (document.getElementById("bft-featureType").value) {
@@ -270,7 +335,6 @@ function setFeatureDetails() {
             break;
         case featureType.event.string :
             details.innerHTML = eventDetails;
-            setInputValue("bft-details_activity");
             setInputValue("bft-details_eventDate");
             setInputValue("bft-details_eventDebut");
             setInputValue("bft-details_eventFin");
@@ -278,7 +342,6 @@ function setFeatureDetails() {
             break;
         case featureType.team.string :
             details.innerHTML = teamDetails;
-            setInputValue("bft-details_activity");
             setCheckboxValue('bft-details_teamTraining');
             break;
         case featureType.shop.string :
@@ -288,17 +351,34 @@ function setFeatureDetails() {
         default:
             details.innerHTML = "Type invalide";
     }
+    setMultipleInputValue("bft-details_activity");
 }
 
 function setInputValue(elementId) {
-    document.getElementById(elementId).value = feature.properties[elementId] ? feature.properties[elementId] : "";
+    let property = elementId.replace("bft-","");
+    document.getElementById(elementId).value = feature.properties[property] ? feature.properties[property] : "";
 }
 
 function setCheckboxValue(elementId) {
-    if (feature.properties[elementId]) {
+    let property = elementId.replace("bft-","");
+    if (feature.properties[property]) {
         document.getElementById(elementId).setAttribute('checked', 'true');
     } else {
         document.getElementById(elementId).removeAttribute('checked');
+    }
+}
+
+function setMultipleInputValue(elementId) {
+    let options = Array.from(document.querySelectorAll('#'+elementId+' option'));
+    let property = elementId.replace("bft-","");
+    let elementValues = feature.properties[property];
+    if (elementValues && elementValues.includes("[") && elementValues.includes("]")) {
+        let items = JSON.parse(elementValues);
+        items.forEach(function(v) {
+            options.find(c => c.value === v).selected = true;
+        });
+    } else if (elementValues) {
+        options.find(c => c.value === elementValues).selected = true;
     }
 }
 
@@ -310,6 +390,9 @@ function setFeatureDetailsFromForm() {
         let itemId = featureDetails[i].id.replace("bft-","");
         if (uniqueFeatureDetails.type === "checkbox") {
             details[itemId] = uniqueFeatureDetails.checked;
+        } else if (uniqueFeatureDetails.type === "select-multiple") {
+            const selected = document.querySelectorAll('#'+featureDetails[i].id+' option:checked');
+            details[itemId] = Array.from(selected).map(el => el.value);
         } else {
             details[itemId] = uniqueFeatureDetails.value;
         }
@@ -498,7 +581,10 @@ async function persistFeature(method) {
 
 function addAddButton() {
     if (connectedUser && hasAddAccess) {
-        let addGroup = document.getElementById('bft-add-group');
+        let filterGroup = document.getElementById('bft-filter-group');
+        let addGroup = document.createElement('div');
+        addGroup.className = 'bft-add-group';
+        addGroup.id = 'bft-add-group';
         let input = document.createElement('input');
         input.type = 'checkbox';
         input.id = 'bft-addFeatureInput';
@@ -510,6 +596,7 @@ function addAddButton() {
         label.setAttribute('id', 'bft-addFeatureLabel');
         label.textContent = 'Ajouter';
         addGroup.appendChild(label);
+        filterGroup.appendChild(addGroup);
 
         input.addEventListener('change', function () {
             if (input.checked) {
@@ -551,6 +638,7 @@ function resetFeature() {
     feature = jQuery.extend(true, {}, defaultFeature);
     document.getElementById("bft-featureInformations").style.display = "none";
     document.getElementById('bft-featureForm').reset();
+    resetTabs();
 }
 
 function removeMarker() {
@@ -559,19 +647,17 @@ function removeMarker() {
 }
 
 function addMapControls() {
-    map.addControl(new mapboxgl.FullscreenControl());
+    map.addControl(new GroupFilterControl(), 'top-right');
+    map.addControl(new ToggleGroupFilterControl(), 'top-right');
+    map.addControl(new mapboxgl.FullscreenControl(), 'bottom-right');
     map.addControl(
         new mapboxgl.GeolocateControl({
             positionOptions: {
                 enableHighAccuracy: true
             },
             trackUserLocation: true
-        })
+        }), 'bottom-right'
     );
-    map.addControl(new GroupFilterControl(), 'top-right');
-    if (connectedUser) {
-        map.addControl(new AddFeatureButtonControl(), 'top-right');
-    }
     map.addControl(
         new mapboxgl.NavigationControl({
             options: {
@@ -869,7 +955,9 @@ async function nextPrev(n) {
             return false;
         } else {
             currentTab = currentTab - 1;
-            x[currentTab-n].style.display = "none";
+            if (x[currentTab-n]) {
+                x[currentTab-n].style.display = "none";
+            }
             return false;
         }
     } else {
@@ -882,9 +970,9 @@ async function nextPrev(n) {
 function fixStepIndicator(n) {
     let i, x = document.getElementsByClassName("bft-step");
     for (i = 0; i < x.length; i++) {
-        x[i].className = x[i].className.replace(" bft-active", "");
+        x[i].className = x[i].className.replace(" active", "");
     }
-    x[n].className += " bft-active";
+    x[n].className += " active";
 }
 
 function activateFeatureList() {

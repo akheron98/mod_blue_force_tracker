@@ -2,7 +2,7 @@ class GroupFilterControl {
     onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
-        this._container.className = 'mapboxgl-ctrl bft-filter-group';
+        this._container.className = 'mapboxgl-ctrl bft-filter-group bft-drawer';
         this._container.id = 'bft-filter-group';
         return this._container;
     }
@@ -13,12 +13,12 @@ class GroupFilterControl {
     }
 }
 
-class AddFeatureButtonControl {
+class ToggleGroupFilterControl {
     onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
-        this._container.className = 'mapboxgl-ctrl bft-add-group';
-        this._container.id = 'bft-add-group';
+        this._container.className = 'mapboxgl-ctrl bft-toggle-filter-group';
+        this._container.id = 'bft-toggle-filter-group';
         return this._container;
     }
 

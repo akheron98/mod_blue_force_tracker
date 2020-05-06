@@ -3,6 +3,19 @@
 if (isset($_POST['data']) && isset($_POST['method'])) {
     $data = $_POST['data'];
     $method = $_POST['method'];
+
+    if ($method !== "DELETE") {
+        $data = json_decode($data);
+        $prop = $data->properties;
+        $id = $prop->id;
+        $image = $prop->image;
+        $output = '/images/blueforcetracker/'.$id.'.png';
+        $imageData = explode( ',', $image );
+        file_put_contents($_SERVER['DOCUMENT_ROOT'] . $output, base64_decode($imageData[1]));
+        $prop->image = $output;
+        $data = json_encode($data);
+    }
+
     $apiKey = "x-api-key:sBLS9lBAy76rFJ4u41qiU7rYyArA2lNF8bwjkn7g"; // . str_replace("\n", "", getenv('AWS_API_KEY'));
     $url = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
 

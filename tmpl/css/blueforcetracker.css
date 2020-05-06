@@ -11,43 +11,50 @@
     padding: 0;
 }
 
-.bft-filter-group, .bft-add-group {
+.bft-filter-group {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;
     z-index: 1;
-    border-radius: 3px;
     width: 120px;
     color: #fff;
 }
 
-.bft-filter-group input[type='checkbox']:first-child+label, .bft-add-group input[type='checkbox']:first-child+label {
+.bft-filter-group input[type='checkbox']:first-child+label,
+.bft-add-group input[type='checkbox']:first-child+label {
     border-radius: 3px 3px 0 0;
 }
 
-.bft-filter-group label:last-child, .bft-add-group label:last-child {
+.bft-filter-group label:last-child,
+.bft-add-group label:last-child {
     border-radius: 0 0 3px 3px;
     border: none;
 }
 
-.bft-filter-group input[type='checkbox'], .bft-add-group input[type='checkbox'] {
+.bft-filter-group input[type='checkbox'] {
     display: none;
 }
 
-.bft-filter-group input[type='checkbox']+label {
-    background-color: #6e6b6f;
+.bft-filter-group input[type='checkbox']+label, .bft-add-group input[type='checkbox']+label {
     display: block;
     cursor: pointer;
-    padding: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    color: #ccc;
-}
-
-.bft-filter-group input[type='checkbox']+label, .bft-add-group input[type='checkbox']+label {
-    background-color: #6e6b6f;
+    padding: 5px;
+    border-radius: 5px;
     text-transform: capitalize;
 }
 
-.bft-filter-group input[type='checkbox']+label:hover, .bft-filter-group input[type='checkbox']:checked+label {
+.bft-filter-group input[type='checkbox']+label, .bft-filter-group input[type='checkbox']+label:hover, .bft-filter-group input[type='checkbox']+label:active {
+    background-color: #6e6b6f;
+    color: #ccc;
+}
+
+.bft-add-group input[type='checkbox']+label {
+    background-color: #0254FE;
+    color: #fff;
+}
+
+.bft-filter-group input[type='checkbox']:checked+label,
+.bft-add-group input[type='checkbox']+label:hover,
+.bft-add-group input[type='checkbox']:checked+label {
     background-color: #0254FE;
     color: #fff;
 }
@@ -57,15 +64,6 @@
     font-weight: 900;
     content: "\f00c";
     margin-right: 5px;
-}
-
-.bft-add-group input[type='checkbox']+label {
-    background-color: #0254FE;
-    display: block;
-    cursor: pointer;
-    padding: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    color: #fff;
 }
 
 .bft-add-group input[type='checkbox']:checked+label:hover, .bft-add-group input[type='checkbox']:checked+label {
@@ -183,6 +181,12 @@
     border-radius:5px;
     border:1px solid #7ac9b7;
     resize: none;
+    overflow: hidden;
+}
+
+.bft-feature-form select {
+    height: 30px;
+    padding-top: 1px;
 }
 
 .bft-feature-form input[type=submit] {
@@ -336,7 +340,7 @@
     transition: 0.4s;
 }
 
-/* Add a background color to the button if it is clicked on (add the .bft-active class with JS), and when you move the mouse over it (hover) */
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
 .bft-listingActive, .bft-listingHeader:hover {
     background-color: #0252bf;
 }
@@ -367,7 +371,7 @@
 }
 
 /* Mark the active step: */
-.bft-step.bft-active {
+.bft-step.active {
     opacity: 1;
 }
 
@@ -495,4 +499,25 @@
 
 #bft-cardContent {
     min-height: 200px;
+}
+
+.bft-drawer {
+    width: 0;
+    z-index: 1;
+    overflow-x: hidden;
+    transition: 0.5s;
+}
+
+.bft-toggle-icon {
+    padding:0!important;
+    padding-top:5px!important;
+}
+
+.bft-toggle-filter-group-button {
+    vertical-align: center;
+    margin:auto;
+}
+
+.bft-toggle-filter-group {
+    margin:0!important;
 }
