@@ -114,6 +114,16 @@
     margin-bottom: 5px;
 }
 
+.bft-container a {
+    color:#fff;
+}
+
+.bft-container a:hover {
+    color:#fff;
+    text-shadow: -1px 0 #0254FE, 0 1px #0254FE, 1px 0 #0254FE, 0 -1px #0254FE;
+    text-decoration: none;
+}
+
 .bft-container {
     padding: 2px 2px;
     width: 180px;
@@ -262,13 +272,6 @@
 .bft-feature-form input[type="file"]:focus + label {
     outline: -webkit-focus-ring-color auto 5px;
 }
-
-/*.bft-feature-form-image {*/
-/*    display: none;*/
-/*    !*margin-left: 10px;*!*/
-/*    !*width: 350px;*!*/
-/*    z-index: 1;*/
-/*}*/
 
 .bft-feature-form-with-image-width {
     /*width: 600px;*/
@@ -520,4 +523,21 @@
 
 .bft-toggle-filter-group {
     margin:0!important;
+}
+
+.bft-description {
+    margin:0;
+    font-weight: bold;
+    display: inline-block;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-y: auto;
+    max-width: 100%;
+    max-height: 140px;
+}
+
+@media (max-width: 767px) {
+    .bft-description {
+        max-width: 400px;
+    }
 }

@@ -9,10 +9,12 @@ if (isset($_POST['data']) && isset($_POST['method'])) {
         $prop = $data->properties;
         $id = $prop->id;
         $image = $prop->image;
-        $output = '/images/blueforcetracker/'.$id.'.png';
-        $imageData = explode( ',', $image );
-        file_put_contents($_SERVER['DOCUMENT_ROOT'] . $output, base64_decode($imageData[1]));
-        $prop->image = $output;
+        if ($image !== "#") {
+            $output = '/images/blueforcetracker/' . $id . '.png';
+            $imageData = explode(',', $image);
+            file_put_contents($_SERVER['DOCUMENT_ROOT'] . $output, base64_decode($imageData[1]));
+            $prop->image = $output;
+        }
         $data = json_encode($data);
     }
 

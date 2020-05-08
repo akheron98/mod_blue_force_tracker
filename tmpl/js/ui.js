@@ -36,7 +36,11 @@ const featureForm = `
                 <div class="bft-stepButtons">                           
                     <div>                               
                         <button type="button" id="bft-prevBtn" onclick="nextPrev(-1)" class="bft-stepButton">&#xf060</button>                           
-                    </div>                           
+                    </div>
+                    <div id="bft-importCal" style="display:none"> 
+                        <input id="bft-cal" type="file" onchange="loadCal()">
+                        <label for="bft-cal">&#xf574</label>
+                    </div>                       
                     <div id="bft-importImageButton" style="display:none">                               
                         <input id="bft-image" type="file" accept="image/*" onchange="loadImage()">                               
                         <label for="bft-image">&#xf574</label>                           
@@ -58,7 +62,7 @@ const featureForm = `
 const activityTypeSelectForm = `
     <label for "details_activity">Type d'activité</label>
     <span id="bft-error-details_activity"></span>
-    <select id="bft-details_activity" class="bft-featureDetailsSelector" multiple>   
+    <select id="bft-details_activity" class="bft-featureDetailsSelector">   
         <option value="airsoft">Airsoft</option>   
         <option value="paintball">Paintball</option>
     </select>
@@ -98,26 +102,49 @@ const featureCardDetails_field = `
 `;
 
 const eventDetails = `
-    <h6>Caractéristiques de l'événement</h6>
-    ${activityTypeSelectForm}
-    <label for "details_eventStyle">Style de jeu</label>
-    <span id="bft-error-details_eventStyle"></span>
-    <select id="bft-details_eventStyle" class="bft-featureDetailsSelector" multiple>   
-        <option value="milsim">Milsim</option>   
-        <option value="skirmish">Skirmish</option>
-    </select>
-    <label for "details_eventDate">Date de l'événement</label>
-    <span id="bft-error-details_eventDate"></span>
-    <input required type="date" id="bft-details_eventDate" class="bft-featureDetailsSelector" value="" />
-    <label for "details_eventDebut">Début</label>
-    <span id="bft-error-details_eventDebut"></span>
-    <input required type="time" id="bft-details_eventDebut" class="bft-featureDetailsSelector" value="" />
-    <label for "details_eventFin">Fin</label>
-    <span id="bft-error-details_eventFin"></span>
-    <input required type="time" id="bft-details_eventFin" class="bft-featureDetailsSelector" value="" />
-    <label for "details_eventCout">Coût</label>
-    <span id="bft-error-details_eventCout"></span>
-    <input required type="number" id="bft-details_eventCout" class="bft-featureDetailsSelector" value="" />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <h6>Caractéristiques de l'événement</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                ${activityTypeSelectForm}
+            </div>
+            <div class="col-6">
+                <label for "details_eventStyle">Style de jeu</label>
+                <span id="bft-error-details_eventStyle"></span>
+                <select id="bft-details_eventStyle" class="bft-featureDetailsSelector">   
+                    <option value="milsim">Milsim</option>   
+                    <option value="skirmish">Skirmish / Recball</option>
+                    <option value="speedsoft">Speedsoft / Speedball</option>
+                    <option value="magfed">Magfed</option>
+                    <option value="cqb">Centre intérieur</option>
+                    <option value="training">Formation</option>
+                </select>
+            </div>    
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <label for "details_eventDate">Date de l'événement</label>
+                <span id="bft-error-details_eventDate"></span>
+                <input required type="date" id="bft-details_eventDate" class="bft-featureDetailsSelector" value="" />
+            </div>
+        </div>
+         <div class="row">
+            <div class="col-6">
+                <label for "details_eventDebut">Début</label>
+                <span id="bft-error-details_eventDebut"></span>
+                <input required type="time" id="bft-details_eventDebut" class="bft-featureDetailsSelector" value="" />
+            </div>
+            <div class="col-6">
+                <label for "details_eventFin">Fin</label>
+                <span id="bft-error-details_eventFin"></span>
+                <input required type="time" id="bft-details_eventFin" class="bft-featureDetailsSelector" value="" />
+            </div>    
+        </div>
+    </div>
 `;
 
 const featureCardDetails_event = `
@@ -129,8 +156,6 @@ const featureCardDetails_event = `
     <p id="bft-card_details_eventDebut"></p>
     <label for="bft-card_details_eventFin">Heure de fin</label>
     <p id="bft-card_details_eventFin"></p>
-    <label for="bft-card_details_eventCout">Coùt de l'événement</label>
-    <p id="bft-card_details_eventCout"></p>
 `;
 
 
@@ -173,13 +198,11 @@ const featureCardDetails = `
 
 const featureCardInformations = `
     <div id="bft-cardAvatar">
-        <a id="bft-featureUrl" href="" target="_blank">
-            <img id="bft-cardImage" class="bft-cardImage" src="" alt="">
-        </a>
+        <img id="bft-cardImage" class="bft-cardImage" src="" alt="">
     </div>
     <div id="bft-cardContainer" class="container bft-container">
-        <h4 id="bft-featureLabel"></h4>
-        <p id="bft-featureDescription"></p>
+        <a id="bft-featureUrl" href="" target="_blank"><h4 id="bft-featureLabel"></h4></a>
+        <p class="bft-description" id="bft-featureDescription"></p>
     </div>
 `;
 

@@ -261,7 +261,6 @@ function setFeatureCardDetailsInformations() {
             setInputDetailValue("bft-card_details_eventDate");
             setInputDetailValue("bft-card_details_eventDebut");
             setInputDetailValue("bft-card_details_eventFin");
-            setInputDetailValue("bft-card_details_eventCout");
             break;
         case featureType.team.string :
             details.innerHTML = featureCardDetails_team;
@@ -326,32 +325,41 @@ function separator(size, index) {
 
 function setFeatureDetails() {
     let details = document.getElementById("bft-details");
+    document.getElementById("bft-importCal").style.display = 'none';
     switch (document.getElementById("bft-featureType").value) {
         case featureType.field.string :
             details.innerHTML = fieldDetails;
+            document.getElementById("bft-details_activity").setAttribute('multiple','true');
+            setMultipleInputValue("bft-details_activity");
             setInputValue("bft-details_fieldRules");
             setCheckboxValue('bft-details_fieldUrban');
             setCheckboxValue('bft-details_fieldMeal');
             break;
         case featureType.event.string :
             details.innerHTML = eventDetails;
+            document.getElementById("bft-importCal").style.display = 'block';
+            document.getElementById("bft-details_activity").removeAttribute('multiple');
+            setMultipleInputValue("bft-details_activity");
+            setInputValue("bft-details_eventStyle");
             setInputValue("bft-details_eventDate");
             setInputValue("bft-details_eventDebut");
             setInputValue("bft-details_eventFin");
-            setInputValue("bft-details_eventCout");
             break;
         case featureType.team.string :
             details.innerHTML = teamDetails;
+            document.getElementById("bft-details_activity").removeAttribute('multiple');
             setCheckboxValue('bft-details_teamTraining');
+            setMultipleInputValue("bft-details_activity");
             break;
         case featureType.shop.string :
             details.innerHTML = shopDetails;
+            document.getElementById("bft-details_activity").setAttribute('multiple','true');
+            setMultipleInputValue("bft-details_activity");
             setInputValue("bft-details_shopHours");
             break;
         default:
             details.innerHTML = "Type invalide";
     }
-    setMultipleInputValue("bft-details_activity");
 }
 
 function setInputValue(elementId) {
@@ -436,7 +444,6 @@ function clearErrorMessage() {
     clearError('bft-error-details_eventDate');
     clearError('bft-error-details_eventDebut');
     clearError('bft-error-details_eventFin');
-    clearError('bft-error-details_eventCout');
 
     clearError('bft-error-image');
 }
@@ -471,28 +478,30 @@ function validateDetailInformation() {
 
     switch (document.getElementById("bft-featureType").value) {
         case featureType.field.string :
-            success = validateFieldNotEmpty("bft-details_fieldRules");
+            success = validateFieldNotEmpty("details_activity");
+            success = validateFieldNotEmpty("details_fieldRules");
             break;
         case featureType.event.string :
-            success = validateFieldNotEmpty("bft-details_activity");
-            success = validateFieldNotEmpty("bft-details_eventDate") && success;
-            success = validateFieldNotEmpty("bft-details_eventDebut") && success;
-            success = validateFieldNotEmpty("bft-details_eventFin") && success;
-            success = validateFieldNotEmpty("bft-details_eventCout") && success;
+            success = validateFieldNotEmpty("details_eventStyle");
+            success = validateFieldNotEmpty("details_activity");
+            success = validateFieldNotEmpty("details_eventDate") && success;
+            success = validateFieldNotEmpty("details_eventDebut") && success;
+            success = validateFieldNotEmpty("details_eventFin") && success;
 
             break;
         case featureType.team.string :
-            success = validateFieldNotEmpty("bft-details_activity");
+            success = validateFieldNotEmpty("details_activity");
             break;
         case featureType.shop.string :
-            success = validateFieldNotEmpty("bft-details_shopHours");
+            success = validateFieldNotEmpty("details_activity");
+            success = validateFieldNotEmpty("details_shopHours");
             break;
     }
     return success;
 }
 
 function validateFieldNotEmpty(id) {
-    if (!document.getElementById(id).value) {
+    if (document.getElementById(id) && !document.getElementById(id).value) {
         document.getElementById('bft-error-'+id).innerHTML = " Requis! *";
         document.getElementById(id).classList.add(INVALID_FIELD_BG);
         return false;
@@ -522,6 +531,69 @@ function validateBasicInformation() {
         success = false;
     }
     return success;
+}
+
+function loadCal() {
+    let cal = document.getElementById("bft-cal");
+    if (cal) {
+        let eventType = document.getElementById("bft-details_activity").value;
+        let oFReader = new FileReader();
+        oFReader.readAsText(cal.files[0]);
+        oFReader.onload = function () {
+            jQuery.post(calParserUrl, { data: {'data':oFReader.result, 'type':eventType} }).done(function(response) {
+                const data = JSON.parse(response);
+                const location = data[0].extendedProps.location;
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', locationService, true);
+                let postData = new FormData();
+                postData.append('data', location);
+                xhr.onreadystatechange = function () {
+                    if (this.readyState === 4 && this.status === 200 && xhr.response) {
+                        const locations = JSON.parse(xhr.response);
+                        if (locations) {
+                            const position = locations['items'][0]['position'];
+                            feature.geometry.coordinates = [position.lng, position.lat];
+                            marker.setLngLat(feature.geometry.coordinates);
+                            marker.setOffset([0, -13]);
+                            map.flyTo({
+                                center: feature.geometry.coordinates,
+                                zoom: 10,
+                                bearing: 0,
+                                speed: 0.8, // make the flying slow
+                                curve: 1, // change the speed at which it zooms out
+                                easing: function (t) {
+                                    return t;
+                                },
+                                essential: true
+                            });
+                        }
+                    }
+                }
+                xhr.send(postData);
+                feature.properties.label = data[0].title;
+                feature.id = data[0].id;
+                feature.properties.id = data[0].id;
+                feature.properties.url = data[0].url;
+                feature.properties.type = featureType.event.string;
+                feature.properties.description = data[0].extendedProps.description;
+                feature.properties.details_eventStyle = data[0].extendedProps.style;
+                const d = new Date(data[0].start);
+                feature.properties.details_eventDate = d.getFullYear() + '-' + d.getMonth().toString().lpad("0", 2)+ '-' + d.getDate().toString().lpad("0", 2)
+                const start = new Date(data[0].start);
+                feature.properties.details_eventDebut = start.getHours().toString().lpad("0", 2) + ":" + start.getMinutes().toString().lpad("0", 2);
+                const end = new Date(data[0].end);
+                feature.properties.details_eventFin = end.getHours().toString().lpad("0", 2) + ":" + end.getMinutes().toString().lpad("0", 2);
+                showfeatureInformations();
+            });
+        };
+    }
+}
+
+String.prototype.lpad = function(padString, length) {
+    let str = this;
+    while (str.length < length)
+        str = padString + str;
+    return str;
 }
 
 async function saveFeature() {
@@ -683,7 +755,7 @@ function setFeatureCardInformation(feature, featureId) {
     if (feature.properties.image && feature.properties.image !== EMPTY_STRING_SHARP) {
         imageElement.setAttribute("src", feature.properties.image);
     } else {
-        imageElement.setAttribute("src","/modules/mod_blue_force_tracker/tmpl/assets/image_non_trouvee.png");
+        imageElement.style.display = 'none';
     }
     imageElement.setAttribute("alt", feature.properties.label);
     let featureLabel = document.getElementById("bft-featureLabel" + id);
@@ -923,11 +995,15 @@ function showTab(n) {
 
     if (n === 0) {
         document.getElementById("bft-prevBtn").style.display = "none";
+        if (document.getElementById("bft-featureType") === featureType.event.string) {
+            document.getElementById("bft-importCal").style.display = 'block';
+        }
     } else {
         document.getElementById("bft-prevBtn").style.display = "inline";
+        document.getElementById("bft-importCal").style.display = 'none';
     }
     if (n === (x.length - 1)) {
-        document.getElementById("bft-importImageButton").style.display = 'block'
+        document.getElementById("bft-importImageButton").style.display = 'block';
         showImage();
         document.getElementById("bft-nextBtn").innerHTML = "&#xf0c7"; // save
     } else {
@@ -1025,7 +1101,7 @@ function generateFeatureMouseOver() {
     });
 }
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiYWtoZXJvbiIsImEiOiJjazduNHBvOXIwOHl6M3Bqd2x2ODJqbjE4In0.Jx6amOk7NKh8qcm91Ba8vg';
+mapboxgl.accessToken = MAPBOX_API_KEY;
 const popup = new mapboxgl.Popup({
     closeButton: false
 });
