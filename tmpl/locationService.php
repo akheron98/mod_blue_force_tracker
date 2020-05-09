@@ -1,7 +1,7 @@
 <?php
 
 if (isset($_POST['data'])) {
-    $url = 'https://discover.search.hereapi.com/v1/discover';
+    $url = 'https://autosuggest.search.hereapi.com/v1/autosuggest';
     $API_KEY = file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/.here");
     $parameters = [
         'at' => '-72.937107,46.286173',

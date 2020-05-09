@@ -3,10 +3,10 @@
 if (isset($_POST['data']) && isset($_POST['method'])) {
     $data = $_POST['data'];
     $method = $_POST['method'];
+    $data = json_decode($data);
+    $prop = $data->properties;
 
     if ($method !== "DELETE") {
-        $data = json_decode($data);
-        $prop = $data->properties;
         $id = $prop->id;
         $image = $prop->image;
         if ($image !== "#") {
@@ -16,6 +16,15 @@ if (isset($_POST['data']) && isset($_POST['method'])) {
             $prop->image = $output;
         }
         $data = json_encode($data);
+    } else {
+        $image = $prop->image;
+        $file = $_SERVER['DOCUMENT_ROOT'] . $prop->image;
+        if ($image !== "#" && is_writable($file)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . $prop->image);
+        }
+        $toDelete = new stdClass();
+        $toDelete->id = $prop->id;
+        $data = json_encode($toDelete);
     }
 
     $apiKey = "x-api-key:sBLS9lBAy76rFJ4u41qiU7rYyArA2lNF8bwjkn7g"; // . str_replace("\n", "", getenv('AWS_API_KEY'));

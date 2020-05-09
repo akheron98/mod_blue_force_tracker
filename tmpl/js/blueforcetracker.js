@@ -6,7 +6,8 @@ const HTTP_SUCCESS_CODE = "200";
 const INVALID_FIELD_BG = "bft-invalid";
 let cardSide = "RECTO";
 let URL_REGEX;
-URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+//URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+URL_REGEX = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/gi;
 let markerOriginalPos = null;
 const featureType = {
     team : {
@@ -31,8 +32,8 @@ const defaultFeature = {
     type: "Feature",
     properties: {
         id: NEW_FEATURE_ID,
-        type: "field",
-        icon: "ranger-station",
+        type: featureType.event.string,
+        icon: featureType.event.icon,
         label: "",
         description: "",
         url: "",
@@ -46,10 +47,10 @@ const defaultFeature = {
 let cropper;
 const cropperOptions = {
     viewport: {
-        width: 200,
+        width: 400,
         height: 200
     },
-    boundary: {width: 290, height: 200},
+    boundary: {width: 500, height: 200},
 };
 
 String.prototype.capitalize = function() {
@@ -258,6 +259,7 @@ function setFeatureCardDetailsInformations() {
             break;
         case featureType.event.string :
             details.innerHTML = featureCardDetails_event;
+            setMultipleInputDetailValue("bft-card_details_eventStyle", "");
             setInputDetailValue("bft-card_details_eventDate");
             setInputDetailValue("bft-card_details_eventDebut");
             setInputDetailValue("bft-card_details_eventFin");
@@ -273,7 +275,7 @@ function setFeatureCardDetailsInformations() {
         default:
             details.innerHTML = "Type invalide";
     }
-    setMultipleInputDetailValue("bft-card_details_activity");
+    setMultipleInputDetailValue("bft-card_details_activity", " seulement.");
 }
 
 function setCheckboxDetailValue(elementId) {
@@ -290,7 +292,7 @@ function setInputDetailValue(elementId) {
     document.getElementById(elementId).innerText = feature.properties[id] ? feature.properties[id] : "";
 }
 
-function setMultipleInputDetailValue(elementId) {
+function setMultipleInputDetailValue(elementId, suffixe) {
     const property = elementId.replace("bft-card_","");
     const elementValues = feature.properties[property];
     let items = elementValues;
@@ -303,7 +305,7 @@ function setMultipleInputDetailValue(elementId) {
             text = text + item.capitalize() + separator(items.length, index);
         });
     } else if (items) {
-        text = items.capitalize() + " seulement.";
+        text = items.capitalize() + suffixe;
     } else {
         text = "Non défini";
     }
@@ -428,8 +430,9 @@ async function setFeaturePropertiesFromForm() {
     }
 }
 
-function isUrlValid(url) {
-    return URL_REGEX.test(url);
+function isUrlValid(urlToTest) {
+    URL_REGEX.compile(URL_REGEX);
+    return URL_REGEX.test(urlToTest);
 }
 
 function clearErrorMessage() {
@@ -452,7 +455,7 @@ function clearError(id) {
     let error = document.getElementById(id);
     if (error) {
         document.getElementById(id).innerHTML = ""
-        document.getElementById(id).classList.remove(INVALID_FIELD_BG);
+        document.getElementById(id.replace("-error", "")).classList.remove(INVALID_FIELD_BG);
     }
 }
 
@@ -538,7 +541,7 @@ function loadCal() {
     if (cal) {
         let eventType = document.getElementById("bft-details_activity").value;
         let oFReader = new FileReader();
-        oFReader.readAsText(cal.files[0]);
+        oFReader.readAsText(cal.files[0], "utf-8");
         oFReader.onload = function () {
             jQuery.post(calParserUrl, { data: {'data':oFReader.result, 'type':eventType} }).done(function(response) {
                 const data = JSON.parse(response);
@@ -639,7 +642,7 @@ async function persistFeature(method) {
         method: "POST",
         url: urlPost,
         data: {
-            data:JSON.stringify(method === "DELETE" ? {id:feature.properties.id} : feature),
+            data:JSON.stringify(feature),
             method: method,
         },
     });
@@ -652,7 +655,7 @@ async function persistFeature(method) {
 }
 
 function addAddButton() {
-    if (connectedUser && hasAddAccess) {
+    if (connectedUser && (hasAddAccess || isAdmin)) {
         let filterGroup = document.getElementById('bft-filter-group');
         let addGroup = document.createElement('div');
         addGroup.className = 'bft-add-group';
@@ -706,6 +709,7 @@ function cancelAddFeature() {
 function resetFeature() {
     destroyCroppie();
     removeMarker();
+    clearErrorMessage();
     cardSide = "RECTO";
     feature = jQuery.extend(true, {}, defaultFeature);
     document.getElementById("bft-featureInformations").style.display = "none";
@@ -741,19 +745,11 @@ function addMapControls() {
 
 function setFeatureCardInformation(feature, featureId) {
     let id = featureId ? featureId : "";
-    let url = document.getElementById("bft-featureUrl" + id);
+    document.getElementById("bft-featureUrl" + id).setAttribute("href", feature.properties.url);
     let imageElement = document.getElementById("bft-cardImage" + id);
 
-    if (feature.properties.url === EMPTY_STRING_SHARP) {
-        let avatar = document.getElementById("bft-cardAvatar" + id);
-        if (avatar) {
-            avatar.replaceChild(imageElement, url);
-        }
-    } else {
-        url.setAttribute("href", feature.properties.url);
-    }
     if (feature.properties.image && feature.properties.image !== EMPTY_STRING_SHARP) {
-        imageElement.setAttribute("src", feature.properties.image);
+        imageElement.setAttribute("src", feature.properties.image + "?" + new Date().getMilliseconds());
     } else {
         imageElement.style.display = 'none';
     }
@@ -994,11 +990,12 @@ function showTab(n) {
     x[n].style.display = "block";
 
     if (n === 0) {
-        document.getElementById("bft-prevBtn").style.display = "none";
-        if (document.getElementById("bft-featureType") === featureType.event.string) {
+        document.getElementById("bft-prevBtn").setAttribute('disabled','true');
+        if (document.getElementById("bft-featureType").value === featureType.event.string) {
             document.getElementById("bft-importCal").style.display = 'block';
         }
     } else {
+        document.getElementById("bft-prevBtn").removeAttribute('disabled');
         document.getElementById("bft-prevBtn").style.display = "inline";
         document.getElementById("bft-importCal").style.display = 'none';
     }

@@ -79,7 +79,7 @@
 }
 
 .mapboxgl-popup {
-    max-width: 600px;
+    max-width: 600px!important;
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
@@ -90,7 +90,7 @@
 .bft-featureCard {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     transition: 0.3s;
-    width: 200px;
+    width: 400px;
     border-radius: 5px;
     background: rgb(1, 42, 127);
     color: #fff;
@@ -105,7 +105,6 @@
     border-radius: 5px;
     object-fit: cover;
     width: 100%;
-    /*height: 200px;*/
     max-height: 200px!important;
 }
 
@@ -181,6 +180,10 @@
     line-height: 2px;
 }
 
+.bft-feature-form select, .bft-feature-form input[type=text], .bft-feature-form input[type=url], .bft-feature-form input[type=date], .bft-feature-form input[type=time], .bft-feature-form input[type=number] {
+    max-height: 20px;
+}
+
 .bft-feature-form select, .bft-feature-form input[type=text], .bft-feature-form input[type=url], .bft-feature-form input[type=date], .bft-feature-form input[type=time], .bft-feature-form input[type=number], .bft-feature-form textarea {
     font-size: 11px;
     background: #222;
@@ -191,7 +194,7 @@
     border-radius:5px;
     border:1px solid #7ac9b7;
     resize: none;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .bft-feature-form select {
@@ -220,7 +223,7 @@
 .bft-feature-form h6 {
     text-align: center;
     font-weight: 900;
-    margin-bottom: 20px!important;
+    margin-bottom: 10px!important;
     margin-top: 0!important;
     padding: 5px;
 }
@@ -229,7 +232,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 300px;
+    width: 550px;
     height: 360px;
     padding: 0 5px 0 5px;
     border-radius:5px;
@@ -271,17 +274,6 @@
 
 .bft-feature-form input[type="file"]:focus + label {
     outline: -webkit-focus-ring-color auto 5px;
-}
-
-.bft-feature-form-with-image-width {
-    /*width: 600px;*/
-}
-
-.bft-feature-form-with-image {
-    /*display: flex;*/
-    /*flex-direction: row;*/
-    /*flex-wrap: nowrap;*/
-    /*z-index: 1;*/
 }
 
 .bft-blue_force_tracker {
@@ -398,6 +390,11 @@
     background-color: #0252bf !important;
 }
 
+.bft-stepButton:disabled {
+    background-color: gray !important;
+}
+
+
 .bft-stepButtons {
     display: flex;
     flex-direction: row;
@@ -406,6 +403,7 @@
     overflow:hidden;
     width:100%;
     margin-top:10px;
+    margin-bottom:5px;
 }
 
 .bft-stepBullets {

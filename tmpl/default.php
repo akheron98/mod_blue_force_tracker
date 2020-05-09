@@ -41,10 +41,10 @@ defined('_JEXEC') or die; ?>
         zoom: 6.5
     });
     const urlFeature = "https://m05rcnja4m.execute-api.us-east-2.amazonaws.com/prod/marker";
-    const urlPost = "<?php echo JURI::root() . "modules/mod_blue_force_tracker/tmpl/gateway.php"?>";
-    const calParserUrl = "<?php echo JURI::root() . "modules/mod_blue_force_tracker/tmpl/calendarParser.php"?>";
-    const urlGetUser = "<?php echo JURI::root() . "modules/mod_blue_force_tracker/tmpl/userService.php"?>";
-    const locationService = "<?php echo JURI::root() . "modules/mod_blue_force_tracker/tmpl/locationService.php"?>";
+    const urlPost = "<?php echo "http://" . $_SERVER['HTTP_HOST'] . "/modules/mod_blue_force_tracker/tmpl/gateway.php"?>";
+    const calParserUrl = "<?php echo "http://" . $_SERVER['HTTP_HOST'] . "/modules/mod_blue_force_tracker/tmpl/calendarParser.php"?>";
+    const urlGetUser = "<?php echo "http://" . $_SERVER['HTTP_HOST'] . "/modules/mod_blue_force_tracker/tmpl/userService.php"?>";
+    const locationService = "<?php echo "http://" . $_SERVER['HTTP_HOST'] . "/modules/mod_blue_force_tracker/tmpl/locationService.php"?>";
     const joomlaUserId = "<?php echo $joomlaUserId;?>";
     const joomlaUserName = "<?php echo $joomlaUserName;?>";
     const hasAddAccess = <?php echo $hasAddAccess;?>;

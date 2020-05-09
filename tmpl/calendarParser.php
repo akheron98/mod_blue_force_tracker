@@ -23,9 +23,12 @@
 
                             if ($key === "DESCRIPTION") {
                                 preg_match_all("/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/im", $event, $urls);
-
+                                $done = [];
                                 foreach ($urls[0] as $url) {
-                                    $event = str_replace($url, "<a href='" . $url . "' target='_blank'>" . $url . "</a>", $event);
+                                    if (array_search($url, $done) === false) {
+                                        $event = str_replace($url, "<a href='" . $url . "' target='_blank'>" . $url . "</a>", $event);
+                                        $done[] = $url;
+                                    }
                                 }
                             }
                             $icsDates [$index] [$key] = $event;
@@ -60,7 +63,7 @@ if (isset($_POST['data'])) {
 
     foreach ($ical as $icsEvent) {
         $event = new stdClass();
-        $event->id = clean(str_ireplace("@facebook.com", "", $icsEvent['UID']));
+        $event->id = clean(str_ireplace(["@facebook.com","@google.com"], "", $icsEvent['UID']));
         $event->title = clean($icsEvent['SUMMARY']);
         $event->start = cleanDate(isset($icsEvent ['DTSTART;VALUE=DATE']) ? $icsEvent ['DTSTART;VALUE=DATE'] : $icsEvent ['DTSTART']);
         $event->end = cleanDate($icsEvent['DTEND']);

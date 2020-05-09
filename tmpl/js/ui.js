@@ -14,7 +14,7 @@ const featureForm = `
                         <br />                               
                         <label for="bft-description">Description</label>
                         <span id="bft-error-description"></span>                               
-                        <textarea rows="2" required id="bft-description" name="bft-description" placeholder="Courte description" maxlength="140"></textarea>
+                        <textarea rows="5" required id="bft-description" name="bft-description" placeholder="Description"></textarea>
                         <br />                               
                         <label for="bft-url">Adresse site web</label>
                         <span id="bft-error-url"></span>                               
@@ -37,13 +37,15 @@ const featureForm = `
                     <div>                               
                         <button type="button" id="bft-prevBtn" onclick="nextPrev(-1)" class="bft-stepButton">&#xf060</button>                           
                     </div>
-                    <div id="bft-importCal" style="display:none"> 
-                        <input id="bft-cal" type="file" onchange="loadCal()">
-                        <label for="bft-cal">&#xf574</label>
-                    </div>                       
-                    <div id="bft-importImageButton" style="display:none">                               
-                        <input id="bft-image" type="file" accept="image/*" onchange="loadImage()">                               
-                        <label for="bft-image">&#xf574</label>                           
+                    <div>         
+                        <div id="bft-importImageButton" style="display:none">                               
+                            <input id="bft-image" type="file" accept="image/*" onchange="loadImage()">                               
+                            <label for="bft-image">&#xf574</label>                           
+                        </div>
+                        <div id="bft-importCal" style="display:none"> 
+                            <input id="bft-cal" type="file" accept=".ics" onchange="loadCal()">
+                            <label for="bft-cal">&#xf271</label>
+                        </div>  
                     </div>                           
                     <div>                               
                         <button type="button" id="bft-nextBtn" onclick="nextPrev(1)" class="bft-stepButton"><span id="bft-saveIcon">&#xf061</span></button>                           
@@ -150,6 +152,8 @@ const eventDetails = `
 const featureCardDetails_event = `
     <label for="bft-card_details_activity">Type d'activité</label>
     <p id="bft-card_details_activity"></p>
+    <label for="bft-card_details_eventStyle">Style d'événement</label>
+    <p id="bft-card_details_eventStyle"></p>
     <label for="bft-card_details_eventDate">Date de l'événement</label>
     <p id="bft-card_details_eventDate"></p>
     <label for="bft-card_details_eventDebut">Heure de début</label>
