@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 512 455.11124"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="shopping-cart.svg"
+   width="512"
+   height="455.11124"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1318"
+     inkscape:window-height="480"
+     id="namedview6"
+     showgrid="false"
+     inkscape:zoom="0.4609375"
+     inkscape:cx="288"
+     inkscape:cy="256"
+     inkscape:window-x="1514"
+     inkscape:window-y="282"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4" />
+  <path
+     d="M 469.44012,267.83918 511.46058,82.950249 c 3.03377,-13.34934 -7.11289,-26.06134 -20.80268,-26.06134 H 141.51826 L 133.3707,17.057783 C 131.34048,7.12978 122.60448,0 112.47025,0 H 21.333339 C 9.5511136,0 0,9.551114 0,21.333339 V 35.555565 C 0,47.337789 9.5511136,56.888909 21.333339,56.888909 H 83.451577 L 145.89426,362.16454 c -14.93867,8.59111 -25.00534,24.69956 -25.00534,43.1689 0,27.49156 22.28623,49.77779 49.77779,49.77779 27.49156,0 49.77779,-22.28623 49.77779,-49.77779 0,-13.93245 -5.73067,-26.52001 -14.95467,-35.55557 h 186.35294 c -9.22312,9.03556 -14.95378,21.62312 -14.95378,35.55557 0,27.49156 22.28622,49.77779 49.77779,49.77779 27.49156,0 49.77779,-22.28623 49.77779,-49.77779 0,-19.70845 -11.45601,-36.73957 -28.07023,-44.80446 l 4.904,-21.57867 c 3.03378,-13.34934 -7.11289,-26.06134 -20.80267,-26.06134 H 193.88183 l -5.81778,-28.44445 h 260.5734 c 9.96089,0 18.59556,-6.89245 20.80267,-16.60534 z"
+     id="path2"
+     inkscape:connector-curvature="0"
+     style="stroke-width:0.88888913" />
+</svg>

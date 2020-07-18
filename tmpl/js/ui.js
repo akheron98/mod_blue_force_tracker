@@ -4,22 +4,46 @@ const featureForm = `
         <div class="bft-feature-form">                   
             <div class="bft-formContent">                       
                 <form id="bft-featureForm" action="">                           
-                    <div class="bft-tab" id="bft-basicInformations">                               
-                        <h6>Votre point d'intérêt</h6>                               
-                        <select id="bft-featureType" onchange="setFeatureDetails()"></select>
-                        <br />                               
-                        <label for="bft-label">Titre</label>
-                        <span id="bft-error-label"></span>                               
-                        <input required autofocus id="bft-label" name="bft-label" placeholder="Titre de votre point d'intérêt" value="" type="text" maxlength="50" />
-                        <br />                               
-                        <label for="bft-description">Description</label>
-                        <span id="bft-error-description"></span>                               
-                        <textarea rows="5" required id="bft-description" name="bft-description" placeholder="Description"></textarea>
-                        <br />                               
-                        <label for="bft-url">Adresse site web</label>
-                        <span id="bft-error-url"></span>                               
-                        <input id="bft-url" name="bft-url" placeholder="http://www.example.com" value="" type="url" width="100px;" >
-                        <br />                           
+                    <div class="bft-tab" id="bft-basicInformations">
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Votre point d'intérêt</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="bft-featureType">Type de point</label>
+                                <select id="bft-featureType" onchange="setFeatureDetails()"></select>
+                            </div>
+                            <div class="col" id="bft-featured-option" style="display:none;">
+                                <label for="bft-featured">Commandité AJPAQ</label>
+                                <select id="bft-featured">   
+                                    <option value="non">Non</option>   
+                                    <option value="oui">Oui</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="bft-label">Titre</label>
+                                <span id="bft-error-label"></span>                               
+                                <input required autofocus id="bft-label" name="bft-label" placeholder="Titre de votre point d'intérêt" value="" type="text" maxlength="50" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">                     
+                                <label for="bft-description">Description</label>
+                                <span id="bft-error-description"></span>                               
+                                <textarea rows="5" required id="bft-description" name="bft-description" placeholder="Description"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="bft-url">Adresse site web</label>
+                                <span id="bft-error-url"></span>                               
+                                <input id="bft-url" name="bft-url" placeholder="http://www.example.com" value="" type="url" width="100px;" >
+                            </div>
+                        </div>                           
                     </div>                           
                     <div class="bft-tab" id="bft-detailInformations">                               
                         <div id="bft-details"></div>                           
@@ -93,14 +117,33 @@ const fieldDetails = `<h6>Caractéristiques du terrain</h6>
 `;
 
 const featureCardDetails_field = `
+<div class="row">
+        <div class="col-12">
     <label for="bft-card_details_activity">Type d'activité</label>
     <p id="bft-card_details_activity"></p>
+     </div>
+      </div>
+    <div class="row">
+        <div class="col-12">
     <label for="bft-card_details_fieldRules">Règles du terrain</label>
     <p id="bft-card_details_fieldRules"></p>
+     </div>
+     </div>
+    <div class="row">
+        <div class="col-6">
     <label for="bft-card_details_fieldUrban">Environnement urbain</label>
     <p id="bft-card_details_fieldUrban"></p>
+    <div class="col-6">
+    </div>
     <label for="bft-card_details_fieldMeal">Nourriture vendue sur place</label>
     <p id="bft-card_details_fieldMeal"></p>
+    </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p class="bft-description" id="bft-featureDescription"></p>
+        </div>
+    </div>
 `;
 
 const eventDetails = `
@@ -150,16 +193,37 @@ const eventDetails = `
 `;
 
 const featureCardDetails_event = `
-    <label for="bft-card_details_activity">Type d'activité</label>
-    <p id="bft-card_details_activity"></p>
-    <label for="bft-card_details_eventStyle">Style d'événement</label>
-    <p id="bft-card_details_eventStyle"></p>
-    <label for="bft-card_details_eventDate">Date de l'événement</label>
-    <p id="bft-card_details_eventDate"></p>
-    <label for="bft-card_details_eventDebut">Heure de début</label>
-    <p id="bft-card_details_eventDebut"></p>
-    <label for="bft-card_details_eventFin">Heure de fin</label>
-    <p id="bft-card_details_eventFin"></p>
+    <div class="row">
+        <div class="col-6">
+            <label for="bft-card_details_activity">Type d'activité</label>
+            <p id="bft-card_details_activity"></p>
+        </div>
+        <div class="col-6">
+            <label for="bft-card_details_eventStyle">Style d'événement</label>
+            <p id="bft-card_details_eventStyle"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <label for="bft-card_details_eventDate">Date de l'événement</label>
+            <p id="bft-card_details_eventDate"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <label for="bft-card_details_eventDebut">Heure de début</label>
+            <p id="bft-card_details_eventDebut"></p>
+        </div>
+        <div class="col-6">
+            <label for="bft-card_details_eventFin">Heure de fin</label>
+            <p id="bft-card_details_eventFin"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p class="bft-description" id="bft-featureDescription"></p>
+        </div>
+    </div>
 `;
 
 
@@ -176,10 +240,21 @@ const teamDetails = `
 `;
 
 const featureCardDetails_team = `
+<div class="row">
+        <div class="col-6">
     <label for="bft-card_details_activity">Type d'activité</label>
     <p id="bft-card_details_activity"></p>
+    </div>
+        <div class="col-6">
     <label for="bft-card_details_teamTraining">Entrainement d'équipe</label>
     <p id="bft-card_details_teamTraining"></p>
+    </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p class="bft-description" id="bft-featureDescription"></p>
+        </div>
+    </div>
 `;
 
 const shopDetails = `<h6>Caractéristiques de la boutique</h6>
@@ -190,10 +265,22 @@ const shopDetails = `<h6>Caractéristiques de la boutique</h6>
 `;
 
 const featureCardDetails_shop = `
+ <div class="row">
+        <div class="col-12">
     <label for="bft-card_details_activity">Type d'activité</label>
     <p id="bft-card_details_activity"></p>
+    </div></div>
+     <div class="row">
+        <div class="col-12">
     <label for="bft-card_details_shopHours">Heures d'ouvertures</label>
     <p id="bft-card_details_shopHours"></p>
+    </div></div>
+   
+    <div class="row">
+        <div class="col-12">
+            <p class="bft-description" id="bft-featureDescription"></p>
+        </div>
+    </div>
 `;
 
 const featureCardDetails = `
@@ -205,8 +292,11 @@ const featureCardInformations = `
         <img id="bft-cardImage" class="bft-cardImage" src="" alt="">
     </div>
     <div id="bft-cardContainer" class="container bft-container">
-        <a id="bft-featureUrl" href="" target="_blank"><h4 id="bft-featureLabel"></h4></a>
-        <p class="bft-description" id="bft-featureDescription"></p>
+        <div class="row">
+            <div class="col-12">
+                <a id="bft-featureUrl" href="" target="_blank"><h4 id="bft-featureLabel"></h4></a>    
+            </div>
+        </div>
     </div>
 `;
 
@@ -217,9 +307,16 @@ const featureCard = `
             ${featureCardInformations}
             <div id="bft-cardLoading" class="spinner-border"></div>
             </div>
-            <div class="bft-spread">
-                <span style="padding-left:10px;color:lightslategray;"><span id="bft-userName"></span></span>
-                <a id="bft-showMoreInfo" class="bft-showMoreFeatureInfoButton" href="#"><i id="bft-flipArrow" class="fas fa-chevron-circle-right" style="padding:0;"></i></a>
+            <div class="row">
+                <div class="col">
+                    <span style="white-space: nowrap;padding-left:10px;color:lightslategray;"><span id="bft-userName"></span></span>
+                </div>
+                <div class="col">
+                    <span class="bft-featured-label" id="bft-featured-label">Commandité AJPAQ</span>
+                </div>
+                <div class="col" style="text-align: right">
+                    <a id="bft-showMoreInfo" class="bft-showMoreFeatureInfoButton" href="#"><i id="bft-flipArrow" class="fas fa-chevron-circle-right" style="padding:0;"></i></a>
+                </div>
             </div>
             <div class="bft-spread">
                 <button onclick="return editFeature();" id="bft-updateFeature" class="bft-updateFeature"><i class="fas fa-edit" style="padding:0;"></i></button>

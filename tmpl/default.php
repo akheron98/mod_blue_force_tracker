@@ -5,6 +5,7 @@ defined('_JEXEC') or die; ?>
 <link href="/modules/mod_blue_force_tracker/tmpl/css/blueforcetracker.css" rel="stylesheet"/>
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/croppie.css" />
 <link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/bootstrap.min.css">
+<link rel="stylesheet" href="/modules/mod_blue_force_tracker/tmpl/css/fontawesome-free-5.13.0-web/css/all.min.css">
 
 <div class="container-fluid" style="padding:0;">
     <div id="bft-featuresStats" class="row" style="margin-left:0;"></div>

@@ -124,7 +124,8 @@ function showFeaturesOnMap() {
                     'type': 'symbol',
                     'source': 'places',
                     'layout': {
-                        'icon-image': symbol + '-15',
+                        'icon-image': featureType[featureProperties].string, //symbol + '-15',
+                        'icon-size': 0.009,
                         'icon-allow-overlap': true,
                     },
                     'filter': ['==', 'icon', symbol]
@@ -275,6 +276,7 @@ function setFeatureCardDetailsInformations() {
         default:
             details.innerHTML = "Type invalide";
     }
+    document.getElementById("bft-featureDescription").innerHTML = feature.properties.description;
     setMultipleInputDetailValue("bft-card_details_activity", " seulement.");
 }
 
@@ -328,6 +330,7 @@ function separator(size, index) {
 function setFeatureDetails() {
     let details = document.getElementById("bft-details");
     document.getElementById("bft-importCal").style.display = 'none';
+    document.getElementById('bft-featured-option').style.display = 'none';
     switch (document.getElementById("bft-featureType").value) {
         case featureType.field.string :
             details.innerHTML = fieldDetails;
@@ -339,6 +342,9 @@ function setFeatureDetails() {
             break;
         case featureType.event.string :
             details.innerHTML = eventDetails;
+            if (isAdmin) {
+                document.getElementById('bft-featured-option').style.display = 'block';
+            }
             document.getElementById("bft-importCal").style.display = 'block';
             document.getElementById("bft-details_activity").removeAttribute('multiple');
             setMultipleInputValue("bft-details_activity");
@@ -414,6 +420,7 @@ async function setFeaturePropertiesFromForm() {
     feature.properties.icon = featureType[feature.properties.type].icon;
     feature.properties.label = document.getElementById("bft-label").value;
     feature.properties.description = document.getElementById("bft-description").value;
+    feature.properties.featured = document.getElementById("bft-featured").value;
     let url = document.getElementById("bft-url").value;
     feature.properties.url = url === "" ? EMPTY_STRING_SHARP : url;
     feature.properties.owner = joomlaUserId;
@@ -756,8 +763,20 @@ function setFeatureCardInformation(feature, featureId) {
     imageElement.setAttribute("alt", feature.properties.label);
     let featureLabel = document.getElementById("bft-featureLabel" + id);
     if (featureLabel) {
-        featureLabel.innerHTML = feature.properties.label;
-        document.getElementById("bft-featureDescription" + id).innerHTML = feature.properties.description;
+        let labelSuffix = "";
+
+        if (feature.properties['approved'] === 'oui') {
+            labelSuffix = `<i id="bft-approved" class="fas fa-check-circle bft-approved"></i>`;
+        }
+        if (feature.properties.featured === 'oui' && feature.properties.type === featureType.event.string) {
+            labelSuffix = `<i id="bft-approved" class="fas fa-check-circle bft-approved"></i>`;
+            const card = document.getElementById("bft-card" + id);
+            if (card) {
+                document.getElementById("bft-card" + id).classList.add("bft-featured");
+                document.getElementById("bft-featured-label").style.display = 'block';
+            }
+        }
+        featureLabel.innerHTML = feature.properties.label + labelSuffix;
     }
     const cardLoading = document.getElementById('bft-cardLoading' + id);
     if (cardLoading) {
@@ -775,6 +794,21 @@ function getUniqueFeatureCardInformations(id) {
     return uniqueCard.replace("bft-featureDescription", "bft-featureDescription" + id);
 }
 
+function getTypeIcon(type) {
+    switch (type) {
+        case featureType.team.string :
+            return `<i class="fas fa-users"></i>`;
+        case  featureType.field.string :
+            return `<i class="fas fa-home"></i>`;
+        case  featureType.event.string :
+            return `<i class="fas fa-calendar-day"></i>`;
+        case  featureType.shop.string :
+            return `<i class="fas fa-shopping-cart"></i>`;
+        default:
+            return `<i class="fas fa-question"></i>`;
+    }
+}
+
 function renderListings(features) {
     const filterEl = document.getElementById('bft-feature-filter');
     const listingEl = document.getElementById('bft-feature-listing');
@@ -787,7 +821,7 @@ function renderListings(features) {
             let prop = feature.properties;
             let html =
                 '<button class="bft-listingHeader">' +
-                prop.label +
+                getTypeIcon(prop.type) + prop.label +
                 '</button>' +
                 '<div class="bft-listingDetail" id="bft-listing'+prop.id+'">' +
                 '    <input type="hidden" id="bft-lngbft-listing'+prop.id+'" value="'+feature.geometry.coordinates[0]+'" />' +
@@ -963,6 +997,7 @@ function showfeatureInformations() {
 
     setInputValue("bft-label");
     setInputValue("bft-description");
+
     if (feature.properties.url === EMPTY_STRING_SHARP) {
         feature.properties.url = "";
     }
@@ -1113,10 +1148,39 @@ const marker = new mapboxgl.Marker({
     offset: [0,-13]
 });
 
+function loadImages() {
+    map.loadImage('/modules/mod_blue_force_tracker/tmpl/assets/home.png', function(error, image) {
+        if (error) throw error;
+        // Add the loaded image to the style's sprite with the ID 'kitten'.
+        map.addImage('field', image);
+    });
+    map.loadImage('/modules/mod_blue_force_tracker/tmpl/assets/question.png', function(error, image) {
+        if (error) throw error;
+        // Add the loaded image to the style's sprite with the ID 'kitten'.
+        map.addImage('default', image);
+    });
+    map.loadImage('/modules/mod_blue_force_tracker/tmpl/assets/users.png', function(error, image) {
+        if (error) throw error;
+        // Add the loaded image to the style's sprite with the ID 'kitten'.
+        map.addImage('team', image);
+    });
+    map.loadImage('/modules/mod_blue_force_tracker/tmpl/assets/calendar-day.png', function(error, image) {
+        if (error) throw error;
+        // Add the loaded image to the style's sprite with the ID 'kitten'.
+        map.addImage('event', image);
+    });
+    map.loadImage('/modules/mod_blue_force_tracker/tmpl/assets/shopping-cart.png', function(error, image) {
+        if (error) throw error;
+        // Add the loaded image to the style's sprite with the ID 'kitten'.
+        map.addImage('shop', image);
+    });
+}
+
 function executeBlueForceTracker() {
     showStats();
     map.on('load', async function () {
         addMapControls();
+        loadImages();
         setOnClosePopup();
         map.addSource('places', {type: 'geojson', data: urlFeature});
         showFeaturesOnMap();
